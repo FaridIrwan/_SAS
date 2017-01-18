@@ -2580,6 +2580,10 @@ namespace HTS.SAS.DataAccessObjects
                         newlistAccDetails.Add(newAccDetails);
                     }
                     argEn.CreditRef = stu;// argList[i].MatricNo;
+                    if (argEn.Category == "Receipt" && argEn.SubType == "Student" )
+                    {
+                        argEn.BankSlipID = argList[i].BankSlipID;
+                    }
                     argEn.AccountDetailsList = newlistAccDetails;
                     try
                     {
@@ -9326,7 +9330,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
                             else if (listStud[i].PaidAmount > 0)
                             {
                                 pamt = paid - transamount;
-                                amount = pamt + listStud[i].PaidAmount;
+                                //amount = pamt + listStud[i].PaidAmount;
+                                amount = listStud[i].PaidAmount + transamount;
                             }
                         }
                         if (paid < transamount)
@@ -9339,7 +9344,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                             else if (listStud[i].PaidAmount > 0)
                             {
                                 pamt = transamount - paid;
-                                amount = listStud[i].PaidAmount + pamt;
+                                amount = listStud[i].TransactionAmount;
                             }
                             //amount = paid;
                         }
