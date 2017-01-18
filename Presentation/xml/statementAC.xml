@@ -1,0 +1,258 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <Table>
+    <sasi_name>AUNI JALILAH BINTI AHMAD JAMILI</sasi_name>
+    <sasi_icno>901124086140</sasi_icno>
+    <sasi_matricno>153305</sasi_matricno>
+    <sasi_pgid>35</sasi_pgid>
+    <program>BACELOR SAINS (KEPUJIAN)</program>
+    <sasi_cursemyr>201120122</sasi_cursemyr>
+    <sasi_intake>200920101</sasi_intake>
+    <no_of_sem>3</no_of_sem>
+    <category>Debit Note</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description />
+    <transcode>DN000000000000050</transcode>
+    <credit>0</credit>
+    <debit>573</debit>
+  </Table>
+  <Table>
+    <sasi_name>KHAIRIL NAIM BIN ROSLI</sasi_name>
+    <sasi_icno>920311086545</sasi_icno>
+    <sasi_matricno>165138</sasi_matricno>
+    <sasi_pgid>35</sasi_pgid>
+    <program>BACELOR SAINS (KEPUJIAN)</program>
+    <sasi_cursemyr>201320141</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>Invoice</category>
+    <hostel>KOLEJ TUJUH BELAS</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>IN000000000000057</transcode>
+    <credit>0</credit>
+    <debit>50</debit>
+    <sponsor>001-JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <valid_from>01/07/2013</valid_from>
+    <valid_to>31/07/2015</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>KHAIRIL NAIM BIN ROSLI</sasi_name>
+    <sasi_icno>920311086545</sasi_icno>
+    <sasi_matricno>165138</sasi_matricno>
+    <sasi_pgid>35</sasi_pgid>
+    <program>BACELOR SAINS (KEPUJIAN)</program>
+    <sasi_cursemyr>201320141</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>Loan</category>
+    <hostel>KOLEJ TUJUH BELAS</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>B000000000000734</transcode>
+    <credit>300</credit>
+    <debit>0</debit>
+    <sponsor>001-JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <valid_from>01/07/2013</valid_from>
+    <valid_to>31/07/2015</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>MUHAMAD HAFIZ BIN ABDUL KADIR</sasi_name>
+    <sasi_icno>940118145687</sasi_icno>
+    <sasi_matricno>179665</sasi_matricno>
+    <sasi_pgid>35</sasi_pgid>
+    <program>BACELOR SAINS (KEPUJIAN)</program>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201420151</sasi_intake>
+    <no_of_sem>5</no_of_sem>
+    <category>Invoice</category>
+    <hostel>KOLEJ KEENAM</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Overall Test @ 02/12/2016</description>
+    <transcode>IN000000000000061</transcode>
+    <credit>0</credit>
+    <debit>721</debit>
+  </Table>
+  <Table>
+    <sasi_name>SITI NUR HASANA BINTI SAMSUDDIN</sasi_name>
+    <sasi_icno>920912145782</sasi_icno>
+    <sasi_matricno>166655</sasi_matricno>
+    <sasi_pgid>50</sasi_pgid>
+    <program>BACELOR KEJURUTERAAN (AWAM)</program>
+    <sasi_cursemyr>201420151</sasi_cursemyr>
+    <sasi_intake>201020111</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>SPA</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Sponsor Allocation Amount</description>
+    <transcode>A000000000000155</transcode>
+    <credit>965</credit>
+    <debit>0</debit>
+    <sponsor>0001-PERBADANAN TABUNG PENDIDIKAN TINGGI NASIONAL</sponsor>
+    <valid_from>01/05/2013</valid_from>
+    <valid_to>31/05/2017</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>SITI NUR HASANA BINTI SAMSUDDIN</sasi_name>
+    <sasi_icno>920912145782</sasi_icno>
+    <sasi_matricno>166655</sasi_matricno>
+    <sasi_pgid>50</sasi_pgid>
+    <program>BACELOR KEJURUTERAAN (AWAM)</program>
+    <sasi_cursemyr>201420151</sasi_cursemyr>
+    <sasi_intake>201020111</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>SPA</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Sponsor Pocket Amount</description>
+    <transcode>A000000000000157</transcode>
+    <credit>100</credit>
+    <debit>0</debit>
+    <sponsor>0001-PERBADANAN TABUNG PENDIDIKAN TINGGI NASIONAL</sponsor>
+    <valid_from>01/05/2013</valid_from>
+    <valid_to>31/05/2017</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>SITI NUR HASANA BINTI SAMSUDDIN</sasi_name>
+    <sasi_icno>920912145782</sasi_icno>
+    <sasi_matricno>166655</sasi_matricno>
+    <sasi_pgid>50</sasi_pgid>
+    <program>BACELOR KEJURUTERAAN (AWAM)</program>
+    <sasi_cursemyr>201420151</sasi_cursemyr>
+    <sasi_intake>201020111</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>SPA</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Sponsor Pocket Amount</description>
+    <transcode>A000000000000149</transcode>
+    <credit>200</credit>
+    <debit>0</debit>
+    <sponsor>0001-PERBADANAN TABUNG PENDIDIKAN TINGGI NASIONAL</sponsor>
+    <valid_from>01/05/2013</valid_from>
+    <valid_to>31/05/2017</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>SITI NUR HASANA BINTI SAMSUDDIN</sasi_name>
+    <sasi_icno>920912145782</sasi_icno>
+    <sasi_matricno>166655</sasi_matricno>
+    <sasi_pgid>50</sasi_pgid>
+    <program>BACELOR KEJURUTERAAN (AWAM)</program>
+    <sasi_cursemyr>201420151</sasi_cursemyr>
+    <sasi_intake>201020111</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>SPA</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Sponsor Allocation Amount</description>
+    <transcode>A000000000000147</transcode>
+    <credit>965</credit>
+    <debit>0</debit>
+    <sponsor>0001-PERBADANAN TABUNG PENDIDIKAN TINGGI NASIONAL</sponsor>
+    <valid_from>01/05/2013</valid_from>
+    <valid_to>31/05/2017</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>SITI NUR HASANA BINTI SAMSUDDIN</sasi_name>
+    <sasi_icno>920912145782</sasi_icno>
+    <sasi_matricno>166655</sasi_matricno>
+    <sasi_pgid>50</sasi_pgid>
+    <program>BACELOR KEJURUTERAAN (AWAM)</program>
+    <sasi_cursemyr>201420151</sasi_cursemyr>
+    <sasi_intake>201020111</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>STA</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Student Pocket Amount</description>
+    <transcode>N000000000000035</transcode>
+    <credit>0</credit>
+    <debit>200</debit>
+    <sponsor>0001-PERBADANAN TABUNG PENDIDIKAN TINGGI NASIONAL</sponsor>
+    <valid_from>01/05/2013</valid_from>
+    <valid_to>31/05/2017</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>SITI NUR HASANA BINTI SAMSUDDIN</sasi_name>
+    <sasi_icno>920912145782</sasi_icno>
+    <sasi_matricno>166655</sasi_matricno>
+    <sasi_pgid>50</sasi_pgid>
+    <program>BACELOR KEJURUTERAAN (AWAM)</program>
+    <sasi_cursemyr>201420151</sasi_cursemyr>
+    <sasi_intake>201020111</sasi_intake>
+    <no_of_sem>1</no_of_sem>
+    <category>STA</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Student Pocket Amount</description>
+    <transcode>N000000000000033</transcode>
+    <credit>0</credit>
+    <debit>100</debit>
+    <sponsor>0001-PERBADANAN TABUNG PENDIDIKAN TINGGI NASIONAL</sponsor>
+    <valid_from>01/05/2013</valid_from>
+    <valid_to>31/05/2017</valid_to>
+  </Table>
+  <Table>
+    <sasi_name>YOSSRA ABDULHAMID ELJAMEL</sasi_name>
+    <sasi_icno>ln9gkK41</sasi_icno>
+    <sasi_matricno>151457</sasi_matricno>
+    <sasi_pgid>35</sasi_pgid>
+    <program>BACELOR SAINS (KEPUJIAN)</program>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>200920102</sasi_intake>
+    <no_of_sem>14</no_of_sem>
+    <category>Credit Note</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>BW</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Overall Test @ 02/12/2016</description>
+    <transcode>CN000000000000058</transcode>
+    <credit>525</credit>
+    <debit>0</debit>
+  </Table>
+  <Table>
+    <sasi_name>YOSSRA ABDULHAMID ELJAMEL</sasi_name>
+    <sasi_icno>ln9gkK41</sasi_icno>
+    <sasi_matricno>151457</sasi_matricno>
+    <sasi_pgid>35</sasi_pgid>
+    <program>BACELOR SAINS (KEPUJIAN)</program>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>200920102</sasi_intake>
+    <no_of_sem>14</no_of_sem>
+    <category>Debit Note</category>
+    <hostel>TIADA DATA</hostel>
+    <curr_status>1-AKTIF</curr_status>
+    <sasc_code>BW</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description />
+    <transcode>DN000000000000048</transcode>
+    <credit>0</credit>
+    <debit>573</debit>
+  </Table>
+  <Messages>
+    <text />
+  </Messages>
+</NewDataSet>

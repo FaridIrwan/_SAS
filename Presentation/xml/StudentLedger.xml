@@ -1,0 +1,402 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>AFC</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>30/11/2016</sb_transdate>
+    <description>AFC-201620171</description>
+    <transcode>AFC000000000133193</transcode>
+    <credit>0</credit>
+    <debit>798</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Receipt</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>RECEIPT TEST @ 01/12/2016</description>
+    <transcode>bbsn5a</transcode>
+    <credit>900</credit>
+    <debit>0</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>TEST PAYMENT @ 1/12/2016</description>
+    <transcode>D000000000000012</transcode>
+    <credit>0</credit>
+    <debit>2</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>D000000000000016</transcode>
+    <credit>0</credit>
+    <debit>30</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>D000000000000017</transcode>
+    <credit>0</credit>
+    <debit>10</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>D000000000000019</transcode>
+    <credit>0</credit>
+    <debit>5</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>D000000000000020</transcode>
+    <credit>0</credit>
+    <debit>5</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>D000000000000021</transcode>
+    <credit>0</credit>
+    <debit>5</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>D000000000000022</transcode>
+    <credit>0</credit>
+    <debit>5</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>TEST PAYMENT @ 1/12/2016</description>
+    <transcode>D000000000000023</transcode>
+    <credit>0</credit>
+    <debit>5</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>TEST PAYMENT @ 1/12/2016</description>
+    <transcode>D000000000000024</transcode>
+    <credit>0</credit>
+    <debit>5</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Invoice</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>IN000000000000058</transcode>
+    <credit>0</credit>
+    <debit>50</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Debit Note</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>01/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>DN000000000000044</transcode>
+    <credit>0</credit>
+    <debit>300</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Receipt</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>BBSNN1</transcode>
+    <credit>2000</credit>
+    <debit>0</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Overall Test @ 01/12/2016</description>
+    <transcode>D000000000000025</transcode>
+    <credit>0</credit>
+    <debit>15</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Loan</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Overall Test @ 02/12/2016</description>
+    <transcode>B000000000000760</transcode>
+    <credit>1200</credit>
+    <debit>0</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Loan</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Overall Test @ 02/12/2016</description>
+    <transcode>B000000000000762</transcode>
+    <credit>1200</credit>
+    <debit>0</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>02/12/2016</sb_transdate>
+    <description>Overall Test @ 02/12/2016</description>
+    <transcode>D000000000000026</transcode>
+    <credit>0</credit>
+    <debit>90</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Refund</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>21/12/2016</sb_transdate>
+    <description>CBP Test @ 21/12/2016</description>
+    <transcode>D000000000000028</transcode>
+    <credit>0</credit>
+    <debit>1800</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Credit Note</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>22/12/2016</sb_transdate>
+    <description>MJ Test @ 22/12/2016</description>
+    <transcode>CN000000000000065</transcode>
+    <credit>30</credit>
+    <debit>0</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Debit Note</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>25/12/2016</sb_transdate>
+    <description />
+    <transcode>DN000000000000082</transcode>
+    <credit>0</credit>
+    <debit>366</debit>
+  </Table>
+  <Table>
+    <sasi_name>IRSYADUDDIN BIN ISHAK</sasi_name>
+    <sasi_icno>910527055079</sasi_icno>
+    <sasi_matricno>170763</sasi_matricno>
+    <sasi_pgid>53</sasi_pgid>
+    <sasi_cursemyr>201620171</sasi_cursemyr>
+    <sasi_intake>201220131</sasi_intake>
+    <sasi_cursem>9</sasi_cursem>
+    <category>Receipt</category>
+    <hostel>TIADA DATA</hostel>
+    <sass_code>1</sass_code>
+    <sasc_code>W</sasc_code>
+    <sb_transdate>26/12/2016</sb_transdate>
+    <description>Test FIX-new @ 26/12/2016</description>
+    <transcode>26121601</transcode>
+    <credit>300</credit>
+    <debit>0</debit>
+  </Table>
+  <Category>
+    <Type>Student Ledger</Type>
+  </Category>
+</NewDataSet>

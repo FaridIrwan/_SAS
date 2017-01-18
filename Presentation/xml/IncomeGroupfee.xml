@@ -1,0 +1,38 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <IncomeGroupFeeDataSet>
+    <Student>student</Student>
+    <Sponsor>sponsor</Sponsor>
+    <faculty>faculty</faculty>
+    <Program>program</Program>
+    <All />
+  </IncomeGroupFeeDataSet>
+  <IncomeGroupFeeDataSet>
+    <Student>student</Student>
+    <Sponsor>sponsor</Sponsor>
+    <faculty>faculty</faculty>
+    <Program>program</Program>
+    <All />
+  </IncomeGroupFeeDataSet>
+  <IncomeGroupFeeDataSet>
+    <Student>student</Student>
+    <Sponsor>sponsor</Sponsor>
+    <faculty>faculty</faculty>
+    <Program>program</Program>
+    <All />
+  </IncomeGroupFeeDataSet>
+  <IncomeGroupFeeDataSet>
+    <Student>student</Student>
+    <Sponsor>sponsor</Sponsor>
+    <faculty>faculty</faculty>
+    <Program>program</Program>
+    <All />
+  </IncomeGroupFeeDataSet>
+  <IncomeGroupFeeDataSet>
+    <Student>student</Student>
+    <Sponsor>sponsor</Sponsor>
+    <faculty>faculty</faculty>
+    <Program>program</Program>
+    <All />
+  </IncomeGroupFeeDataSet>
+</NewDataSet>

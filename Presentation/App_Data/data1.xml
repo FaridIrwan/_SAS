@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NewDataSet>
+  <Notebook>
+    <Manufacturer>Dell</Manufacturer>
+    <Name>Inspiron 1525</Name>
+    <CPU>T7250</CPU>
+    <RAM>2048 MB</RAM>
+    <Price>$654</Price>
+  </Notebook>
+  <Notebook>
+    <Manufacturer>Dell</Manufacturer>
+    <Name>Inspiron 1525</Name>
+    <CPU>T5750</CPU>
+    <RAM>2048 MB</RAM>
+    <Price>$690</Price>
+  </Notebook>
+  <Notebook>
+    <Manufacturer>Dell</Manufacturer>
+    <Name>Studio 1535</Name>
+    <CPU>T5750</CPU>
+    <RAM>2048 MB</RAM>
+    <Price>$735</Price>
+  </Notebook>
+  <Notebook>
+    <Manufacturer>Dell</Manufacturer>
+    <Name>Vostro 1510</Name>
+    <CPU>T5870</CPU>
+    <RAM>2048 MB</RAM>
+    <Price>$724</Price>
+  </Notebook>
+  <Notebook>
+    <Manufacturer>HP</Manufacturer>
+    <Name>530</Name>
+    <CPU>T5200</CPU>
+    <RAM>1024 MB</RAM>
+    <Price>$545</Price>
+  </Notebook>
+  <Notebook>
+    <Manufacturer>HP</Manufacturer>
+    <Name>6720s</Name>
+    <CPU>T5670</CPU>
+    <RAM>1024 MB</RAM>
+    <Price>$637</Price>
+  </Notebook>
+  <Notebook>
+    <Manufacturer>HP</Manufacturer>
+    <Name>Pavilion dv9233</Name>
+    <CPU>T5670</CPU>
+    <RAM>1024 MB</RAM>
+    <Price>$780</Price>
+  </Notebook>
+</NewDataSet>
