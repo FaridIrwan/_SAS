@@ -319,6 +319,25 @@ Partial Class Student
         ddlProgram.DataBind()
     End Sub
     ''' <summary>
+    ''' Method to Load Programs Dropdown
+    ''' </summary>
+    ''' <remarks></remarks>
+    Private Sub LoadFaculty()
+        Dim eFaculty As New FacultyEn
+        Dim bFaculty As New FacultyBAL
+        ddlFaculty.Items.Clear()
+        ddlFaculty.Items.Add(New ListItem("---Select---", "-1"))
+        ddlFaculty.DataTextField = "SAFC_Desc"
+        ddlFaculty.DataValueField = "SAFC_Code"
+        eFaculty.SAFC_Code = "%"
+        Try
+            ddlFaculty.DataSource = bFaculty.GetList(eFaculty)
+        Catch ex As Exception
+            LogError.Log("Student", "FillDropDownList", ex.Message)
+        End Try
+        ddlFaculty.DataBind()
+    End Sub
+    ''' <summary>
     ''' Method to Load All the Dropdowns
     ''' </summary>
     ''' <remarks></remarks>
@@ -363,6 +382,7 @@ Partial Class Student
             LogError.Log("Student", "FillDropDownList", ex.Message)
         End Try
         ddlFaculty.DataBind()
+        'Session("ddlfaculty") = ddlFaculty.DataSource
 
         eStuStatus.StudentStatusCode = ""
         eStuStatus.Description = ""
@@ -1354,7 +1374,7 @@ Partial Class Student
                 Else
                     eKolej.SAKO_Code = obj.KokoCode
                     Try
-                        kokolist = bKolej.GetListKokorikulum(eKolej)
+                        kokolist = bKolej.GetList(eKolej)
                     Catch ex As Exception
                         LogError.Log("Student", "FillDropDownList", ex.Message)
                     End Try
@@ -1369,9 +1389,29 @@ Partial Class Student
 
 
                 Dim listObj As New List(Of ProgramInfoEn)
-
+                Dim listfaculty As New List(Of FacultyEn)
+                Dim fac As Integer = 0
                 'Student faculty and program
-                ddlFaculty.SelectedValue = obj.Faculty
+                LoadFaculty()
+                listfaculty = ddlFaculty.DataSource
+                While fac < ddlFaculty.DataSource.Count
+                    For Each ListItem In ddlFaculty.Items
+                        If obj.Faculty = listfaculty(fac).SAFC_Code Then
+                            ddlFaculty.SelectedValue = obj.Faculty
+                        Else
+                            'lblMsg.Text = "Faculty " + obj.Faculty + " does not exist"
+                            'lblMsg.Visible = True
+                            Exit For
+                        End If
+                    Next
+                    fac = fac + 1
+                End While
+                'If Not obj.Faculty = Session("ddlfaculty") Then
+                '    ddlFaculty.SelectedValue = "-1"
+                'Else
+                '    ddlFaculty.SelectedValue = obj.Faculty
+                'End If
+
                 LoadProgram()
                 listObj = ddlProgram.DataSource
                 'listObj = Session("listObj")
@@ -1380,6 +1420,8 @@ Partial Class Student
                         If obj.ProgramID = listObj(a).ProgramCode Then
                             ddlProgram.SelectedValue = obj.ProgramID
                         Else
+                            'lblMsg.Text = "Program Id " + obj.ProgramID + " does not exist"
+                            'lblMsg.Visible = True
                             'ddlProgram.SelectedValue = "-1"
                             Exit For
                         End If
@@ -1428,11 +1470,11 @@ Partial Class Student
                 End Try
                 'Shah
                 'LoadcurrentSemYer(eob.Semester)
-                ddlSem.SelectedValue = eob.Semester
+                ddlSem.SelectedValue = obj.CurrentSemester
                 'LoadcurrentSession()
                 'ddlCurSession.SelectedValue = obj.CurretSemesterYear
                 Dim d1, m1, y1, d2, m2, y2 As String
-                If eob.Semester <> Nothing Then
+                If obj.CurrentSemester <> Nothing Then
                     LoadcurrentSession()
                     If Oldsemyear.Length = 9 Then
                         d1 = Mid(Oldsemyear, 1, 4)
