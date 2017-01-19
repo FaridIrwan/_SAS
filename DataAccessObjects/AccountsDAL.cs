@@ -9155,8 +9155,33 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 oldamount = Convert.ToDouble(drTrack["transamount"]);
                                 newTransId = clsGeneric.NullToInteger(drTrack["transid"]);
                                 newamount = Convert.ToDouble(drTrack["paidamount"]);
-                                toldamount = oldamount - newamount;
-                                balance = toldamount - paidamt;
+                                toldamount = oldamount - newamount;  
+                                if (toldamount > paidamt)
+                                {
+                                    if (newamount == 0)
+                                    {
+                                        
+                                    }
+                                    else if (newamount > 0)
+                                    {
+                                        paidamt = newamount + paidamt;
+                                    }
+                                }
+                                else if (toldamount <= paidamt)
+                                {
+
+                                    if (newamount == 0)
+                                    {
+                                        paidamt = toldamount;
+                                    }
+                                    else if (newamount > 0)
+                                    {
+                                        //pamt = transamount - paid;
+                                        paidamt = oldamount;
+                                    }
+                                    //amount = paid;
+                                }
+                                balance = oldamount - paidamt;
                                 if (balance == 0)
                                 {
                                     string sqlupdate = "UPDATE SAS_AccountsDetails SET Transstatus = @TransStatus WHERE TransID = @TransID And refcode = @RefCode";
@@ -9199,6 +9224,23 @@ public double GetSponserStuAllocateAmount(string BatchId)
 
                         //if update statement successful - Stop
 
+                        string sqlget1 = "update sas_accounts set paidamount = (select sum(paidamount) as paidamount from sas_accountsdetails where transid = '" + Int32.Parse(use) + "') where transid = '" + Int32.Parse(use) + "';";
+                        string sqlupdate1 = "update sas_accounts set transstatus = 'Closed' where transamount = paidamount and transid = '" + Int32.Parse(use) + "';";
+                        if (!FormHelp.IsBlank(sqlget))
+                        {
+                            int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                 DataBaseConnectionString, sqlget1);
+
+                            if (liRowAffected > -1)
+                            { }
+                            else
+                                throw new Exception("Update Failed! No Row has been updated...");
+                        }
+                        if (!FormHelp.IsBlank(sqlupdate1))
+                        {
+                            int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                 DataBaseConnectionString, sqlupdate1);
+                        }
 
                     }
                 }
@@ -9334,7 +9376,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 amount = listStud[i].PaidAmount + transamount;
                             }
                         }
-                        if (paid < transamount)
+                        if (paid <= transamount)
                         {
 
                             if (listStud[i].PaidAmount == 0)
@@ -9383,14 +9425,34 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                         throw new Exception("Update Failed! No Row has been updated...");
                                 }
                             }
+                            //{
+                                
+                            //}
                         }
                         if (paid < transamount)
                         {
                             transamount = transamount - paid;
                         }
-                        if (paid > transamount)
+                        else if (paid > transamount)
                         {
                             transamount = 0;
+                        }
+                        string sqlget = "update sas_accounts set paidamount = (select sum(paidamount) as paidamount from sas_accountsdetails where transid = '" + listStud[i].TransactionID + "') where transid = '" + listStud[i].TransactionID + "';";
+                        string sqlupdate = "update sas_accounts set transstatus = 'Closed' where transamount = paidamount and transid = '" + listStud[i].TransactionID + "';";
+                        if (!FormHelp.IsBlank(sqlget))
+                        {
+                            int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                 DataBaseConnectionString, sqlget);
+
+                            if (liRowAffected > -1)
+                            { }
+                            else
+                                throw new Exception("Update Failed! No Row has been updated...");
+                        }
+                        if (!FormHelp.IsBlank(sqlupdate))
+                        {
+                            int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                 DataBaseConnectionString, sqlupdate);
                         }
                     }
                 }
