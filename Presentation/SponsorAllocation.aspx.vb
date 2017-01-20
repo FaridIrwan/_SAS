@@ -108,6 +108,13 @@ Partial Class SponsorAllocation
             Session("Err") = Nothing
             trFileGen.Visible = False
             ibtnYesNo.Visible = False
+
+            'added by Hafiz @ 19/01/2017
+            'PTPTN upload file - start
+            trPTPTNupload.Visible = False
+            FileUpload2.Attributes("onchange") = "UploadFile(this)"
+            'PTPTN upload file - end
+
         End If
         ' Import Sponsor Data from Excel 
         If Not Session("fileSponsor") Is Nothing And Session("fileType") = "excel" Then
@@ -130,6 +137,10 @@ Partial Class SponsorAllocation
             addSpnCode()
             'LoadInvoiceGrid1()
             btnupload.Enabled = True
+
+            'PTPTN upload file - start
+            trPTPTNupload.Visible = True
+            'PTPTN upload file - end
         End If
         If Not Session("liststu") Is Nothing Then
             addSpnCode()
@@ -2103,6 +2114,10 @@ Partial Class SponsorAllocation
         txtspnAllAmount.Text = ""
         trFileGen.Visible = False
         chkSelectAll.Visible = False
+        'added by Hafiz @ 19/01/2017
+        'upload ptptn tr - start
+        trPTPTNupload.Visible = False
+        'upload ptptn tr - end
         dgView.DataSource = Nothing
         dgView.DataBind()
         dgUnView.DataSource = Nothing
@@ -2689,7 +2704,7 @@ Partial Class SponsorAllocation
                             txtSponamt.Text = String.Format("{0:F}", sponamt)
 
                             txtpamont.Text = String.Format("{0:F}", tamt)
-                            
+
 
                             Exit For
                         End If
@@ -4026,6 +4041,76 @@ Partial Class SponsorAllocation
         MultiView1.SetActiveView(View1)
 
     End Sub
+
+#End Region
+
+#Region "PTPTN Upload File Related"
+
+    'Methods added by Hafiz @ 19/01/2017
+    'PTPTN Upload File Related
+
+    'print message
+    Private Sub DisplayMessage(ByVal MessageToDisplay As String)
+
+        lblMsg.Text = String.Empty
+        lblMsg.Text = MessageToDisplay
+
+    End Sub
+
+
+    'get path from config - start
+    Private ReadOnly Property GetUploadFilePath As String
+        Get
+            Return MaxGeneric.clsGeneric.NullToString(
+                ConfigurationManager.AppSettings("PTPTN_UPLOAD_PATH"))
+        End Get
+    End Property
+    'get path from config - end
+
+
+    'ptptn file upload methods - start
+    Protected Sub Upload(sender As Object, e As EventArgs)
+
+        Dim _FileHelper As New FileHelper()
+
+        Dim UploadedPtptnFile As String = Nothing
+
+        Try
+            'Get Uploaded File - Start
+            UploadedPtptnFile = FileUpload2.FileName
+            UploadedPtptnFile = GetUploadFilePath & Path.GetFileName(UploadedPtptnFile)
+            'Get Uploaded File - Stop
+
+            'Check file uploaded - Start
+            If _FileHelper.IsPtptnFileUploaded(UploadedPtptnFile) Then
+                Call DisplayMessage("File Uploaded Previously")
+                Exit Sub
+            End If
+            'Check file uploaded - Stop
+
+            'Save File
+            FileUpload2.SaveAs(UploadedPtptnFile)
+
+            If _FileHelper.GenerateDirectDebitFile(UploadedPtptnFile, 0, 0, Nothing, Nothing, dgView) Then
+                If dgView.Items.Count = 0 Then
+                    Call DisplayMessage("File Upload Failed")
+                Else
+                    Call DisplayMessage("File Uploaded Successfully.")
+                End If
+            Else
+                Call DisplayMessage("File Upload Failed")
+            End If
+
+        Catch ex As Exception
+
+            'Log & Display Error
+            Call MaxModule.Helper.LogError(ex.Message)
+            Call DisplayMessage(ex.Message)
+
+        End Try
+
+    End Sub
+    'ptptn file upload methods - end
 
 #End Region
 

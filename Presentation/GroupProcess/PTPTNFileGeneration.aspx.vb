@@ -145,7 +145,6 @@ Partial Class PTPTNFileGeneration
                 If Not DateTime.TryParseExact(DbtDate, myformat, New CultureInfo("en-US"), Globalization.DateTimeStyles.None, dt_result) Then
                     Throw New Exception("Debiting Date Format Error")
                 End If
-
             End If
 
             'Save File

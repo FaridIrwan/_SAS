@@ -293,7 +293,7 @@ Partial Class RptStudentLedger
             Dim dgItem1 As DataGridItem
             Dim link As HyperLink
             Dim str As String, cat As String, desc As String = Nothing
-
+            Dim doc As String = Nothing
             'Modified by Hafiz @ 16/3/2016 - added &MatricNo param at SPA
             'Modified by Hafiz @ 17/3/2016 - added &MatricNo param at BatchInvoice
             'Modified by Hafiz @ 19/7/2016 - CIMB "View"
@@ -303,7 +303,7 @@ Partial Class RptStudentLedger
                 str = dgItem1.Cells(10).Text
                 desc = dgItem1.Cells(2).Text
                 cat = dgItem1.Cells(3).Text
-
+                doc = dgItem1.Cells(1).Text
                 link.Attributes.Add("onClick", "OpenWindow('about:blank')")
                 If cat = "Invoice" Then
                     link.NavigateUrl = "../BatchInvoice.aspx?Menuid=14&Formid=Inv&IsStudentLedger=1&BatchCode=" + str + "&MatricNo=" + txtStudentCode.Text + ""
@@ -341,8 +341,12 @@ Partial Class RptStudentLedger
                     'ElseIf cat = "AFC" Then
                     '    link.NavigateUrl = "../WorkFlowStudentAccountView.aspx?Formid=FS&TransID=" + str + ""
                     '    link.Target = "MyPopup"
+                    'commended by farid on 19012017
+                    'ElseIf cat = "AFC" Then
+                    '    link.NavigateUrl = "../AFCDetails.aspx?MatricNo=" + txtStudentCode.Text + "&CurSem=" + lblCurSem.Text + "&BatchCode=" + str + ""
+                    '    link.Target = "MyPopup"
                 ElseIf cat = "AFC" Then
-                    link.NavigateUrl = "../AFCDetails.aspx?MatricNo=" + txtStudentCode.Text + "&CurSem=" + lblCurSem.Text + "&BatchCode=" + str + ""
+                    link.NavigateUrl = "../AFCDetails.aspx?docno=" + doc + "&BatchCode=" + str + ""
                     link.Target = "MyPopup"
                 ElseIf cat = "Credit Note" Then
                     link.NavigateUrl = "../BatchInvoice.aspx?Menuid=16&Formid=CN&IsStudentLedger=1&BatchCode=" + str + "&MatricNo=" + txtStudentCode.Text + ""

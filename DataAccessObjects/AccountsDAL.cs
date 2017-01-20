@@ -8745,76 +8745,41 @@ public double GetSponserStuAllocateAmount(string BatchId)
         //added by Hafiz @ 02/6/2016; created by Mona
         //Get AFC Details (View) used by Student Ledger
 
-        public DataSet GetAFCDetails(string MatricNo, string CurSem, string BatchCode)
+        public DataSet GetAFCDetails(string docno)
         {
             string sqlCmd = string.Empty;
             StudentDAL _StudentDAL = new StudentDAL();
 
             try
             {
-                StudentEn studobj = _StudentDAL.GetItem(MatricNo);
 
-                sqlCmd = "SELECT b.SAFT_Desc,a.SAFT_Code,a.SAFD_Type,a.SAFA_Amount,a.SAST_Code,a.SAFD_Sem FROM ( ";
+                //sqlCmd = "SELECT a.SAFT_Desc,a.SAFT_Code,a.SAFD_Type,a.SAFA_Amount FROM ( ";
 
-                sqlCmd += "SELECT SAS_FeeStrAmount.SAFS_Code, SAS_FeeStrAmount.SAFA_Amount, SAS_FeeStrAmount.SAFD_Type,SAS_FeeStrAmount.SAFT_Code, " +
-                          "SAS_FeeStruct.sast_code,SAS_FeeStrAmount.safd_sem FROM SAS_FeeStrAmount " +
-                          "INNER JOIN SAS_FeeStrDetails ON SAS_FeeStrAmount.SAFS_Code = SAS_FeeStrDetails.SAFS_Code " +
-                          "INNER JOIN SAS_FeeStruct ON SAS_FeeStrDetails.SAFS_Code = SAS_FeeStruct.SAFS_Code " +
-                          "INNER JOIN SAS_FeeTypes ON SAS_FeeStrDetails.SAFT_Code = SAS_FeeTypes.SAFT_Code " +
-                          "WHERE (SAS_FeeStrAmount.SASC_Code in (SELECT SASC_Code FROM sas_student where sasi_matricno = '" + MatricNo + "'))" +
-                          "AND SAS_FeeStruct.sabp_code IN (SELECT sabp_code FROM sas_program WHERE sapg_code in (SELECT sasi_pgid FROM sas_student " +
-                          //"where sasi_matricno = '" + MatricNo + "')) AND SAS_FeeStruct.sast_code = '" + CurSem + "' AND SAS_FeeStrAmount.SAFD_Type = 'A' " +
-                          "where sasi_matricno = '" + MatricNo + "')) AND SAS_FeeStruct.sast_code = '" + studobj.Intake + "' AND SAS_FeeStrAmount.SAFD_Type = 'A' " +
-                          "GROUP BY SAS_FeeStrAmount.SAFS_Code, SAS_FeeStrAmount.SAFA_Amount, SAS_FeeStrAmount.SAFD_Type,SAS_FeeStrAmount.SAFT_Code, " +
-                          "SAS_FeeStruct.sast_code,SAS_FeeStrAmount.safd_sem ";
-                sqlCmd += "UNION ";
-                sqlCmd += "SELECT SAS_FeeStrAmount.SAFS_Code, SAS_FeeStrAmount.SAFA_Amount, SAS_FeeStrAmount.SAFD_Type,SAS_FeeStrAmount.SAFT_Code, " +
-                            "SAS_FeeStruct.sast_code,SAS_FeeStrAmount.safd_sem FROM SAS_FeeStrAmount " +
-                            "INNER JOIN SAS_FeeStrDetails ON SAS_FeeStrAmount.SAFS_Code = SAS_FeeStrDetails.SAFS_Code " +
-                            "INNER JOIN SAS_FeeStruct ON SAS_FeeStrDetails.SAFS_Code = SAS_FeeStruct.SAFS_Code " +
-                            "INNER JOIN SAS_FeeTypes ON SAS_FeeStrDetails.SAFT_Code = SAS_FeeTypes.SAFT_Code " +
-                            "WHERE (SAS_FeeStrAmount.SASC_Code in (SELECT SASC_Code FROM sas_student where sasi_matricno = '" + MatricNo + "'))" +
-                            "AND SAS_FeeStruct.sabp_code IN (SELECT sabp_code FROM sas_program WHERE sapg_code in (SELECT sasi_pgid FROM sas_student " +
-                            //"where sasi_matricno  = '" + MatricNo + "')) AND SAS_FeeStruct.sast_code = '" + CurSem + "' AND SAS_FeeStrAmount.SAFD_Type = 'S' " +
-                            "where sasi_matricno  = '" + MatricNo + "')) AND SAS_FeeStruct.sast_code = '" + studobj.Intake + "' AND SAS_FeeStrAmount.SAFD_Type = 'S' " +
-                            "GROUP BY SAS_FeeStrAmount.SAFS_Code,SAS_FeeStrAmount.SAFA_Amount,SAS_FeeStrAmount.SAFD_Type, SAS_FeeStrAmount.SAFT_Code,SAS_FeeStruct.sast_code,SAS_FeeStrAmount.safd_sem ";
-                sqlCmd += "UNION ";
-                sqlCmd += "SELECT SAS_FeeStrAmount.SAFS_Code,CASE WHEN SAS_FeeStruct.safd_feebaseon = '1' THEN (SAS_FeeStrAmount.SAFA_Amount * " +
-                            "(SELECT sasi_crdithrs FROM sas_student where sasi_matricno= '" + MatricNo + "')) ELSE SAS_FeeStrAmount.SAFA_Amount END as SAFA_Amount, " +
-                            "SAS_FeeStrAmount.SAFD_Type,SAS_FeeStrAmount.SAFT_Code,SAS_FeeStruct.sast_code,(SAS_FeeStruct.safd_feebaseon:: integer) as safd_sem " +
-                            "FROM SAS_FeeStrAmount INNER JOIN SAS_FeeStrDetails ON SAS_FeeStrAmount.SAFS_Code = SAS_FeeStrDetails.SAFS_Code " +
-                            "INNER JOIN SAS_FeeStruct ON SAS_FeeStrDetails.SAFS_Code = SAS_FeeStruct.SAFS_Code INNER JOIN SAS_FeeTypes ON " +
-                            "SAS_FeeStrDetails.SAFT_Code = SAS_FeeTypes.SAFT_Code WHERE (SAS_FeeStrAmount.SASC_Code in (SELECT SASC_Code FROM sas_student " +
-                            "where sasi_matricno= '" + MatricNo + "')) and SAS_FeeStruct.sabp_code IN (SELECT sabp_code FROM sas_program WHERE sapg_code in " +
-                            //"(SELECT sasi_pgid FROM sas_student where sasi_matricno = '" + MatricNo + "')) and SAS_FeeStruct.sast_code = '" + CurSem + "'" +
-                            "(SELECT sasi_pgid FROM sas_student where sasi_matricno = '" + MatricNo + "')) and SAS_FeeStruct.sast_code = '" + studobj.Intake + "'" +
-                            "AND SAS_FeeStrAmount.SAFD_Type = 'T' GROUP BY SAS_FeeStrAmount.SAFS_Code, SAS_FeeStrAmount.SAFA_Amount, SAS_FeeStrAmount.SAFD_Type, " +
-                            "SAS_FeeStrAmount.SAFT_Code,SAS_FeeStruct.sast_code,SAS_FeeStruct.safd_feebaseon ";
-                sqlCmd += "UNION ";
-                sqlCmd += "SELECT SA.sahs_code as safs_code, SA.SAHA_Amount AS SAfa_Amount, 'H' as SAFD_Type, SA.saft_code, SS.sasi_cursemyr as sast_code, " +
-                            "SS.sasi_cursem as safd_sem from SAS_Student SS,SAS_HostelStruct SH,SAS_HostelStrAmount SA,SAS_FeeTypes SF " +
-                            "where SASI_Hostel = true and SASI_MatricNo = '" + MatricNo + "' and (SS.SAKO_Code = SH.SAHB_Code and SS.SABK_Code = SH.SAHB_Block) " +
-                            "and SH.SAHS_Code = SA.SAHS_Code and SS.SASI_FeeCat = SA.SASC_Code and SF.SAFT_Code = SA.SAFT_Code and  sasi_hostel = true ";
-                sqlCmd += "UNION ";
-                sqlCmd += "SELECT SK.SAKO_Code As safs_code, case when (select sasi_hostel from sas_student where sasi_matricno  = '" + MatricNo + "') = true then " +
-                            "sum (SKD.sakod_feeamount) else sum (SKD.sakod_feeamountout) end as SAfa_Amount, SKD.safd_type, SKD.saft_code, " +
-                            "SS.sasi_cursemyr as sast_code, SS.sasi_cursem as safd_sem FROM SAS_Student SS, SAS_Kokorikulum SK,SAS_KokorikulumDetails SKD " +
-                            "where sasi_matricno = '" + MatricNo + "' AND SS.sasi_kokocode <> '-1' and SKD.SAKO_Code = SK.SAKO_Code and " +
-                            "SKD.sako_code = SS.sasi_kokocode and SKD.sakod_categorycode = SS.sasc_code group by SK.SAKO_Code,SKD.safd_type, " +
-                            "SKD.saft_code,SS.sasi_cursemyr,SS.sasi_cursem ";
+                //sqlCmd += "select distinct sf.saft_desc,sad.refcode as saft_code,sad.transamount as safa_amount,sfd.safd_type " +
+                //          "from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid " +
+                //          "inner join sas_feetypes sf on sf.saft_code = sad.refcode inner join sas_feestrdetails sfd on sfd.saft_code = sad.refcode " +
+                //          "where sad.transcode = '" + docno + "'" +
+                //          "AND sfd.safd_type is not null ";
+                //sqlCmd += "UNION ";
+                //sqlCmd += "select distinct sf.saft_desc,sad.refcode as saft_code,sad.transamount as safa_amount,skd.safd_type " +
+                //            "from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid " +
+                //            "inner join sas_feetypes sf on sf.saft_code = sad.refcode inner join sas_kokorikulumdetails skd on skd.saft_code = sad.refcode " +
+                //            "where sad.transcode = '" + docno + "'" +
+                //            "and skd.safd_type is not null ";
+                //sqlCmd += "UNION ";
+                //sqlCmd += "select distinct sf.saft_desc,sad.refcode as saft_code,sad.transamount as safa_amount,sh.sahd_type " +
+                //            "from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid " +
+                //            "inner join sas_feetypes sf on sf.saft_code = sad.refcode inner join SAS_HostelStrdetails sh on sh.saft_code = sad.refcode " +
+                //            "where sad.transcode = '" + docno + "'" +
+                //            "and sh.sahd_type  is not null ";
 
-                sqlCmd += ") a INNER JOIN SAS_FeeTypes b ON a.saft_code = b.saft_code ";
+                //sqlCmd += ") a ";
 
-                if (studobj.CurrentSemester != 1)
-                {
-                    sqlCmd += "WHERE a.SAFD_type != 'A' AND a.SAFD_sem IN (0,'" + studobj.CurrentSemester + "') ";
-                }
-                else
-                {
-                    sqlCmd += "WHERE a.SAFD_sem IN (0,'" + studobj.CurrentSemester + "') ";
-                }
-
-                sqlCmd = sqlCmd + "and safa_amount > 0 ORDER by a.SAFD_Type ";
+                sqlCmd = "select distinct sf.saft_desc,sad.refcode as saft_code,sad.transamount as safa_amount,sad.ref3 as safd_type from sas_accountsdetails sad "+
+                         "inner join sas_accounts sa on sa.transid = sad.transid inner join sas_feetypes sf on sf.saft_code = sad.refcode "+
+                         "where sad.transcode = '" + docno + "'" +
+                         " order by saft_code";
+                //sqlCmd = sqlCmd + "where safa_amount > 0 ORDER by a.SAFD_Type ";
 
                 //execute query - start
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -8847,26 +8812,30 @@ public double GetSponserStuAllocateAmount(string BatchId)
             try
             {
                 //Build Sql Statement - Start
-                SqlStatement = "SELECT creditref from sas_accounts WHERE batchcode = "
+                SqlStatement = "SELECT creditref,subcategory from sas_accounts WHERE batchcode = "
                     + clsGeneric.AddQuotes(BatchCode);
                 //Build Sql Statement - Stop
 
                 //Get Batch Details - Start
                 _IDataReader = _DatabaseFactory.ExecuteReader(
                     Helper.GetDataBaseType, DataBaseConnectionString, SqlStatement).CreateDataReader();
-                //Get Batch Details - Stop
+                //Get Batch Details - Stop"UpdatePaidAmount"
 
                 //loop thro the batch details - start
                 while (_IDataReader.Read())
                 {
                     String creditref = GetValue<string>(_IDataReader, "creditref");
-                    //Updated Mona 19/2/2016
-                    //string transstatus = "Open";
+                    String sub = GetValue<string>(_IDataReader, "subcategory");
 
-
-                    //Build Update Statement - Start
-                    UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '0' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
-
+                    if (sub == "UpdatePaidAmount")
+                    {
+                        //Build Update Statement - Start
+                        UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '2' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
+                    }
+                    else
+                    {
+                        UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '0' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
+                    }
                     //Build Update Statement - Stop
                 }
                 //loop thro the batch details - stop
