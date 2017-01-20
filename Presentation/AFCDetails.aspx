@@ -38,8 +38,8 @@
                             <asp:BoundColumn DataField="SAFT_Code" HeaderText="Fee Code"></asp:BoundColumn>
                             <asp:BoundColumn DataField="SAFD_Type" HeaderText="Fee Type"></asp:BoundColumn>   
                             <asp:BoundColumn DataField="SAFA_Amount" HeaderText="Fee Amount" DataFormatString="{0:F}"></asp:BoundColumn>
-                            <asp:BoundColumn DataField="SAST_Code" HeaderText="Semester Code" Visible="false"></asp:BoundColumn>
-                            <asp:BoundColumn DataField="SAFD_Sem" HeaderText="Semester" Visible="false"></asp:BoundColumn>                            
+                            <%--<asp:BoundColumn DataField="SAST_Code" HeaderText="Semester Code" Visible="false"></asp:BoundColumn>--%>
+                            <%--<asp:BoundColumn DataField="SAFD_Sem" HeaderText="Semester" Visible="false"></asp:BoundColumn>--%>                            
                         </Columns>
                     </asp:DataGrid>
                 </fieldset>

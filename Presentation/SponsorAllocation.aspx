@@ -355,6 +355,16 @@
             return true;
         }	
        
+        //added by Hafiz @ 19/01/2017
+        //Upload PTPTN
+        function UploadFile(fileUpload)
+        {
+            if (fileUpload.value != '')
+            {
+                document.getElementById("<%=btnUploadPTPTN.ClientID%>").click();
+
+            }
+        }
     </script>
     <%--</ContentTemplate>     
 </atlas:UpdatePanel>--%>
@@ -857,6 +867,39 @@
                                 <td colspan="1" style="width: 151px; height: 27px">
                                 </td>
                             </tr>
+
+                           <%--added by Hafiz @ 19/01/2017 start --%>
+                           <tr runat="server" id="trPTPTNupload">
+                                <td style="height: 27px;">
+                                    &nbsp;</td>
+                                <td style="width: 13%; height: 27px;">
+                                    Upload PTPTN File</td>
+                                <td colspan="1" style="width: 34px; height: 27px">
+                                    &nbsp;</td>
+                                <td style="width: 1209px; height: 27px">
+                                    <asp:FileUpload ID="FileUpload2" runat="server" />
+                                    <br /> 
+                                    <asp:Button ID="btnUploadPTPTN" Text="Upload" runat="server" OnClick="Upload" Style="display: none" />
+                                </td>
+                               <td colspan="1" style="width: 6448px; height: 27px">
+                                    &nbsp;</td>
+                                <td style="width: 1266px; height: 27px">
+                                    &nbsp;</td>
+                                <td colspan="1" style="width: 1266px; height: 27px">
+                                    &nbsp;</td>
+                                <td colspan="1" style="width: 53px; height: 27px">
+                                    &nbsp;</td>
+                                <td colspan="1" style="width: 27px; height: 27px">
+                                    &nbsp;</td>
+                                <td colspan="1" style="width: 151px; height: 27px">
+                                    &nbsp;</td>
+                                <td colspan="1" style="width: 6642px; height: 27px">
+                                    &nbsp;</td>
+                                <td colspan="1" style="width: 151px; height: 27px">
+                                    &nbsp;</td>
+                           </tr>
+                           <%--added by Hafiz @ 19/01/2017 end --%>
+
                             <tr runat="server" id="trFileGen">
                                 <td style="height: 27px;">
                                     </td>

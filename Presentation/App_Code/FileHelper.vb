@@ -291,6 +291,16 @@ Public Class FileHelper
             End Set
         End Property
 
+        'OUTSTANDING AMT
+        Private _STUDENT_OUTSTANDING_AMT As Decimal
+        Public Property OutstandingAmt() As Decimal
+            Get
+                Return _STUDENT_OUTSTANDING_AMT
+            End Get
+            Set(ByVal value As Decimal)
+                _STUDENT_OUTSTANDING_AMT = value
+            End Set
+        End Property
     End Class
 
 #End Region
@@ -560,8 +570,9 @@ Public Class FileHelper
     'Created Date		: 13/06/2015
     'Modified by Hafiz @ 24/5/2016
 
-    Public Function GenerateDirectDebitFile(ByVal UploadFile As String, ByRef TotalRecords As Integer, ByRef TotalAmount As Decimal,
-                                            ByRef DirectDebitFileName As String, Optional ByVal dt_result As DateTime = Nothing) As Boolean
+    Public Function GenerateDirectDebitFile(ByVal UploadFile As String, Optional ByRef TotalRecords As Integer = 0, Optional ByRef TotalAmount As Decimal = 0,
+                                            Optional ByRef DirectDebitFileName As String = Nothing, Optional ByVal dt_result As DateTime = Nothing,
+                                            Optional ByRef dgView As DataGrid = Nothing) As Boolean
 
         'Create Instances - Start
         Dim _AccountsBAL As New AccountsBAL
@@ -575,7 +586,7 @@ Public Class FileHelper
 
         'Variable Declarations - Start
         Dim WarrantAmountText As String = Nothing, IdentityNo As String = Nothing, WarrantAmount As Decimal = 0
-        Dim PtptnFileName As String = Nothing, LineContent As String = Nothing
+        Dim PtptnFileName As String = Nothing, LineContent As String = Nothing, AllocatedAmount As Decimal = 0, OutstandingAmount As Decimal = 0
         'Variable Declarations - Stop
 
         Try
@@ -633,6 +644,8 @@ Public Class FileHelper
 
                             stud_obj.MatricNo = _StudentEntityPTPTN.MatricNO
                             outamt = _AccountsBAL.GetStudentOutstandingAmtInSponsorAllocation(stud_obj)
+
+                            _StudentEntityPTPTN.OutstandingAmt = Format(outamt, "0.00")
 
                             If outamt <= 0 Then
 
@@ -692,6 +705,10 @@ Public Class FileHelper
             'if student list available - Start
             If Not ListStudentEntity Is Nothing Then
 
+                If dgView IsNot Nothing AndAlso BindSponsorAllocDG(ListStudentEntity, dgView) Then
+                    Return True
+                End If
+
                 If CreateDirectDebitFile(UploadFile, ListStudentEntity, TotalRecords, TotalAmount, DirectDebitFileName, dt_result) Then
 
                     'Create fail`s DD File
@@ -731,6 +748,87 @@ Public Class FileHelper
             'Destroy Stream reader instance - Stop
 
         End Try
+
+    End Function
+
+#End Region
+
+#Region "BindSponsorAllocDG"
+    'added by Hafiz @ 19/01/2017
+    'Sponsor Allocation Bind Datagrid For PTPTN
+
+    Private Function BindSponsorAllocDG(ByVal ListStudentEntity As List(Of StudentEntityPTPTN), ByVal dgView As DataGrid) As Boolean
+
+        Dim ListStudAll As New List(Of AccountsDetailsEn)
+        Dim i As Integer = 0, outamt As Double = 0, sponamt As Double = 0, amt As Double = 0, tamt As Double = 0
+        Dim chk As CheckBox, sponsor_amt As TextBox, allocated_amt As TextBox
+        Dim credit_amt As TextBox, pocket_amt As TextBox
+
+        ListStudAll.AddRange(ListStudentEntity.Select(Function(x) New AccountsDetailsEn With
+                                                                  {.Sudentacc = New StudentEn With {.MatricNo = x.MatricNO, .StudentName = x.StudentName, .ProgramID = x.ProgramID, .CurrentSemester = x.CurrentSemester,
+                                                                                                    .ICNo = x.ICNo, .OutstandingAmount = x.OutstandingAmt}, .AmaunWarran = x.WarrantAmt
+                                                                  }).ToList())
+        dgView.DataSource = ListStudAll
+        dgView.DataBind()
+
+        While i < ListStudAll.Count
+
+            For Each _dgItems As DataGridItem In dgView.Items
+
+                If _dgItems.Cells(1).Text = ListStudAll(i).MatricNo Then
+
+                    chk = _dgItems.Cells(0).Controls(1)
+                    chk.Checked = False
+
+                    sponsor_amt = _dgItems.Cells(6).Controls(1)
+                    sponsor_amt.Text = Format(ListStudAll(i).AmaunWarran, "0.00")
+                    allocated_amt = _dgItems.Cells(8).Controls(1)
+                    credit_amt = _dgItems.Cells(10).Controls(1)
+                    pocket_amt = _dgItems.Cells(11).Controls(1)
+
+                    sponamt = sponsor_amt.Text
+                    outamt = Format(ListStudAll(i).Sudentacc.OutstandingAmount, "0.00")
+
+                    If outamt >= 0 And outamt <= sponamt Then
+                        allocated_amt.Text = String.Format("{0:F}", outamt)
+                    ElseIf outamt <= 0 Then
+                        amt = 0
+                        allocated_amt.Text = String.Format("{0:F}", amt)
+                    ElseIf outamt >= 0 And outamt > sponamt Then
+                        amt = 0
+                        allocated_amt.Text = String.Format("{0:F}", sponamt)
+                    End If
+
+                    If sponamt >= outamt Then
+                        If allocated_amt.Text = "" Then
+                            allocated_amt.Text = 0.0
+                        End If
+                        credit_amt.Text = String.Format("{0:F}", sponamt - allocated_amt.Text)
+                    Else
+                        amt = 0
+                        credit_amt.Text = String.Format("{0:F}", amt)
+                    End If
+
+                    pocket_amt.Text = String.Format("{0:F}", tamt)
+
+                    If pocket_amt.Text = 0 And credit_amt.Text = 0 Then
+                        _dgItems.Cells(10).Enabled = False
+                        _dgItems.Cells(11).Enabled = False
+                    End If
+
+                    _dgItems.Cells(7).Text = String.Format("{0:F}", outamt)
+                    _dgItems.Cells(14).Text = credit_amt.Text
+                    _dgItems.Cells(13).Text = pocket_amt.Text
+
+                End If
+
+            Next
+
+            i += 1
+
+        End While
+
+        Return True
 
     End Function
 
