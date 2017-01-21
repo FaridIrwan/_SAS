@@ -441,6 +441,14 @@ Public Class FileHelper
         Return clsGeneric.NullToShort(ConfigurationManager.AppSettings("PTPTN_UPLOAD_FILE_IC_NO_END_POS"))
     End Function
 
+    Private Function GetAccountNoStartPosition() As Short
+        Return clsGeneric.NullToShort(ConfigurationManager.AppSettings("PTPTN_UPLOAD_FILE_ACC_NO_START_POS"))
+    End Function
+
+    Private Function GetAccountNoEndPosition() As Short
+        Return clsGeneric.NullToShort(ConfigurationManager.AppSettings("PTPTN_UPLOAD_FILE_ACC_NO_END_POS"))
+    End Function
+
     Private Function GetUploadFileWarrantAmountStartPosition() As Short
         Return clsGeneric.NullToShort(ConfigurationManager.AppSettings("PTPTN_UPLOAD_FILE_WARRANT_AMOUNT_START_POS"))
     End Function
@@ -585,7 +593,7 @@ Public Class FileHelper
         'Create Instances - Stop
 
         'Variable Declarations - Start
-        Dim WarrantAmountText As String = Nothing, IdentityNo As String = Nothing, WarrantAmount As Decimal = 0
+        Dim WarrantAmountText As String = Nothing, IdentityNo As String = Nothing, WarrantAmount As Decimal = 0, AccountNo As String = Nothing
         Dim PtptnFileName As String = Nothing, LineContent As String = Nothing, AllocatedAmount As Decimal = 0, OutstandingAmount As Decimal = 0
         'Variable Declarations - Stop
 
@@ -611,6 +619,10 @@ Public Class FileHelper
                     IdentityNo = GetPositionValue(LineContent, GetUploadFileIcNoStartPosition, GetUploadFileIcNoEndPosition)
                     'Get Identity No - Stop
 
+                    'Get Account No - Start @ added by Hafiz 22/01/2017 
+                    AccountNo = GetPositionValue(LineContent, GetAccountNoStartPosition, GetAccountNoEndPosition)
+                    'Get Account No - End @ added by Hafiz 22/01/2017 
+
                     'Get Warrant Amount - Start
                     WarrantAmountText = GetPositionValue(LineContent, GetUploadFileWarrantAmountStartPosition, GetUploadFileWarrantAmountEndPosition)
                     WarrantAmount = clsGeneric.NullToInteger(WarrantAmountText) / 100
@@ -629,7 +641,8 @@ Public Class FileHelper
                         _StudentEntityPTPTN.StudentName = clsGeneric.NullToString(StudentDetails(SASI_Name))
                         _StudentEntityPTPTN.ProgramID = clsGeneric.NullToString(StudentDetails(SASI_PgId))
                         _StudentEntityPTPTN.CurrentSemester = clsGeneric.NullToInteger(StudentDetails(SASI_CurSem))
-                        _StudentEntityPTPTN.AccountNo = clsGeneric.NullToString(StudentDetails(SASI_AccNO))
+                        '_StudentEntityPTPTN.AccountNo = clsGeneric.NullToString(StudentDetails(SASI_AccNO))
+                        _StudentEntityPTPTN.AccountNo = AccountNo
                         _StudentEntityPTPTN.StatsCode = clsGeneric.NullToString(StudentDetails(SASS_Code))
 
                         Dim FndStats As StudentStatusEn = _StudentStatusDAL.GetStudentBlStatus(_StudentEntityPTPTN.StatsCode)
@@ -971,6 +984,16 @@ Public Class FileHelper
                 StudentMatricNo = clsGeneric.NullToString(ListStudentEntity(Index).MatricNO)
                 StudentAccountNo = clsGeneric.NullToString(ListStudentEntity(Index).AccountNo)
 
+                'student name - Start @ added by Hafiz 22/01/2017 
+                Dim studname As String = Nothing
+
+                If StudentName.Length > 40 Then
+                    studname = StudentName.Substring(0, 40)
+                Else
+                    studname = StudentName
+                End If
+                'student name - End @ added by Hafiz 22/01/2017 
+
                 'Increment total records
                 TotalRecords = TotalRecords + 1
 
@@ -987,7 +1010,7 @@ Public Class FileHelper
                 LineContent &= BatchNumber
                 LineContent &= clsGeneric.StringFiller(StudentMatricNo, 30, EnumHelp.FillerType.Suffix, " ")
                 LineContent &= clsGeneric.StringFiller(StudentIdentityNo, 16, EnumHelp.FillerType.Suffix, " ")
-                LineContent &= clsGeneric.StringFiller(StudentName, 40, EnumHelp.FillerType.Suffix, " ")
+                LineContent &= clsGeneric.StringFiller(studname, 40, EnumHelp.FillerType.Suffix, " ")
                 LineContent &= clsGeneric.StringFiller(StudentAccountNo, 14, EnumHelp.FillerType.Suffix, " ")
                 LineContent &= clsGeneric.StringFiller(clsGeneric.RemoveCurrencyFormat(ListStudentEntity(Index).AllocAmt), 13,
                                                         EnumHelp.FillerType.Prefix, "0")
@@ -2519,27 +2542,28 @@ Public Class FileHelper
         Dim _StringBuilder As New StringBuilder
         Dim _StudentDAL As New StudentDAL
 
-        Dim Index As Integer = 0, LineContent As String = Nothing, stud_icno As String = Nothing
+        Dim Index As Integer = 0, LineContent As String = Nothing, stud_icno As String = Nothing, AccountNo As String = Nothing
 
         Try
             While Index < obj.Count
 
                 stud_icno = obj(Index).ICNo
+                AccountNo = obj(Index).AccountNo
 
                 Dim argEn As StudentEn = _StudentDAL.GetStudInfo(stud_icno)
 
                 TotalRecords = TotalRecords + 1
 
-                'account no - start
+                'account no - Start @ added by Hafiz 22/01/2017
                 Dim str_accno As String = Nothing
 
-                If argEn.ICNo.Length > 12 Then
-                    str_accno = clsGeneric.StringFiller(argEn.ICNo, 14, EnumHelp.FillerType.Suffix, " ")
+                If AccountNo.Length >= 14 Then
+                    str_accno = clsGeneric.StringFiller(AccountNo, 14, EnumHelp.FillerType.Suffix, " ")
                 Else
-                    str_accno = clsGeneric.StringFiller("", 14 - argEn.ICNo.Length, EnumHelp.FillerType.Suffix, " ")
-                    str_accno &= clsGeneric.StringFiller(argEn.ICNo, argEn.ICNo.Length, EnumHelp.FillerType.Suffix, " ")
+                    str_accno = clsGeneric.StringFiller("", 14 - AccountNo.Length, EnumHelp.FillerType.Suffix, " ")
+                    str_accno &= clsGeneric.StringFiller(AccountNo, AccountNo.Length, EnumHelp.FillerType.Suffix, " ")
                 End If
-                'account no - end
+                'account no - End @ added by Hafiz 22/01/2017
 
                 'student name - start
                 Dim studname As String = Nothing

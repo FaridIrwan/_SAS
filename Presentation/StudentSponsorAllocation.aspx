@@ -1,216 +1,178 @@
-﻿Imports MaxGeneric
-Imports System.Data
-Imports HTS.SAS.BusinessObjects
-Imports HTS.SAS.Entities
-Imports System.Collections.Generic
-Imports System.Linq
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="StudentSponsorAllocation.aspx.vb" Inherits="StudentSponsorAllocation" %>
 
-Partial Class StudentSponsorAllocation
-    Inherits System.Web.UI.Page
+<!DOCTYPE html>
 
-    Private _StudentDAL As New HTS.SAS.DataAccessObjects.StudentDAL
-    Private _AccountsDAL As New HTS.SAS.DataAccessObjects.AccountsDAL
-    Dim MatricNo As String
-    Dim ProgramId As String
-    Dim BatchCode As String = String.Empty
-    Dim Status As String = String.Empty
-    Dim Sponsor As String
-    Private listStu As New List(Of StudentEn)
-    Private lststud As New List(Of AccountsDetailsEn)
-    Private lststudA As New List(Of StudentEn)
-    Dim listStudent As New List(Of AccountsDetailsEn)
-    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
-        Sponsor = Request.QueryString("SponsorCode")
-        If Not Page.IsPostBack Then
-            'MatricNo = Request.QueryString("MatricNo")
-            'BindGrid()
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title>Student Sponsor Allocation</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div style="text-align: left">
+            <table style="width: 400px">
+                <tr>
+                    <td style="width: 3px; height: 16px; text-align: center">
+                    
+                                    <asp:Label ID="lblmatricno" runat="server" Font-Bold="False" Text=" Matric No :" Width="113px"></asp:Label>
+                                
+                     </td><td style="width: 3px; height: 16px; text-align: center">
+                                    <asp:TextBox ID="txtMatricNo" runat="server" Width="100px"></asp:TextBox>
+                        </td>
+                                    <!--<input name="txtMatricNo" onkeyup="Filterchanged()" runat="server" />-->
+                                <td style="width: 3px; height: 16px; text-align: center">
+                                <asp:ImageButton ID="ibtnSearch" runat="server" ImageUrl="~/images/find.gif" />
+                            </td>
+                            <td style="width: 270px; height: 16px">
+                                <asp:Label ID="Label14" runat="server" Text="Search" Width="104px"></asp:Label>
+                            </td>
+                            <td style="width: 100px; height: 16px">
+                            </td>
+                         </tr>
+                
+                        </table>
+                
+                
+            <table style="width: 400px">
+                 <tr>
+                    <td align="center">
+                        <asp:Label ID="lblMsg" runat="server" CssClass="lblError" Style="text-align: left"
+                            Width="348px"></asp:Label>
+                    </td>
+                </tr>
+                 <tr>
+                    <td style="width: 100px; height: 16px">
+                        <table style="width: 416px; height: 25px">
+                            <tr>
+                                <td style="width: 100px; height: 149px; vertical-align: top;">
+                                    <asp:CheckBox ID="chkStudent" runat="server"
+                                        AutoPostBack="True" Text="Select All" />
+                                    <div style="overflow: auto; width: 550px; height:200px ">
+                                        <asp:DataGrid ID="dgStudentInfo" runat="server" AutoGenerateColumns="False" Width="500px" AllowPaging="true" PageSize="25"
+                                            Height="123px" Style="vertical-align: text-top" ShowFooter="true" Visible ="false" >
+                                            <FooterStyle CssClass="dgFooterStyle" Height="20px" />
+                                            <PagerStyle Mode="NumericPages" HorizontalAlign="Center" />
+                                            <SelectedItemStyle CssClass="dgSelectedItemStyle" />
+                                            <AlternatingItemStyle BackColor="Beige" CssClass="dgAlternatingItemStyle" Font-Bold="False"
+                                                Font-Italic="False" Font-Overline="False" Font-Strikeout="False" Font-Underline="False" />
+                                            <ItemStyle CssClass="dgItemStyle" />
+                                            <HeaderStyle BackColor="#CDD7EE" CssClass="dgHeaderStyle" Font-Bold="True" Font-Italic="False"
+                                                Font-Overline="False" Font-Size="Medium" Font-Strikeout="False" Font-Underline="False" HorizontalAlign="Center" />
+                                            <%-- <HeaderTemplate>
+                     
+                         <input type="checkbox" id="mainCB" onclick="javascript: CheckAll(this);" />
+                    </HeaderTemplate>--%>
 
-        End If
-    End Sub
-    Private Sub BindGrid()
-        Dim i As Integer = 0
-        'Dim list As New List(Of StudentEn)
-        If Not lststud Is Nothing Then
-            MatricNo = Trim(txtMatricNo.Text)
-            lststud = _StudentDAL.GetListStudentForAllocation(Sponsor)
-            dgStudentInfo.Visible = True
-            dgStudentInfo.DataSource = lststud
-            dgStudentInfo.DataBind()
-            txtMatricNo.Focus()
-            If lststud.Count = 0 Then
-                lblMsg.Text = "No Students are Available"
-                lblMsg.Visible = True
-                dgStudentInfo.Visible = False
-            End If
-        Else
-            lblMsg.Text = "No Students are Available"
-            lblMsg.Visible = True
-            Response.Write("No Students are Available")
-        End If
+                                            <Columns>
+                                                <asp:TemplateColumn HeaderText="Select">
+                                                    <ItemTemplate>
+                                                        &nbsp;<asp:CheckBox ID="chk" runat="server" AutoPostBack="true" OnCheckedChanged="chk_CheckedChanged" />
+                                                    </ItemTemplate>
+                                                </asp:TemplateColumn>
+                                                <asp:BoundColumn DataField="MatricNo" HeaderText="Matric No"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="StudentName" HeaderText="Name"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="ICNo" HeaderText="IC NO"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="ProgramID" HeaderText="Program"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="CurrentSemester" HeaderText="Semester"></asp:BoundColumn> 
+                                                
+                                                <%--<asp:BoundColumn DataField="OutstandingAmount" HeaderText="Available Amount"></asp:BoundColumn>--%>
+                                                <%--<asp:BoundColumn DataField="CategoryCode" HeaderText="Category Code" Visible="false"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="ProgramID" HeaderText="Program ID" Visible="false"></asp:BoundColumn>--%>
+                                            </Columns>
+                                        </asp:DataGrid>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 100px; text-align: right">
+                        <table style=" height: 25px">
+                            <tr>
+                                <td >
+                                    <table>
+                                        <tr>
+                                            <td style="width: 350px; height: 30px; text-align: left"></td>
+                                            <td style="width: 10px; height: 30px; text-align: left">
+                                                <asp:ImageButton ID="ibtnOK" runat="server" ImageUrl="~/images/add_list.gif" Width="24px"
+                                                    Height="24px" />
+                                            </td>
+                                            <td style="width: 50px; height: 30px; text-align: left">
+                                                <asp:Label ID="Label2" runat="server" Text="Select" Width="21px"></asp:Label>
+                                            </td>
+                                            <td style="width: 10px; height: 30px; text-align: left">
+                                                <asp:ImageButton ID="ibtnClose" runat="server" Height="24px" ImageUrl="~/images/ok_cancel.jpg"
+                                                    Width="24px" />
+                                            </td>
+                                            <td style="width: 50px; height: 30px; text-align: left">
+                                                <asp:Label ID="Label3" runat="server" Text="Close" Width="21px"></asp:Label>
+                                            </td>
 
-    End Sub
-    Protected Sub ibtnSearch_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles ibtnSearch.Click
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
 
-        BindGrid()
-
-    End Sub
-    Protected Sub chk_CheckedChanged(sender As Object, e As EventArgs)
-        Dim chk As CheckBox = (DirectCast(sender, CheckBox))
-        Dim dgitem As DataGridItem = DirectCast(chk.Parent.Parent, DataGridItem)
-        If Not Session("lstStu") Is Nothing Then
-            listStu = Session("lstStu")
-        Else
-            listStu = New List(Of StudentEn)
-        End If
-
-        If chk.Checked = True Then
-            chk.Checked = True
-            If Not listStu.Any(Function(x) x.MatricNo = dgitem.Cells(1).Text) Then
-                Dim eobjstu As New StudentEn
-                eobjstu.ProgramID = Request.QueryString("ProgramId")
-                eobjstu.SponsorCode = Request.QueryString("SponsorCode")
-                eobjstu.MatricNo = dgitem.Cells(1).Text
-                eobjstu.StudentName = dgitem.Cells(2).Text
-                eobjstu.ICNo = dgitem.Cells(3).Text
-                eobjstu.ProgramID = dgitem.Cells(4).Text
-                eobjstu.CurrentSemester = dgitem.Cells(5).Text
-                'eobjstu.CategoryCode = dgitem.Cells(7).Text
-                listStu.Add(eobjstu)
-            End If
-        Else
-            chk.Checked = False
-            listStu.Remove(listStu.Where(Function(x) x.MatricNo = dgitem.Cells(1).Text).Select(Function(x) x).FirstOrDefault())
-        End If
-        Session("lstStu") = listStu
-        Session("check") = chk.Checked
-    End Sub
-
-
-
-    Protected Sub chkStudent_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles chkStudent.CheckedChanged
-
-        Dim chk As CheckBox
-        Dim dgitem As DataGridItem
-        If Not Session("lstStu") Is Nothing Then
-            listStu = Session("lstStu")
-        Else
-            listStu = New List(Of StudentEn)
-        End If
-        If chkStudent.Checked = True Then
-            Dim eobjstu As New StudentEn
-            For Each dgitem In dgStudentInfo.Items
-                chk = dgitem.Cells(0).Controls(1)
-                chk.Checked = True
-                If Not listStu.Any(Function(x) x.MatricNo = dgitem.Cells(1).Text) Then
-                    eobjstu.ProgramID = Request.QueryString("ProgramId")
-                    eobjstu.SponsorCode = Request.QueryString("SponsorCode")
-                    'eobjstu.MatricNo = dgitem.Cells(1).Text
-                    'eobjstu.StudentName = dgitem.Cells(2).Text
-                    'eobjstu.CurrentSemester = dgitem.Cells(3).Text
-                    'eobjstu.CategoryCode = dgitem.Cells(7).Text
-                    eobjstu.MatricNo = dgitem.Cells(1).Text
-                    eobjstu.StudentName = dgitem.Cells(2).Text
-                    eobjstu.ICNo = dgitem.Cells(3).Text
-                    eobjstu.ProgramID = dgitem.Cells(4).Text
-                    eobjstu.CurrentSemester = dgitem.Cells(5).Text
-                    listStu.Add(eobjstu)
-                End If
-            Next
-        Else
-            For Each dgitem In dgStudentInfo.Items
-                chk = dgitem.Cells(0).Controls(1)
-                chk.Checked = False
-                listStu.Remove(listStu.Where(Function(x) x.MatricNo = dgitem.Cells(1).Text).Select(Function(x) x).FirstOrDefault())
-            Next
-        End If
-        Session("lstStu") = listStu
-
-    End Sub
-
-    Protected Sub ibtnOK_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles ibtnOK.Click
-        Dim eobj As New AccountsDetailsEn
-
-        Dim chkBox As CheckBox
-        'For Each dgi As DataGridItem In dgStudentInfo.Items
-        '    chkBox = dgi.Cells(0).Controls(1)
-        '    If chkBox.Checked = True Then
-        '        eobj = New StudentEn
-        '        eobj.MatricNo = dgi.Cells(1).Text
-        '        eobj.StudentName = dgi.Cells(2).Text
-        '        eobj.CurrentSemester = dgi.Cells(3).Text
-        '        eobj.SponsorLimit = dgi.Cells(4).Text
-        '        eobj.AllocatedAmount = dgi.Cells(5).Text
-        '        eobj.OutstandingAmount = dgi.Cells(6).Text
-        '        eobj.CategoryCode = dgi.Cells(7).Text
-        '        eobj.ProgramID = dgi.Cells(8).Text
-        '        eobj.TempAmount = 0
-        '        listStudent.Add(eobj)
-        '        dgStudentInfo.SelectedIndex = -1
-        '        Session("eobjstu") = eobj
-        '        Session("liststu") = listStudent
-        '        eobj = Nothing
-        '    End If
-        'Next
-        For Each dgi As DataGridItem In dgStudentInfo.Items
-            chkBox = dgi.Cells(0).Controls(1)
-            If chkBox.Checked = True Then
-                eobj = New AccountsDetailsEn
-                eobj.Sudentacc = New StudentEn
-                eobj.Sudentacc.MatricNo = dgi.Cells(1).Text
-                eobj.Sudentacc.StudentName = dgi.Cells(2).Text
-                eobj.Sudentacc.ICNo = dgi.Cells(3).Text
-                'eobj.Sudentacc.Faculty = dgi.Cells(4).Text
-                eobj.Sudentacc.ProgramID = dgi.Cells(4).Text
-                eobj.Sudentacc.CurrentSemester = dgi.Cells(5).Text
-                'eobj.Sudentacc.CurretSemesterYear = dgi.Cells(7).Text
-                'eobj.CategoryCode = dgi.Cells(8).Text
-                eobj.TempAmount = 0
-                listStudent.Add(eobj)
-                dgStudentInfo.SelectedIndex = -1
-                Session("eobjstu") = eobj
-                Session("liststu") = listStudent
-                eobj = Nothing
-            End If
-        Next
-        UpdateGrid()
-
-    End Sub
-
-    Protected Sub ibtnClose_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles ibtnClose.Click
-        UpdateGrid()
-    End Sub
-
-    ''' <summary>
-    ''' Method to Update Grid
-    ''' </summary>
-    ''' <remarks></remarks>
-    Private Sub UpdateGrid()
-        Dim chk As CheckBox
-        For Each dgitem In dgStudentInfo.Items
-            chk = dgitem.Cells(0).Controls(1)
-            'chk.Checked = True
-            If chkStudent.Checked = True Then
-                chkStudent.Checked = True
-                chkStudent.Enabled = True
-                chk.Checked = True
-                chk.Enabled = False
-            Else
-                chk.Checked = False
-                chk.Enabled = True
-                chkStudent.Checked = False
-                chkStudent.Enabled = True
-            End If
-            'If chk.Checked = True Then
-            '    chk.Checked = True
-            '    chk.Enabled = False
-            'Else
-            '    chk.Checked = False
-            '    chk.Enabled = True
-            'End If
-        Next
-        Dim cScript As String = ""
-        cScript = "<SCRIPT LANGUAGE=""JavaScript"">window.opener.document.getElementById('ctl00_ContentPlaceHolder1_btnHidden').click();self.close();</SCRIPT>"
-        ClientScript.RegisterStartupScript(Me.GetType(), "ClosePopUp", cScript)
-    End Sub
-
-End Class
+                        </table>
+                    </td>
+                </tr>
+               
+                <tr>
+                    <td>
+                        <asp:Label ID="lblCount" runat="server" Text="Student Count : " Font-Bold="True" Visible="False"></asp:Label>
+                        <asp:Label ID="lblstucount" Font-Bold="True" runat="server"></asp:Label>
+                        <br />
+                        <asp:Label ID="lblAmount" runat="server" Style="font-weight: 700" Text="Total Batch Amount : RM " Visible="False"></asp:Label>
+                        <asp:Label ID="lblbatch" runat="server" Style="font-weight: 700"></asp:Label>
+                        <br />
+                    </td>
+                </tr>
+                
+               
+                <tr>
+                    <td style="width: 100px; height: 149px; vertical-align: top;">
+                        <table style="width: 416px; height: 25px">
+                            <tr>
+                                <td style="width: 100px; height: 149px; vertical-align: top;">
+                                    <div style="overflow: auto; width: 550px; height:200px">
+                                        <asp:Panel ID="pnlStuNotAvailable" runat="server" Width="100%" Visible="false">
+                                            <span>
+                                                List Below Show Student N/A for Sponsorship.
+                                            </span>
+                                        <asp:DataGrid ID="dgStudentNotAvailable" runat="server" AutoGenerateColumns="False" Width="100%" AllowPaging="true" PageSize="25"
+                                            Height="123px" Style="vertical-align: text-top" ShowFooter="false">
+                                            <FooterStyle CssClass="dgFooterStyle" Height="20px" />
+                                            <PagerStyle Mode="NumericPages" HorizontalAlign="Center" />
+                                            <SelectedItemStyle CssClass="dgSelectedItemStyle" />
+                                            <AlternatingItemStyle BackColor="Beige" CssClass="dgAlternatingItemStyle" Font-Bold="False"
+                                                Font-Italic="False" Font-Overline="False" Font-Strikeout="False" Font-Underline="False" />
+                                            <ItemStyle CssClass="dgItemStyle" />
+                                            <HeaderStyle BackColor="#CDD7EE" CssClass="dgHeaderStyle" Font-Bold="True" Font-Italic="False"
+                                                Font-Overline="False" Font-Size="Medium" Font-Strikeout="False" Font-Underline="False" HorizontalAlign="Center" />
+                                            <Columns>
+                                                <asp:TemplateColumn HeaderText="Select" Visible="false">
+                                                    <ItemTemplate>
+                                                        &nbsp;<asp:CheckBox ID="chk" runat="server" AutoPostBack="true" Checked="true" />
+                                                    </ItemTemplate>
+                                                </asp:TemplateColumn>
+                                                <asp:BoundColumn DataField="MatricNo" HeaderText="Matric No"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="StudentName" HeaderText="Student Name"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="CurrentSemester" HeaderText="Semester"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="SponsorLimit" HeaderText="Sponsor Limit"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="PaidAmount" HeaderText="Allocated Amount"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="OutstandingAmount" HeaderText="Available Amount"></asp:BoundColumn>
+                                            </Columns>
+                                        </asp:DataGrid>
+                                            </asp:Panel>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</body>
+</html>
