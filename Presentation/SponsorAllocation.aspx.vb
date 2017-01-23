@@ -2674,7 +2674,7 @@ Partial Class SponsorAllocation
                 While y < liststuAll.Count
                     For Each dgItem1 In dgView.Items
                         If dgItem1.Cells(1).Text = liststuAll(y).MatricNo Then
-                            stuen.BatchCode = Trim(txtbatchspcode.Text)
+                            stuen.BatchCode = Trim(txtspcode.Text)
                             stuen.MatricNo = liststuAll(y).MatricNo
 
                             sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
@@ -2749,7 +2749,7 @@ Partial Class SponsorAllocation
                     dgInvoices1.DataBind()
                     ledgerformat()
                     'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
-                    outamt = Trim(txtoutamount.Text)
+                    'outamt = Trim(txtoutamount.Text)
                     outamt = Trim(txtoutamount.Text)
                     If _totalSpon > _available Then
                         _txtSpon.Text = String.Format("{0:F}", _sponamt)
