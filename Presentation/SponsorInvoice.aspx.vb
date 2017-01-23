@@ -2347,7 +2347,8 @@ Partial Class SponsorInvoice
                             ListTranctionDetails.ForEach(Sub(x) x.ProgramID = x.Internal_Use)
                             Session("LstStueObj") = newStuList
                             hfStudentCount.Value = newStuList.Count
-
+                            Dim lstmatric1 As List(Of String)
+                            lstmatric1 = newStuList.Select(Function(x) x.MatricNo).Distinct().ToList()
                             ''GROUPING FEE CODE - START
                             If ListTranctionDetails.Count > 0 Then
                                 Dim totalTransAmount As Double = 0
@@ -2369,7 +2370,8 @@ Partial Class SponsorInvoice
                                         assignNewTotal.TransactionAmount = assignNewTotal.TransactionAmount + stu.TransactionAmount
                                         assignNewTotal.GSTAmount = assignNewTotal.GSTAmount + stu.GSTAmount
                                         assignNewTotal.TempAmount = assignNewTotal.TransactionAmount - assignNewTotal.GSTAmount
-                                        assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
+                                        'assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
+                                        assignNewTotal.StudentQty = lstmatric1.Count
                                     End If
                                     totalGSTAmount = 0
                                     totalTransAmount = 0
@@ -2494,7 +2496,8 @@ Partial Class SponsorInvoice
                         Session("LstStueObj") = newStuList
                         hfStudentCount.Value = newStuList.Count
 
-                        ''GROUPING FEE CODE - START
+                        Dim lstmatric1 As List(Of String)
+                        lstmatric1 = newStuList.Select(Function(x) x.MatricNo).Distinct().ToList()
                         If ListTranctionDetails.Count > 0 Then
                             Dim totalTransAmount As Double = 0
                             Dim totalGSTAmount As Double = 0
@@ -2515,7 +2518,8 @@ Partial Class SponsorInvoice
                                     assignNewTotal.TransactionAmount = assignNewTotal.TransactionAmount + stu.TransactionAmount
                                     assignNewTotal.GSTAmount = assignNewTotal.GSTAmount + stu.GSTAmount
                                     assignNewTotal.TempAmount = assignNewTotal.TransactionAmount - assignNewTotal.GSTAmount
-                                    assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
+                                    'assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
+                                    assignNewTotal.StudentQty = lstmatric1.Count
                                 End If
                                 totalGSTAmount = 0
                                 totalTransAmount = 0
@@ -3497,8 +3501,8 @@ Partial Class SponsorInvoice
                                                                                      .AllocatedAmount = x.PaidAmount, .OutstandingAmount = x.OutstandingAmount,
                                                                                      .Internal_Use = x.ProgramID, .ICNo = x.ICNo, .TaxId = x.TaxId,
                                                                                       .ProgramName = x.ProgramName, .CurretSemesterYear = x.CurretSemesterYear,
-                                                                                      .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .GSTAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description
-                                                                                    }))
+                                                                                      .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .GSTAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description,
+                                                                                    .TransactionID = x.TransactionID}))
         End If
         'If saveAllStu.Count <= 0 Then
         saveAllStu.AddRange(lstobjects.Where(Function(y) Not saveAllStu.Any(Function(z) z.MatricNo = y.MatricNo)))
@@ -3837,8 +3841,8 @@ Partial Class SponsorInvoice
                                                                                      .AllocatedAmount = x.AllocatedAmount, .OutstandingAmount = x.OutstandingAmount,
                                                                                      .Internal_Use = x.ProgramID, .ICNo = x.ICNo, .TaxId = x.TaxId,
                                                                                       .ProgramName = x.ProgramName, .CurretSemesterYear = x.CurretSemesterYear,
-                                                                                      .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description
-                                                                                    }))
+                                                                                      .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description,
+                                                                                    .TransactionID = x.TransactionID}))
         End If
 
         If hfStudentCount.Value = 0 Or mylst.Count = 0 Then
@@ -3973,8 +3977,7 @@ Partial Class SponsorInvoice
             lstReferenceCode = stuList.Select(Function(x) x.ReferenceCode).Distinct().ToList()
             Dim lstmatricno As List(Of String)
             lstmatricno = stuList.Select(Function(x) x.MatricNo).Distinct().ToList()
-            'For Each obj In lstmatricno
-            '    For Each stu In mylst.Where(Function(x) x.MatricNo = obj).ToList()
+
             For Each obj In lstReferenceCode
                 For Each stu In stuList.Where(Function(x) x.ReferenceCode = obj).ToList()
                     'Feetype = stu.Feetype
@@ -3989,8 +3992,8 @@ Partial Class SponsorInvoice
                         totalTransAmount = totalTransAmount + stu.TransactionAmount
                         totalActualFeeAmount = totalTransAmount - totalGSTAmount
                         ListTRD.Add(New AccountsDetailsEn With {.ReferenceCode = stu.ReferenceCode, .Description = stu.Description, .TransactionAmount = totalTransAmount,
-                                                                  .GSTAmount = totalGSTAmount, .TaxAmount = stu.GSTAmount, .TempAmount = totalActualFeeAmount,
-                                                                .TempPaidAmount = stu.TransactionAmount, .TaxId = stu.TaxId, .StudentQty = 1})
+                                                                  .GSTAmount = totalGSTAmount, .TaxAmount = stu.GSTAmount, .TempAmount = totalActualFeeAmount, .TransactionID = stu.TransactionID,
+                                                                .MatricNumber = stu.MatricNo, .TempPaidAmount = stu.TransactionAmount, .TaxId = stu.TaxId, .StudentQty = 1})
 
                         '    'End If
                         '    'Else
@@ -4002,7 +4005,9 @@ Partial Class SponsorInvoice
                         assignNewTotal.TransactionAmount = assignNewTotal.TransactionAmount + stu.TransactionAmount
                         assignNewTotal.GSTAmount = assignNewTotal.GSTAmount + stu.GSTAmount
                         assignNewTotal.TempAmount = assignNewTotal.TransactionAmount - assignNewTotal.GSTAmount
-                        assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
+                        'assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
+                        assignNewTotal.StudentQty = lstmatricno.Count
+
 
                     End If
                     'End If

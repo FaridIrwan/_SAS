@@ -114,8 +114,8 @@ namespace HTS.SAS.DataAccessObjects
              ",SAS_Accounts.PaidAmount,SAS_Accounts.BatchCode as TransCode,SAS_SponsorInvoice.batchcode, " +
             "SAS_Accounts.TransTempCode ,SAS_Accounts.Category,SAS_Accounts.TransType,SAS_Accounts.PostStatus,SAS_Accounts.TransStatus,SAS_Accounts.allocateamount FROM SAS_Accounts " +
                 "INNER JOIN SAS_Sponsor On SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code " +
-" inner join sas_sponsor_inv_rec on sas_sponsor_inv_rec.receipt_id=SAS_Accounts.transid " +
-" inner join SAS_SponsorInvoice on SAS_SponsorInvoice.batchcode =sas_sponsor_inv_rec.invoice_id WHERE (SAS_Accounts.TransType = 'Credit') AND SAS_Accounts.allocateamount<>0 AND" +
+" left join sas_sponsor_inv_rec on sas_sponsor_inv_rec.receipt_id=SAS_Accounts.transid " +
+" left join SAS_SponsorInvoice on SAS_SponsorInvoice.batchcode =sas_sponsor_inv_rec.invoice_id WHERE (SAS_Accounts.TransType = 'Credit') AND SAS_Accounts.allocateamount<>0 AND" +
 
 
                 //(SAS_Accounts.Category = 'Receipt')  and (SAS_Accounts.PostStatus = 'Posted') AND (SAS_Accounts.TransStatus='Closed')
@@ -206,8 +206,8 @@ namespace HTS.SAS.DataAccessObjects
             "END AS AmountBalance " +
             "FROM SAS_Accounts " +
                 "INNER JOIN SAS_Sponsor On SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code " +
-" inner join sas_sponsor_inv_rec on sas_sponsor_inv_rec.receipt_id=SAS_Accounts.transid " +
-" inner join SAS_SponsorInvoice on SAS_SponsorInvoice.batchcode =sas_sponsor_inv_rec.invoice_id WHERE (SAS_Accounts.TransType = 'Credit') AND SAS_Accounts.allocateamount<>0 AND (SAS_Accounts.TransAmount >= SAS_Accounts.allocateamount) AND" +
+" left join sas_sponsor_inv_rec on sas_sponsor_inv_rec.receipt_id=SAS_Accounts.transid " +
+" left join SAS_SponsorInvoice on SAS_SponsorInvoice.batchcode =sas_sponsor_inv_rec.invoice_id WHERE (SAS_Accounts.TransType = 'Credit') AND SAS_Accounts.allocateamount<>0 AND (SAS_Accounts.TransAmount >= SAS_Accounts.allocateamount) AND" +
                            " (SAS_Accounts.Category = '" + argEn.Category + "') " +
                            " and (SAS_Accounts.PostStatus = '" + argEn.PostStatus + "')";
 
@@ -8624,7 +8624,9 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                       CASE WHEN acc.SourceType = 'FER' THEN acc.TransCode 
                                       ELSE 
                                            CASE WHEN acc.Description LIKE 'CIMB CLICKS%' THEN acc.TransCode 
-	                                       ELSE acc.BankRecNo
+	                                       ELSE 
+                                                CASE WHEN acc.Subcategory='Loan' THEN acc.TransCode 
+                                                ELSE acc.BankRecNo END
                                            END
                                       END 
 			                     ELSE
@@ -8673,8 +8675,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
 
             if (argEn.TransType.Length != 0) sqlCmd += " AND acc.TransType LIKE '" + argEn.TransType + "'";
 
-            sqlCmd += @"AND acc.subcategory NOT IN ('Loan') AND acc.TransAmount > 0 
-                        GROUP BY acc.TransDate,  acc.ReceiptDate, acc.BankRecNo, acc.Description, acc.Category, acc.TransCode, acc.TransType, acc.BatchCode, 
+            sqlCmd += @"AND acc.Category NOT IN ('Loan') AND acc.TransAmount > 0 
+                        GROUP BY acc.TransDate,  acc.ReceiptDate, acc.BankRecNo, acc.Description, acc.Category, acc.Subcategory, acc.TransCode, acc.TransType, acc.BatchCode, 
                         acc.TransAmount, acc.postedtimestamp,acc.SourceType,acc.BatchDate) ";
             //Student Ledger - End
 
@@ -8711,7 +8713,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
 			                END TransType,
                         BatchCode
                     FROM SAS_StudentLoan
-                    WHERE CreditRef = '" + argEn.CreditRef + "' AND SubType = '" + argEn.SubType + "'and PostStatus ='" + argEn.PostStatus + "') ";
+                    WHERE CreditRef = '" + argEn.CreditRef + "' AND SubType = '" + argEn.SubType + "'and PostStatus ='" + argEn.PostStatus + "'  AND Category NOT IN ('Receipt') ) ";
             //Loan Ledger - End
 
             sqlCmd += ") ledger ORDER BY ledger.PostedTimestamp ";

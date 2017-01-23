@@ -255,7 +255,7 @@ Partial Class SponsorAllocation
 
     Protected Sub IdtnStud_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles IdtnStud.Click
         Dim lststud As New List(Of StudentEn)
-        Dim _StudentDAL As New HTS.SAS.DataAccessObjects.StudentDAL
+        Dim _StudentDAL As New StudentDAL
         Dim Sponsor As String
         Sponsor = Trim(txtspcode.Text)
         If txtspcode.Text = "" Then
@@ -2481,27 +2481,7 @@ Partial Class SponsorAllocation
                         obj.MatricNo = dgItem1.Cells(1).Text
                         'outamt = liststuAll(j).PaidAmount
                         stuen.MatricNo = liststuAll(j).MatricNo
-                        Dim ListInvObjects1 As New List(Of AccountsEn)
-                        Dim obj3 As New AccountsBAL
-                        Dim eob3 As New AccountsEn
-
-                        eob3.CreditRef = stuen.MatricNo
-                        eob3.PostStatus = "Posted"
-                        eob3.SubType = "Student"
-                        eob3.TransType = ""
-                        eob3.TransStatus = "Closed"
-
-                        Try
-
-                            ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
-
-                        Catch ex As Exception
-                            LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
-                        End Try
-
-                        dgInvoices1.DataSource = ListInvObjects1
-                        dgInvoices1.DataBind()
-                        ledgerformat()
+                       
                         stuen.BatchCode = eobstu.TransTempCode
                         stuen.SASI_Add3 = txtspcode.Text
                         sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
@@ -2513,36 +2493,10 @@ Partial Class SponsorAllocation
                         txtCreditamt = dgItem1.Cells(10).Controls(1)
                         txtpamont = dgItem1.Cells(11).Controls(1)
 
-                        outamt = Trim(txtoutamount.Text)
+                        'outamt = Trim(txtoutamount.Text)
 
                         txtSponamt.Text = String.Format("{0:F}", sponamt)
 
-                        'If outamt >= 0 And outamt <= sponamt Then
-                        '    txtAmount.Text = String.Format("{0:F}", outamt)
-                        'ElseIf outamt <= 0 Then
-                        '    amt = 0
-                        '    txtAmount.Text = String.Format("{0:F}", amt)
-                        'ElseIf outamt >= 0 And outamt > sponamt Then
-                        '    amt = 0
-                        '    txtAmount.Text = String.Format("{0:F}", sponamt)
-                        'End If
-                        'If sponamt >= outamt Then
-                        '    If txtAmount.Text = "" Then
-                        '        txtAmount.Text = 0.0
-                        '    End If
-                        '    txtCreditamt.Text = String.Format("{0:F}", sponamt - txtAmount.Text)
-                        'Else
-                        '    amt = 0
-                        '    txtCreditamt.Text = String.Format("{0:F}", amt)
-                        'End If
-                        'txtpamont.Text = String.Format("{0:F}", tamt)
-                        'If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
-                        '    dgItem1.Cells(10).Enabled = False
-                        '    dgItem1.Cells(11).Enabled = False
-                        'End If
-                        'dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
-                        'dgItem1.Cells(14).Text = txtCreditamt.Text
-                        'dgItem1.Cells(13).Text = txtpamont.Text
                         dgItem1.Cells(15).Text = liststuAll(j).NoKelompok
                         dgItem1.Cells(16).Text = liststuAll(j).NoWarran
                         dgItem1.Cells(17).Text = liststuAll(j).AmaunWarran
@@ -2571,48 +2525,78 @@ Partial Class SponsorAllocation
 
             'co = z
             _sponamt = eobj1.TempAmount / liststuAll.Count
+            Dim ja As Integer = 0
+            While ja < liststuAll.Count
+                For Each dgItem1 In dgView.Items
+                    If dgItem1.Cells(1).Text = liststuAll(ja).MatricNo Then
+                        _txtSpon = dgItem1.FindControl("txtsponamt")
+                        stuen.MatricNo = liststuAll(ja).MatricNo
+                        txtAmount = dgItem1.Cells(8).Controls(1)
+                        'amt = liststuAll(j).TransactionAmount
+                        txtCreditamt = dgItem1.Cells(10).Controls(1)
+                        txtpamont = dgItem1.Cells(11).Controls(1)
+                        sponamt = _txtSpon.Text
+                        Dim ListInvObjects1 As New List(Of AccountsEn)
+                        Dim obj3 As New AccountsBAL
+                        Dim eob3 As New AccountsEn
 
-            For Each dgItem1 In dgView.Items
-                _txtSpon = dgItem1.FindControl("txtsponamt")
-                txtAmount = dgItem1.Cells(8).Controls(1)
-                'amt = liststuAll(j).TransactionAmount
-                txtCreditamt = dgItem1.Cells(10).Controls(1)
-                txtpamont = dgItem1.Cells(11).Controls(1)
-                sponamt = _txtSpon.Text
-                outamt = Trim(txtoutamount.Text)
-                If _totalSpon > eobj1.TempAmount Then
-                    _txtSpon.Text = String.Format("{0:F}", _sponamt)
-                Else
-                    _txtSpon.Text = String.Format("{0:F}", sponamt)
-                End If
-                sponamt = _txtSpon.Text
-                If outamt >= 0 And outamt <= sponamt Then
-                    txtAmount.Text = String.Format("{0:F}", outamt)
-                ElseIf outamt <= 0 Then
-                    amt = 0
-                    txtAmount.Text = String.Format("{0:F}", amt)
-                ElseIf outamt >= 0 And outamt > sponamt Then
-                    amt = 0
-                    txtAmount.Text = String.Format("{0:F}", sponamt)
-                End If
-                If sponamt >= outamt Then
-                    If txtAmount.Text = "" Then
-                        txtAmount.Text = 0.0
+                        eob3.CreditRef = stuen.MatricNo
+                        eob3.PostStatus = "Posted"
+                        eob3.SubType = "Student"
+                        eob3.TransType = ""
+                        eob3.TransStatus = "Closed"
+
+                        Try
+
+                            ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+
+                        Catch ex As Exception
+                            LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
+                        End Try
+
+                        dgInvoices1.DataSource = ListInvObjects1
+                        dgInvoices1.DataBind()
+                        ledgerformat()
+                        outamt = Trim(txtoutamount.Text)
+                        If _totalSpon > eobj1.TempAmount Then
+                            _txtSpon.Text = String.Format("{0:F}", _sponamt)
+                        Else
+                            _txtSpon.Text = String.Format("{0:F}", sponamt)
+                        End If
+                        sponamt = _txtSpon.Text
+                        If outamt >= 0 And outamt <= sponamt Then
+                            txtAmount.Text = String.Format("{0:F}", outamt)
+                        ElseIf outamt <= 0 Then
+                            amt = 0
+                            txtAmount.Text = String.Format("{0:F}", amt)
+                        ElseIf outamt >= 0 And outamt > sponamt Then
+                            amt = 0
+                            txtAmount.Text = String.Format("{0:F}", sponamt)
+                        End If
+                        If sponamt >= outamt Then
+                            If txtAmount.Text = "" Then
+                                txtAmount.Text = 0.0
+                            End If
+                            txtCreditamt.Text = String.Format("{0:F}", sponamt - txtAmount.Text)
+                        Else
+                            amt = 0
+                            txtCreditamt.Text = String.Format("{0:F}", amt)
+                        End If
+                        txtpamont.Text = String.Format("{0:F}", tamt)
+                        If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
+                            dgItem1.Cells(10).Enabled = False
+                            dgItem1.Cells(11).Enabled = False
+                        End If
+                        dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
+                        dgItem1.Cells(14).Text = txtCreditamt.Text
+                        dgItem1.Cells(13).Text = txtpamont.Text
+
+                        Exit For
                     End If
-                    txtCreditamt.Text = String.Format("{0:F}", sponamt - txtAmount.Text)
-                Else
-                    amt = 0
-                    txtCreditamt.Text = String.Format("{0:F}", amt)
-                End If
-                txtpamont.Text = String.Format("{0:F}", tamt)
-                If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
-                    dgItem1.Cells(10).Enabled = False
-                    dgItem1.Cells(11).Enabled = False
-                End If
-                dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
-                dgItem1.Cells(14).Text = txtCreditamt.Text
-                dgItem1.Cells(13).Text = txtpamont.Text
-            Next
+                Next
+                ja = ja + 1
+                _totalSpon = _totalSpon + sponamt
+            End While
 
         End If
         If Not Session("liststu") Is Nothing Then
@@ -2690,7 +2674,7 @@ Partial Class SponsorAllocation
                 While y < liststuAll.Count
                     For Each dgItem1 In dgView.Items
                         If dgItem1.Cells(1).Text = liststuAll(y).MatricNo Then
-                            stuen.BatchCode = Trim(txtbatchspcode.Text)
+                            stuen.BatchCode = Trim(txtspcode.Text)
                             stuen.MatricNo = liststuAll(y).MatricNo
 
                             sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
@@ -2765,7 +2749,7 @@ Partial Class SponsorAllocation
                     dgInvoices1.DataBind()
                     ledgerformat()
                     'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
-                    outamt = Trim(txtoutamount.Text)
+                    'outamt = Trim(txtoutamount.Text)
                     outamt = Trim(txtoutamount.Text)
                     If _totalSpon > _available Then
                         _txtSpon.Text = String.Format("{0:F}", _sponamt)
