@@ -8672,7 +8672,12 @@ public double GetSponserStuAllocateAmount(string BatchId)
 				                    ELSE acc.TransCode
 				                    END
 			                END TransCode,                            
-                        acc.Description, acc.Category ,
+                        CASE WHEN acc.Category = 'SPA' THEN
+                                
+	                                ( SELECT Description FROM sas_accounts WHERE batchcode = acc.BatchCode and category = 'Allocation' and subtype = 'Sponsor'
+		                              )
+	                        ELSE acc.Description
+	                        END Description, acc.Category ,
                             CASE WHEN acc.category = 'Credit Note' or acc.category = 'Debit Note' or acc.category = 'Invoice' THEN
                                 CASE
                                     WHEN acc.transtype = 'Debit' then SUM(de.TransAmount)
@@ -9157,7 +9162,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                         string sqlChanges = "select sad.transid,sad.transamount,Case when sad.taxamount is null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount is null then 0 else sad.paidamount end as paidamount from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st " +
                         " on st.saft_code = sad.refcode left join sas_student ss on ss.sasi_matricno = sa.creditref" +
                         " where sa.poststatus = 'Posted' and sad.transstatus = 'Open' and sa.creditref = '" + matric + "' and sad.refcode = '" + refcode + "' and " +
-                    " sa.category in ('Debit Note','AFC','Invoice') and sad.transamount <> 0 ";
+                    " sa.category in ('Debit Note','AFC','Invoice') and sad.transamount <> 0 and sad.transid = '" + use + "' ";
                         using (IDataReader drTrack = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
                            DataBaseConnectionString, sqlChanges).CreateDataReader())
                         {
