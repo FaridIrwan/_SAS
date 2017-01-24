@@ -155,12 +155,40 @@ Partial Class SponsorAllocation
         End If
 
         If Not Request.QueryString("BatchCode") Is Nothing Then
+            Dim matric As String = Request.QueryString("MatricNo")
             Session("Menuid") = Request.QueryString("Menuid")
             txtRecNo.Text = Request.QueryString("BatchCode")
             DirectCast(Master.FindControl("Panel1"), System.Web.UI.WebControls.Panel).Visible = False
             DirectCast(Master.FindControl("td"), System.Web.UI.HtmlControls.HtmlTableCell).Visible = False
             Panel1.Visible = False
             OnSearchOthers()
+            For Each dgItem1 As DataGridItem In dgView.Items
+                If dgItem1.Cells(1).Text = matric Then
+                    dgItem1.Cells(0).Visible = True
+                    dgItem1.Cells(1).Visible = True
+                    dgItem1.Cells(2).Visible = True
+                    dgItem1.Cells(3).Visible = True
+                    dgItem1.Cells(4).Visible = True
+                    dgItem1.Cells(5).Visible = True
+                    dgItem1.Cells(6).Visible = True
+                    dgItem1.Cells(7).Visible = True
+                    dgItem1.Cells(8).Visible = True
+                    dgItem1.Cells(10).Visible = True
+                    dgItem1.Cells(11).Visible = True
+                Else
+                    dgItem1.Cells(0).Visible = False
+                    dgItem1.Cells(1).Visible = False
+                    dgItem1.Cells(2).Visible = False
+                    dgItem1.Cells(3).Visible = False
+                    dgItem1.Cells(4).Visible = False
+                    dgItem1.Cells(5).Visible = False
+                    dgItem1.Cells(6).Visible = False
+                    dgItem1.Cells(7).Visible = False
+                    dgItem1.Cells(8).Visible = False
+                    dgItem1.Cells(10).Visible = False
+                    dgItem1.Cells(11).Visible = False
+                End If
+            Next
         End If
     End Sub
 

@@ -8634,7 +8634,12 @@ public double GetSponserStuAllocateAmount(string BatchId)
 				                    ELSE acc.TransCode
 				                    END
 			                END TransCode,                            
-                        acc.Description, acc.Category ,
+                        CASE WHEN acc.Category = 'SPA' THEN
+                                
+	                                ( SELECT Description FROM sas_accounts WHERE batchcode = acc.BatchCode and category = 'Allocation' and subtype = 'Sponsor'
+		                              )
+	                        ELSE acc.Description
+	                        END Description, acc.Category ,
                             CASE WHEN acc.category = 'Credit Note' or acc.category = 'Debit Note' or acc.category = 'Invoice' THEN
                                 CASE
                                     WHEN acc.transtype = 'Debit' then SUM(de.TransAmount)
