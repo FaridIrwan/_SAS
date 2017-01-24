@@ -9565,7 +9565,4 @@ public double GetSponserStuAllocateAmount(string BatchId)
 
         #endregion
     }
-
 }
-
-
