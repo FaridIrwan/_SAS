@@ -648,6 +648,7 @@ Public Class FileHelper
                         Dim FndStats As StudentStatusEn = _StudentStatusDAL.GetStudentBlStatus(_StudentEntityPTPTN.StatsCode)
 
                         If FndStats.BlStatus = True Then
+
                             'calculate the alloc. amt - start
                             Dim stud_obj As New StudentEn
                             Dim amt As Double = 0, tamt As Double = 0, outamt As Double = 0, allocamt As Double = 0
@@ -660,10 +661,11 @@ Public Class FileHelper
 
                             _StudentEntityPTPTN.OutstandingAmt = Format(outamt, "0.00")
 
-                            If outamt <= 0 Then
+                            If outamt = Nothing Or outamt <= 0 Then
 
-                                tamt = amt
-                                allocamt = 0
+                                'Add to Student Entity List - Failed list
+                                _StudentEntityPTPTN.AllocAmt = 0.0
+                                ListStudentEntityFail.Add(_StudentEntityPTPTN)
 
                             Else
 
@@ -693,18 +695,16 @@ Public Class FileHelper
                                     allocamt = 0
                                 End If
 
+                                'Add to Student Entity List - Succeed list
+                                _StudentEntityPTPTN.AllocAmt = Format(allocamt, "0.00") 'allocated/allocamt
+                                ListStudentEntity.Add(_StudentEntityPTPTN)
+
                             End If
-
-                            'Add to Student Entity List - Succeed list
-                            _StudentEntityPTPTN.AllocAmt = Format(allocamt, "0.00") 'allocated/allocamt
-                            ListStudentEntity.Add(_StudentEntityPTPTN)
-
                             'calculate the alloc. amt - end
                         Else
                             'Add to Student Entity List - Failed list
                             _StudentEntityPTPTN.AllocAmt = 0.0
                             ListStudentEntityFail.Add(_StudentEntityPTPTN)
-
                         End If
 
                     End While
