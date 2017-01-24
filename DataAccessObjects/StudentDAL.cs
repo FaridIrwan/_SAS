@@ -1068,7 +1068,7 @@ namespace HTS.SAS.DataAccessObjects
             string sqlCmd = "";
           
             sqlCmd = @"select distinct sad.transid,stu.sasi_name,stu.sasi_matricno,stu.sasi_crdithrs,stu.sasi_pgid,prog.sapg_programbm,stu.sasi_icno,stu.sasc_code,stu.sasi_cursemyr,
-sad.transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
+sad.transamount - sad.paidamount as transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
  ( SELECT CASE WHEN SUM(acc.transamount) IS NULL THEN 0
                     ELSE SUM(acc.transamount) END 
                     FROM   SAS_SponsorInvoice D  
@@ -1106,7 +1106,7 @@ left join sas_program prog on prog.sapg_code = stu.sasi_pgid
                     left join sas_feestruct fs on  prog.sabp_code = fs.sabp_code  and stu.sasi_intake = fs.sast_code 
                     left join sas_feestrdetails fsd on fs.safs_code = fsd.safs_code and sad.refcode = fsd.saft_code
 where sspon.sass_sponsor = " + clsGeneric.AddQuotes(Sponsor) +
-                             " and sa.poststatus = 'Posted' and sa.category in ('AFC','Invoice','Debit Note','Credit Note') and sa.subtype = 'Student'" +
+                             " and sa.poststatus = 'Posted' and sa.category in ('AFC','Invoice','Debit Note') and sa.subtype = 'Student'" +
             " and stu.sasi_reg_status =  " + Helper.StuRegistered + " and stu.sass_code = " + clsGeneric.AddQuotes(Helper.StuActive) +
 " and sad.transstatus = 'Open'" +
 " and TO_DATE( sspon.SASS_sDATE,'DD/MM/YYYY') <= current_date and sad.transamount > 0  " +
@@ -1226,7 +1226,7 @@ where sspon.sass_sponsor = " + clsGeneric.AddQuotes(Sponsor) +
             string sqlCmd = "";
           
             sqlCmd = @"select distinct sad.transid,stu.sasi_name,stu.sasi_matricno,stu.sasi_crdithrs,stu.sasi_pgid,prog.sapg_programbm,stu.sasi_icno,stu.sasc_code,stu.sasi_cursemyr,
-sad.transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
+sad.transamount - sad.paidamount as transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
  ( SELECT CASE WHEN SUM(acc.transamount) IS NULL THEN 0
                     ELSE SUM(acc.transamount) END 
                     FROM   SAS_SponsorInvoice D  
@@ -1264,7 +1264,7 @@ left join sas_program prog on prog.sapg_code = stu.sasi_pgid
                     left join sas_feestruct fs on  prog.sabp_code = fs.sabp_code  and stu.sasi_intake = fs.sast_code 
                     left join sas_feestrdetails fsd on fs.safs_code = fsd.safs_code and sad.refcode = fsd.saft_code
 where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
-                             " and sa.poststatus = 'Posted' and sa.category in ('AFC','Invoice','Debit Note','Credit Note') and sa.subtype = 'Student'" +
+                             " and sa.poststatus = 'Posted' and sa.category in ('AFC','Invoice','Debit Note') and sa.subtype = 'Student'" +
                 //" and stu.sasi_reg_status =  " + Helper.StuRegistered + " and stu.sass_code = " + clsGeneric.AddQuotes(Helper.StuActive) +
 " and sad.transstatus = 'Open'" +
                 //" union " +
