@@ -3,6 +3,7 @@ Imports HTS.SAS.BusinessObjects
 Imports HTS.SAS.DataAccessObjects
 Imports System.Data
 Imports System.Collections.Generic
+Imports System.Linq
 
 Partial Class RptStudentLedger
     Inherits System.Web.UI.Page
@@ -238,8 +239,9 @@ Partial Class RptStudentLedger
             lblkolej.Text = ""
         End If
 
+        Dim MaxVal As Integer = New AccountsDAL().GetListByCreditRef(eobjf.MatricNo).Max(Function(x) x.CurSem)
         Dim i As Integer = 0
-        While i < eobjf.CurrentSemester
+        While i < MaxVal
             i = i + 1
             ddlSponser.Items.Add(New ListItem(i, i))
         End While
@@ -261,22 +263,26 @@ Partial Class RptStudentLedger
         eob.SubType = "Student"
         eob.TransType = ""
         'eob.TransStatus = "Closed" commented by Hafiz @ 27/5/2015
+
+        If ddlSponser.SelectedValue <> "-1" Then
+            eob.CurSem = CInt(ddlSponser.SelectedValue)
+        Else
+            eob.CurSem = 0
+        End If
+
         Dim studentCode As String
         studentCode = txtStudentCode.Text
         If studentCode = "" Then
         Else
             Session("studentCode") = studentCode
         End If
+
         Try
-            'If rdbStudentLeddger.Checked = True Then
-            '    ListInvObjects = obj.GetStudentLedgerDetailList(eob)
-            'Else
-            '    ListInvObjects = obj.GetStudentLoanLedgerDetailList(eob)
-            'End If
             ListInvObjects = obj.GetStudentLedgerCombine(eob)
         Catch ex As Exception
             LogError.Log("StudentLedger", "LoadInvoiceGrid", ex.Message)
         End Try
+
         If ListInvObjects.Count = 0 Then
             dgInvoices.DataSource = Nothing
             dgInvoices.DataBind()
@@ -290,6 +296,7 @@ Partial Class RptStudentLedger
         Else
             dgInvoices.DataSource = ListInvObjects
             dgInvoices.DataBind()
+
             Dim dgItem1 As DataGridItem
             Dim link As HyperLink
             Dim str As String, cat As String, desc As String = Nothing
