@@ -1016,6 +1016,23 @@ Public Class CfPosting
                         SqlStatement &= "WHERE SAS_Accounts.Batchcode = " & clsGeneric.AddQuotes(BatchCode) & " "
                         SqlStatement &= "GROUP BY SAS_Universityfund.SAUF_Glcode"
 
+                    Case CfGeneric.CategoryTypeCreditNote
+                        SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY GL_Code) AS Row_No,GL_Code,Trans_Amount "
+                        SqlStatement &= "FROM ("
+                        SqlStatement &= "SELECT CASE WHEN FGL.GL_Account IS NULL THEN "
+                        SqlStatement &= "CASE WHEN KGL.GL_Account IS NULL THEN (SELECT GL_Account FROM SAS_Kolej_GLaccount WHERE SAFT_Code=SAS_AccountsDetails.RefCode "
+                        SqlStatement &= "AND SAKO_Code=(SELECT SASI_KokoCode FROM SAS_Student WHERE SASI_MatricNo=SAS_Accounts.CreditRef)) "
+                        SqlStatement &= "ELSE KGL.GL_Account END "
+                        SqlStatement &= "ELSE FGL.GL_Account END AS GL_Code,"
+                        SqlStatement &= "SUM(SAS_AccountsDetails.TransAmount) AS Trans_Amount "
+                        SqlStatement &= "FROM SAS_Accounts "
+                        SqlStatement &= "INNER JOIN SAS_AccountsDetails ON SAS_Accounts.TransId = SAS_AccountsDetails.TransId "
+                        SqlStatement &= "INNER JOIN SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo "
+                        SqlStatement &= "LEFT JOIN SAS_Faculty_GLaccount FGL ON SAS_AccountsDetails.RefCode = FGL.SAFT_Code AND FGL.SAFC_Code = SAS_Student.SASI_Faculty "
+                        SqlStatement &= "LEFT JOIN SAS_Kolej_GLaccount KGL ON SAS_AccountsDetails.RefCode = KGL.SAFT_Code AND KGL.SAKO_Code = SAS_Student.SAKO_Code "
+                        SqlStatement &= "WHERE SAS_Accounts.Batchcode = " & clsGeneric.AddQuotes(BatchCode) & " "
+                        SqlStatement &= "GROUP BY GL_Code ) a "
+
                     Case Else
                         SqlStatement = "Select ROW_NUMBER() OVER (ORDER BY SAS_Program.SAPG_TI) AS Row_No,"
                         SqlStatement &= "SAS_Program.SAPG_TI AS GL_Code,SUM(SAS_AccountsDetails.TransAmount) AS Trans_Amount"
@@ -1171,6 +1188,16 @@ Public Class CfPosting
                         SqlStatement &= "INNER JOIN SAS_Universityfund ON SAS_Accounts.SubRef1=SAS_Universityfund.SAUF_Code "
                         SqlStatement &= "WHERE SAS_Accounts.Batchcode = " & clsGeneric.AddQuotes(BatchCode) & " "
                         SqlStatement &= "GROUP BY SAS_Universityfund.SAUF_Glcode"
+
+                    Case CfGeneric.CategoryTypeCreditNote
+                        SqlStatement = "Select ROW_NUMBER() OVER (ORDER BY SAS_Program.SAPG_TI) AS Row_No,"
+                        SqlStatement &= "SAS_Program.SAPG_TI AS GL_Code,SUM(SAS_AccountsDetails.TransAmount) AS Trans_Amount"
+                        SqlStatement &= " FROM SAS_Accounts INNER JOIN SAS_AccountsDetails ON"
+                        SqlStatement &= " SAS_Accounts.TransId = SAS_AccountsDetails.TransId INNER JOIN"
+                        SqlStatement &= " SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo"
+                        SqlStatement &= " INNER JOIN SAS_Program ON SAS_Student.SASI_PgId = SAS_Program.SAPG_Code"
+                        SqlStatement &= " WHERE SAS_Accounts.batchcode = " & clsGeneric.AddQuotes(BatchCode)
+                        SqlStatement &= " GROUP BY SAS_Program.SAPG_TI"
 
                     Case Else
                         SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY GL_Code) AS Row_No,GL_Code,Trans_Amount "
