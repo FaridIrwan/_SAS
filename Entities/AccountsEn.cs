@@ -101,6 +101,7 @@ namespace HTS.SAS.Entities
         private string cbKoko;
         private decimal csControlAmt;
         private string csTaxCode;
+        private int csCurSem;
 
         [System.Xml.Serialization.XmlElement]
         ////[DataMember]
@@ -833,6 +834,14 @@ namespace HTS.SAS.Entities
         {
             get { return csTaxCode; }
             set { csTaxCode = value; }
+        }
+
+        [System.Xml.Serialization.XmlElement]
+        ////[DataMember]
+        public int CurSem
+        {
+            get { return csCurSem; }
+            set { csCurSem = value; }
         }
     }
 }

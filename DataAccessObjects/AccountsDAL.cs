@@ -1495,7 +1495,6 @@ namespace HTS.SAS.DataAccessObjects
 
         #endregion
 
-
         #region LoadSponsor
 
         /// <summary>
@@ -1558,6 +1557,44 @@ namespace HTS.SAS.DataAccessObjects
             {
                 throw ex;
             }
+            return loEnList;
+        }
+
+        #endregion
+
+        #region GetListByCreditRef
+
+        /// <summary>
+        /// added by Hafiz @ 24/01/2017
+        /// Method to Get List of Posted Transaction By CreditRef
+        /// </summary>
+
+        public List<AccountsEn> GetListByCreditRef(string CreditRef)
+        {
+            List<AccountsEn> loEnList = new List<AccountsEn>();
+            string sqlCmd = "SELECT * FROM SAS_Accounts WHERE CreditRef = '" + CreditRef + "' AND PostStatus = 'Posted'";
+
+            try
+            {
+                if (!FormHelp.IsBlank(sqlCmd))
+                {
+                    using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                       DataBaseConnectionString, sqlCmd).CreateDataReader())
+                    {
+                        while (loReader.Read())
+                        {
+                            AccountsEn loItem = LoadObject(loReader);
+                            loEnList.Add(loItem);
+                        }
+                        loReader.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
             return loEnList;
         }
 
@@ -5278,6 +5315,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             loItem.ChequeDate = GetValue<DateTime>(argReader, "ChequeDate");
             loItem.ChequeNo = GetValue<string>(argReader, "ChequeNo");
             loItem.VoucherNo = GetValue<string>(argReader, "VoucherNo");
+            loItem.CurSem = GetValue<int>(argReader, "CurSem");
             loItem.PocketAmount = GetValue<string>(argReader, "PocketAmount");
             loItem.SubReferenceOne = GetValue<string>(argReader, "SubRef1");
             loItem.SubReferenceTwo = GetValue<string>(argReader, "SubRef2");
@@ -8678,7 +8716,9 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     left join sas_accountsdetails de on acc.transid = de.transid
                     WHERE  acc.CreditRef = '" + argEn.CreditRef + "' AND acc.SubType = '" + argEn.SubType + "' AND acc.PostStatus ='" + argEn.PostStatus + "' ";
 
-            if (argEn.TransType.Length != 0) sqlCmd += " AND acc.TransType LIKE '" + argEn.TransType + "'";
+            if (argEn.TransType.Length != 0) sqlCmd += "AND acc.TransType LIKE '" + argEn.TransType + "' ";
+
+            if (argEn.CurSem != 0) sqlCmd += "AND acc.CurSem = " + argEn.CurSem + " ";
 
             sqlCmd += @"AND acc.Category NOT IN ('Loan') AND acc.TransAmount > 0 
                         GROUP BY acc.TransDate,  acc.ReceiptDate, acc.BankRecNo, acc.Description, acc.Category, acc.Subcategory, acc.TransCode, acc.TransType, acc.BatchCode, 
@@ -9122,7 +9162,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                         string sqlChanges = "select sad.transid,sad.transamount,Case when sad.taxamount is null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount is null then 0 else sad.paidamount end as paidamount from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st " +
                         " on st.saft_code = sad.refcode left join sas_student ss on ss.sasi_matricno = sa.creditref" +
                         " where sa.poststatus = 'Posted' and sad.transstatus = 'Open' and sa.creditref = '" + matric + "' and sad.refcode = '" + refcode + "' and " +
-                    " sa.category in ('Debit Note','AFC','Invoice') and sad.transamount <> 0 ";
+                    " sa.category in ('Debit Note','AFC','Invoice') and sad.transamount <> 0 and sad.transid = '" + use + "' ";
                         using (IDataReader drTrack = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
                            DataBaseConnectionString, sqlChanges).CreateDataReader())
                         {
@@ -9525,7 +9565,4 @@ public double GetSponserStuAllocateAmount(string BatchId)
 
         #endregion
     }
-
 }
-
-

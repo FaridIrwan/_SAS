@@ -365,12 +365,11 @@
                                 <td style="width: 183px; text-align: right; height: 25px;">&nbsp;</td>
                                 <td align="left">
                                     <strong>
-                                    <asp:Label ID="Label7" runat="server" Text="Semester " Width="51px" Style="text-align: left" Visible ="False"></asp:Label></strong>
+                                    <asp:Label ID="Label7" runat="server" Text="Semester " Width="51px" Style="text-align: left" ></asp:Label></strong>
                                     </td>
                                 <td>
                                     
-                                    <asp:DropDownList ID="ddlSponser" runat="server" AppendDataBoundItems="True" Width="82px"
-                                        AutoPostBack="True" Visible ="False">
+                                    <asp:DropDownList ID="ddlSponser" runat="server" AppendDataBoundItems="True" Width="82px" AutoPostBack="True" >
                                         <asp:ListItem Value="-1">All</asp:ListItem>
                                     </asp:DropDownList>
                                 </td>
