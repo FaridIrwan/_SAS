@@ -102,7 +102,7 @@ namespace HTS.SAS.Entities
         private decimal csControlAmt;
         private string csTaxCode;
         private int csCurSem;
-
+        private string cscurrsemyear;
         [System.Xml.Serialization.XmlElement]
         ////[DataMember]
         public string KumpulanPelajar
@@ -842,6 +842,13 @@ namespace HTS.SAS.Entities
         {
             get { return csCurSem; }
             set { csCurSem = value; }
+        }
+
+        [System.Xml.Serialization.XmlElement]
+        public string currsemyear
+        {
+            get { return cscurrsemyear; }
+            set { cscurrsemyear = value; }
         }
     }
 }
