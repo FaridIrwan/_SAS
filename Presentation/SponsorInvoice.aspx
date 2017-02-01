@@ -414,13 +414,7 @@
 
 
 
-                if (date2 < date1) {
-                    alert("Batch Date Cannot be Greater than Current Date");
-                    document.getElementById("<%=txtBatchDate.ClientID%>").value = "";
-                    document.getElementById("<%=txtBatchDate.ClientID%>").focus();
-                    //"");
-                    return false;
-                }
+               
             }
             //txtInvoiceDate---------------------------------------------------------------------------
             if (document.getElementById("<%=txtInvoiceDate.ClientID%>") != null) {
@@ -458,13 +452,7 @@
 
 
 
-                if (date2 < date1) {
-                    alert("Invoice Date Cannot be Greater than Current Date");
-                    document.getElementById("<%=txtInvoiceDate.ClientID%>").value = "";
-                    document.getElementById("<%=txtInvoiceDate.ClientID%>").focus();
-                    //"");
-                    return false;
-                }
+             
             }
 
             if (document.getElementById("<%=txtDuedate.ClientID%>") != null) {
@@ -861,7 +849,7 @@
                                                         <%--<span style="color: #ff0000">*</span>--%>
                                                     </td>
                                                     <td style="width: 120px; height: 25px">
-                                                        <asp:Label ID="lblBatchIntake" runat="server" Text="Semester" Width="59px"></asp:Label>
+                                                        <asp:Label ID="lblBatchIntake" runat="server" Text="Batch Intake" Width="59px"></asp:Label>
                                                     </td>
                                                     <td style="height: 25px"></td>
                                                     <td style="height: 25px">
@@ -1364,6 +1352,37 @@
                                                 <asp:Button ID="btnLoadFeeType" runat="server" Text="Load Fee Type" Visible="true" />
                                             </td>
                                         </tr>
+                                <tr>
+                                   <%-- <td>
+                                        <asp:Label ID="lblsem" runat="server" Text="Semester " Width="51px" Style="text-align: left"></asp:Label>
+                                        
+                                    </td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlSem" runat="server" AppendDataBoundItems="True" Width="82px" AutoPostBack="True">
+                                        <asp:ListItem Value="-1">All</asp:ListItem>
+                                             <asp:ListItem Value="1">1</asp:ListItem>
+                                                <asp:ListItem Value="2">2</asp:ListItem>
+                                                <asp:ListItem Value="3">3</asp:ListItem>
+                                                <asp:ListItem Value="4">4</asp:ListItem>
+                                                <asp:ListItem Value="5">5</asp:ListItem>
+                                                <asp:ListItem Value="6">6</asp:ListItem>
+                                                <asp:ListItem Value="7">7</asp:ListItem>
+                                                <asp:ListItem Value="8">8</asp:ListItem>
+                                                <asp:ListItem Value="9">9</asp:ListItem>
+                                                <asp:ListItem Value="10">10</asp:ListItem>
+                                    </asp:DropDownList>
+                                    </td>--%>
+                                    <td style="width: 120px; height: 25px">
+                                                        <asp:Label ID="lblSemyear" runat="server" Text="Semester Year" Width="82px"></asp:Label>
+                                                    </td>
+                                                    
+                                                    <td style="height: 25px">
+                                                        <asp:DropDownList ID="ddlsemyear" runat="server" AppendDataBoundItems="true" Width="150px">
+                                                        
+                                                        </asp:DropDownList>
+                                                        &nbsp;
+                                                    </td>
+                                </tr>
 
                             </table>
                         </td>

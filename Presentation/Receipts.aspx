@@ -334,7 +334,7 @@
 
             if (Total_Amount.value < Control_Amount.value)
             {
-                alert("Total Amount Should Not Be Less Than Control Amount");
+                alert("Total Amount Should Be Equal to Control Amount");
                 Total_Amount.focus();
                 return false;
             }
