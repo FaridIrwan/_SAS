@@ -86,6 +86,7 @@ Partial Class SponsorAllocation
             Session("eobjspn") = Nothing
             'Session("newListStudentReady") = Nothing
             Session("PageMode") = "Add"
+
             'Session("PageMode") = "Post"
             DisableRecordNavigator()
             txtRecNo.Attributes.Add("OnKeyup", "return geterr()")
@@ -143,8 +144,8 @@ Partial Class SponsorAllocation
             'PTPTN upload file - end
         End If
         If Not Session("liststu") Is Nothing Then
-            addSpnCode()
-            'addSelectStudent()
+            'addSpnCode()
+            addSelectStudent()
         End If
         If Not Session("File1") Is Nothing Then
             uploadData()
@@ -720,29 +721,46 @@ Partial Class SponsorAllocation
         End If
     End Sub
 
-    Protected Sub chkSelectAll_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles chkSelectAll.CheckedChanged
+    Protected Sub chkSelectAll_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         Dim dgItem1 As DataGridItem
         Dim chkselect As CheckBox
+        'If chkSelectAll.Checked = False Then
+        '    chkSelectAll.Checked = False
+        'ElseIf chkSelectAll.Checked = True Then
+        '    chkSelectAll.Checked = True
+        'End If
         For Each dgItem1 In dgView.Items
             chkselect = dgItem1.Cells(0).Controls(1)
             If chkSelectAll.Checked = False Then
                 chkselect.Checked = False
                 LoadTotal()
             Else
+                chkSelectAll.Checked = True
                 chkselect.Checked = True
-                If chkselect.Checked = True Then
-                    If Not Session("AddListStud") Is Nothing Or Not Session("AddFee") Is Nothing Or Not Session("AddFeeType") Is Nothing Or Not Session("AddOtherStudent") Is Nothing Or lblStatus.Value = "Ready" Or Not Session("newListStudentReady") Is Nothing Then
-                        LoadTotal()
-                    ElseIf Session("AddListStud") Is Nothing Then
-                        LoadTotals()
-                    Else
-                        chkSelectAll.Checked = False
-                        txtAllocateAmount.Text = ""
-                        LoadTotals()
-                    End If
+                'If chkselect.Checked = True Then
+                '    If Not Session("AddListStud") Is Nothing Or Not Session("AddFee") Is Nothing Or Not Session("AddFeeType") Is Nothing Or Not Session("AddOtherStudent") Is Nothing Or lblStatus.Value = "Ready" Or Not Session("newListStudentReady") Is Nothing Then
+                '        LoadTotal()
+                '    ElseIf Session("AddListStud") Is Nothing Then
+                '        LoadTotals()
+                '    Else
+                '        chkSelectAll.Checked = False
+                '        txtAllocateAmount.Text = ""
+                '        LoadTotals()
+                '    End If
+                'End If
+                If lblStatus.Value = "Ready" Then
+                    LoadTotal()
+                    chkSelectAll.Enabled = True
+                ElseIf lblStatus.Value = "Posted" Then
+                    chkSelectAll.Enabled = False
+                    LoadTotal()
+                Else
+                    chkSelectAll.Enabled = True
+                    LoadTotal()
                 End If
             End If
-        Next 
+        Next
+
         'LoadTotals()
     End Sub
 
@@ -750,20 +768,28 @@ Partial Class SponsorAllocation
 
         Dim chk As CheckBox
         Dim dgItem1 As DataGridItem
-
-            For Each dgItem1 In dgView.Items
-                chk = dgItem1.Cells(0).Controls(1)
+        Dim liststuAll As New List(Of AccountsDetailsEn)
+        If Not Session("AddListStud") Is Nothing Then
+            liststuAll = Session("AddListStud")
+        Else
+            liststuAll = New List(Of AccountsDetailsEn)
+        End If
+        For Each dgItem1 In dgView.Items
+            chk = dgItem1.Cells(0).Controls(1)
             If chk.Checked = True Then
-                If Not Session("AddListStud") Is Nothing Or Not Session("AddFee") Is Nothing Or Not Session("AddFeeType") Is Nothing Or Not Session("AddOtherStudent") Is Nothing Or lblStatus.Value = "Ready" Or Not Session("newListStudentReady") Is Nothing Then
-                    LoadTotal()
-                ElseIf Session("AddListStud") Is Nothing Then
-                    LoadTotals()
-                Else
-                    chkSelectAll.Checked = False
-                    txtAllocateAmount.Text = ""
-                    LoadTotals()
-                End If
+                chk.Checked = True
+                'If Not Session("AddListStud") Is Nothing Or Not Session("AddFee") Is Nothing Or Not Session("AddFeeType") Is Nothing Or Not Session("AddOtherStudent") Is Nothing Or lblStatus.Value = "Ready" Or Not Session("newListStudentReady") Is Nothing Then
+                LoadTotal()
+                'ElseIf Session("AddListStud") Is Nothing Then
+                '    LoadTotals()
+                'Else
+                '    chkSelectAll.Checked = False
+                '    txtAllocateAmount.Text = ""
+                '    LoadTotals()
+                'End If
+                'LoadTotal()
             Else
+                chk.Checked = False
                 LoadTotal()
             End If
         Next
@@ -1235,8 +1261,9 @@ Partial Class SponsorAllocation
                     eobstu.TempAmount = obj.SubReferenceTwo
                     txtAllAmount.Text = String.Format("{0:F}", eobstu.TempAmount)
                     'RspStuAllAmount = MaxGeneric.clsGeneric.NullToDecimal(txtAllAmount.Text)
-                    'txtAllAmount.Text = RspStuAllAmount
+                    IdtnStud.Enabled = True
                     chkSelectAll.Checked = True
+                    chkSelectAll.Enabled = True
                     While x < liststuAll.Count
 
                         For Each dgItem1 In dgView.Items
@@ -1349,6 +1376,7 @@ Partial Class SponsorAllocation
                     chkSelectAll.Enabled = False
                     LabelAvailable.Visible = True
                     txtAllAmount.Visible = True
+                    IdtnStud.Enabled = False
                     txtAllAmount.ReadOnly = True
                     'eobstu.TempAmount = obj.AllocatedAmount
                     'txtAllAmount.Text = String.Format("{0:F}", eobstu.TempAmount)
@@ -1427,6 +1455,7 @@ Partial Class SponsorAllocation
                                 dgItem1.Cells(16).Text = liststuAll(x).NoWarran
                                 dgItem1.Cells(17).Text = liststuAll(x).AmaunWarran
                                 dgItem1.Cells(18).Text = liststuAll(x).noAkaun
+                                dgItem1.Cells(6).Enabled = False
                                 dgItem1.Cells(8).Enabled = False
                                 dgItem1.Cells(10).Enabled = False
                                 dgItem1.Cells(11).Enabled = False
@@ -1731,6 +1760,8 @@ Partial Class SponsorAllocation
                         ibtnSave.Enabled = True
                     End If
                     dgItem1.Cells(12).Text = totalAmt1
+                    'Else
+                    '    chk.Checked = False
                 End If
                 txtAllocateAmount.Text = totalAmt3
 
@@ -2152,7 +2183,7 @@ Partial Class SponsorAllocation
         dgUnView.DataBind()
         dgInvoices.DataSource = Nothing
         dgInvoices.DataBind()
-
+        Session("liststu") = Nothing
         Session("PageMode") = "Add"
     End Sub
 
@@ -2627,11 +2658,305 @@ Partial Class SponsorAllocation
             End While
 
         End If
-        If Not Session("liststu") Is Nothing Then
-            If lblStatus.Value = "Ready" Then
+       
+        Session("SPncode") = eobj.CreditRef
+        Session("PAidAmount") = amount
+        Session("Scode") = eobj.CreditRef
+        Session("spt") = eobj.CreditRef
+        Session("spnObj") = Nothing
+        'Session("liststu") = Nothing
+        'setDateFormat()
+        dates()
+    End Sub
+    Protected Sub dgInvoices_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+
+    End Sub
+    Private Sub ledgerformat()
+        'Updated by Hafiz Roslan @ 10/2/2016
+        'Include the Category = "Receipt" logic
+
+        Dim TotalAmount As Double
+        Dim amount As Double
+        Dim dr As Double = 0
+        Dim cr As Double = 0
+        Dim dgItem1 As DataGridItem
+        'txtDebitAmount.Text = String.Format("{0:F}", 0)
+        'txtCreditAmount.Text = String.Format("{0:F}", 0)
+        'txtoutamount.Text = String.Format("{0:F}", 0)
+        txtDebitAmount.Text = String.Format("{0:N}", 0)
+        txtCreditAmount.Text = String.Format("{0:N}", 0)
+        txtoutamount.Text = String.Format("{0:N}", 0)
+
+        For Each dgItem1 In dgInvoices1.Items
+            If dgItem1.Cells(6).Text = "Credit" Then
+                'If rdbStudentLeddger.Checked = True Then
+                TotalAmount = TotalAmount - CDbl(dgItem1.Cells(7).Text)
+
+                dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
+                amount = dgItem1.Cells(7).Text
+                dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "-"
+                cr = cr + amount
+                txtCreditAmount.Text = String.Format("{0:N}", cr)
+
+              
 
             Else
-                chkSelectAll.Checked = False
+                'If rdbStudentLeddger.Checked = True Then
+                TotalAmount = TotalAmount + CDbl(dgItem1.Cells(7).Text)
+
+                dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
+                amount = dgItem1.Cells(7).Text
+                dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "+"
+                dr = dr + amount
+                txtDebitAmount.Text = String.Format("{0:N}", dr)
+
+
+            End If
+
+        Next
+        ' txtoutamount.Text = String.Format("{0:F}", CDbl(txtDebitAmt.Text) - CDbl(txtCreditAmt.Text))
+
+        'Added by Hafiz Roslan
+        'Dated: 06/01/2015
+
+        'outstanding amount - Start
+        Dim debitAmount As Double = 0.0, creditAmount As Double = 0.0
+
+        debitAmount = CDbl(txtDebitAmount.Text)
+        creditAmount = CDbl(txtCreditAmount.Text)
+
+        'If debitAmount > creditAmount Then
+        '    txtoutamount.Text = String.Format("{0:F}", debitAmount - creditAmount)
+        'Else
+        '    txtoutamount.Text = String.Format("{0:F}", creditAmount - debitAmount)
+        'End If
+        txtoutamount.Text = String.Format("{0:N}", debitAmount - creditAmount)
+    End Sub
+    ''' <summary>
+    ''' Method to Add Student Manually
+    ''' </summary>
+    ''' <remarks></remarks>
+    Private Sub addSelectStudent()
+        Dim liststuAll As New List(Of AccountsDetailsEn)
+        Dim outamt As Double = 0
+        Dim stuen As New StudentEn
+        Dim list As New List(Of AccountsDetailsEn)
+        Dim amount As Double
+        Dim chk As CheckBox
+        Dim txtAmount As TextBox
+        Dim txtCreditamt As TextBox
+        Dim txtSponamt As TextBox
+        Dim txtpamont As TextBox
+        Dim dgItem1 As DataGridItem
+        Dim obj As New AccountsEn
+        Dim obb As New AccountsEn
+        Dim obj1 As New AccountsDetailsBAL
+        Dim eob As New StudentEn
+        Dim eobj As New SponsorEn
+        Dim SpnObjects As New List(Of AccountsDetailsEn)
+        Dim eobstu As New AccountsDetailsEn
+        Dim j As Integer = 0
+        Dim x As Integer = 0
+        Dim amt As Double = 0
+        'Dim outamt As Double = 0
+        Dim sponamt As Double = 0
+        Dim tamt As Double = 0
+        'Dim liststuAll As New List(Of AccountsDetailsEn)
+        Dim objacc As New AccountsBAL
+        Dim eobacc As New AccountsEn
+        Dim stlist As New List(Of StudentEn)
+        Dim bsstu As New AccountsBAL
+        'Dim stuen As New StudentEn
+        Dim eobjDetails As New AccountsDetailsEn
+        Dim eobDetails As New StudentEn
+        Dim NoKelompok As String = ""
+        Dim NoWarran As String = ""
+        Dim AmaunWarran As Double = 0.0
+        Dim noAkaun As String = ""
+        Dim eobj1 As New AccountsDetailsEn
+        Dim bospn As New AccountsBAL
+        Dim totalAmt As Double = 0
+        Dim _totalSpon As Double = 0
+        'Dim bsstu As New AccountsBAL
+        If Not Session("liststu") Is Nothing Then
+            If lblStatus.Value = "Ready" Then
+                'chkSelectAll.Checked = True
+                Dim ebjStu As New StudentEn
+                Dim objStu As New StudentEn
+                Dim eobjFt As AccountsDetailsEn
+                Dim mylst As List(Of AccountsDetailsEn)
+                Dim newListStu As New List(Of StudentEn)
+                Dim newListStudent As New List(Of StudentEn)
+                Dim newStudentList As New List(Of StudentEn)
+                Dim ListTRD = New List(Of AccountsDetailsEn)
+                Dim ListTRDA = New List(Of AccountsDetailsEn)
+                Dim ListTRDAA = New List(Of AccountsDetailsEn)
+                Dim i As Integer = 0
+                Dim k As Integer = 0
+                Dim z As Integer = 0
+                Dim y As Integer = 0
+                Dim b As Integer = 0
+                Dim w As Integer = 0
+                Dim Flag As Boolean = False
+                mylst = Session("liststu")
+                'If Not Session("AddListStud") Is Nothing Then
+                'txtAllocateAmount.Visible = False
+                'dgView.DataSource = Nothing
+                'dgView.DataBind()
+                Session("newListStudentReady") = Nothing
+                'Session("AddFee") = Nothing
+                If Not Session("AddFee") Is Nothing Then
+                    liststuAll = Session("AddFee")
+                Else
+                    liststuAll = New List(Of AccountsDetailsEn)
+                End If
+                'If Not Session("AddFeeType") Is Nothing Then
+                '    newListStu = Session("AddFeeType")
+                '    Session("AddListStud") = Nothing
+                '    newListStu.AddRange(mylst)
+                'Else
+                '    newListStu = New List(Of StudentEn)
+                'End If
+
+                ''newListStu.AddRange(mylst)
+                If Not Session("AddListStud") Is Nothing Then
+                    If mylst.Count <> 0 Then
+                        While i < mylst.Count
+                            eobjFt = mylst(i)
+                            'Dim j As Integer = 0
+                            'Dim Flag As Boolean = False
+                            While j < liststuAll.Count
+                                If liststuAll(j).MatricNo = eobjFt.MatricNo Then
+                                    Flag = True
+
+                                    Exit While
+                                End If
+                                j = j + 1
+                            End While
+                            If Flag = False Then
+                                liststuAll.Add(eobjFt)
+
+
+                            End If
+                            i = i + 1
+                        End While
+                    End If
+
+                End If
+
+                'Session("AddStudent") = ListTRD
+                Session("AddFeeType") = liststuAll
+                dgView.DataSource = liststuAll
+                dgView.DataBind()
+                While y < liststuAll.Count
+                    For Each dgItem1 In dgView.Items
+                        If dgItem1.Cells(1).Text = liststuAll(y).MatricNo Then
+                            chk = dgItem1.Cells(0).Controls(1)
+                            chk.Checked = True
+                            stuen.BatchCode = Trim(txtbatchspcode.Text)
+                            stuen.MatricNo = liststuAll(y).MatricNo
+
+                            sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
+
+                            txtSponamt = dgItem1.Cells(6).Controls(1)
+                            txtAmount = dgItem1.Cells(8).Controls(1)
+                            'amt = liststuAll(j).TransactionAmount
+                            txtCreditamt = dgItem1.Cells(10).Controls(1)
+                            txtpamont = dgItem1.Cells(11).Controls(1)
+                            tamt = 0
+                            txtSponamt.Text = String.Format("{0:F}", sponamt)
+
+                            txtpamont.Text = String.Format("{0:F}", tamt)
+
+
+                            Exit For
+                        End If
+                    Next
+                    y = y + 1
+                    _totalSpon = _totalSpon + sponamt
+                End While
+                Dim co As Integer = 0
+                Dim _sponamt As Double
+                'Dim z As Integer = 0
+                Dim _available As Double
+                _available = txtAllAmount.Text
+                Dim _txtSpon As TextBox
+
+                _sponamt = _available / liststuAll.Count
+
+                For Each dgItem1 In dgView.Items
+                    'If dgItem1.Cells(1).Text = liststuAll(j).MatricNo Then
+                    _txtSpon = dgItem1.FindControl("txtsponamt")
+                    If _txtSpon.Text = "" Then
+                        _txtSpon.Text = 0
+                    End If
+                    txtAmount = dgItem1.Cells(8).Controls(1)
+                    'amt = liststuAll(j).TransactionAmount
+                    txtCreditamt = dgItem1.Cells(10).Controls(1)
+                    txtpamont = dgItem1.Cells(11).Controls(1)
+                    sponamt = _txtSpon.Text
+                    Dim ListInvObjects1 As New List(Of AccountsEn)
+                    Dim obj3 As New AccountsBAL
+                    Dim eob3 As New AccountsEn
+                    eob3.CreditRef = dgItem1.Cells(1).Text
+                    eob3.PostStatus = "Posted"
+                    eob3.SubType = "Student"
+                    eob3.TransType = ""
+                    eob3.TransStatus = "Closed"
+
+                    Try
+
+                        ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+
+                    Catch ex As Exception
+                        LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
+                    End Try
+
+                    dgInvoices1.DataSource = ListInvObjects1
+                    dgInvoices1.DataBind()
+                    ledgerformat()
+                    'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+                    'outamt = Trim(txtoutamount.Text)
+                    outamt = Trim(txtoutamount.Text)
+                    If _totalSpon > _available Then
+                        _txtSpon.Text = String.Format("{0:F}", _sponamt)
+                    Else
+                        _txtSpon.Text = String.Format("{0:F}", sponamt)
+                    End If
+                    sponamt = _txtSpon.Text
+
+                    If outamt >= 0 And outamt <= sponamt Then
+                        txtAmount.Text = String.Format("{0:F}", outamt)
+                    ElseIf outamt <= 0 Then
+                        amt = 0
+                        txtAmount.Text = String.Format("{0:F}", amt)
+                    ElseIf outamt >= 0 And outamt > sponamt Then
+                        amt = 0
+                        txtAmount.Text = String.Format("{0:F}", sponamt)
+                    End If
+                    If sponamt >= outamt Then
+                        If txtAmount.Text = "" Then
+                            txtAmount.Text = 0.0
+                        End If
+                        txtCreditamt.Text = String.Format("{0:F}", sponamt - txtAmount.Text)
+                    Else
+                        amt = 0
+                        txtCreditamt.Text = String.Format("{0:F}", amt)
+                    End If
+                    txtpamont.Text = String.Format("{0:F}", tamt)
+                    If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
+                        dgItem1.Cells(10).Enabled = False
+                        dgItem1.Cells(11).Enabled = False
+                    End If
+                    dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
+                    dgItem1.Cells(14).Text = txtCreditamt.Text
+                    dgItem1.Cells(13).Text = txtpamont.Text
+                    'Exit For
+                    'End If
+                Next
+
+            Else
+                'chkSelectAll.Checked = False
                 Dim ebjStu As New StudentEn
                 Dim objStu As New StudentEn
                 Dim eobjFt As AccountsDetailsEn
@@ -2702,7 +3027,7 @@ Partial Class SponsorAllocation
                 While y < liststuAll.Count
                     For Each dgItem1 In dgView.Items
                         If dgItem1.Cells(1).Text = liststuAll(y).MatricNo Then
-                            stuen.BatchCode = Trim(txtspcode.Text)
+                            stuen.BatchCode = Trim(txtbatchspcode.Text)
                             stuen.MatricNo = liststuAll(y).MatricNo
 
                             sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
@@ -2817,251 +3142,7 @@ Partial Class SponsorAllocation
                 Next
             End If
         End If
-        Session("SPncode") = eobj.CreditRef
-        Session("PAidAmount") = amount
-        Session("Scode") = eobj.CreditRef
-        Session("spt") = eobj.CreditRef
-        Session("spnObj") = Nothing
         Session("liststu") = Nothing
-        'setDateFormat()
-        dates()
-    End Sub
-    Protected Sub dgInvoices_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-
-    End Sub
-    Private Sub ledgerformat()
-        'Updated by Hafiz Roslan @ 10/2/2016
-        'Include the Category = "Receipt" logic
-
-        Dim TotalAmount As Double
-        Dim amount As Double
-        Dim dr As Double = 0
-        Dim cr As Double = 0
-        Dim dgItem1 As DataGridItem
-        'txtDebitAmount.Text = String.Format("{0:F}", 0)
-        'txtCreditAmount.Text = String.Format("{0:F}", 0)
-        'txtoutamount.Text = String.Format("{0:F}", 0)
-        txtDebitAmount.Text = String.Format("{0:N}", 0)
-        txtCreditAmount.Text = String.Format("{0:N}", 0)
-        txtoutamount.Text = String.Format("{0:N}", 0)
-
-        For Each dgItem1 In dgInvoices1.Items
-            If dgItem1.Cells(6).Text = "Credit" Then
-                'If rdbStudentLeddger.Checked = True Then
-                TotalAmount = TotalAmount - CDbl(dgItem1.Cells(7).Text)
-
-                dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
-                amount = dgItem1.Cells(7).Text
-                dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "-"
-                cr = cr + amount
-                txtCreditAmount.Text = String.Format("{0:N}", cr)
-
-                'Else
-                '    If Not dgItem1.Cells(3).Text = "Receipt" Then
-                '        TotalAmount = TotalAmount + CDbl(dgItem1.Cells(7).Text)
-
-                '        dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
-                '        amount = dgItem1.Cells(7).Text
-                '        dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "-"
-                '        cr = cr + amount
-                '        txtCreditAmount.Text = String.Format("{0:N}", cr)
-
-                '    Else
-                '        TotalAmount = TotalAmount - CDbl(dgItem1.Cells(7).Text)
-
-                '        dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
-                '        amount = dgItem1.Cells(7).Text
-                '        dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "+"
-                '        dr = dr + amount
-                '        txtDebitAmount.Text = String.Format("{0:N}", dr)
-                '    End If
-                'End If
-
-                'dgItem1.Cells(8).Text = String.Format("{0:F}", TotalAmount)
-                'amount = dgItem1.Cells(7).Text
-                'dgItem1.Cells(7).Text = String.Format("{0:F}", amount) & "-"
-                'cr = cr + amount
-                'txtCreditAmount.Text = String.Format("{0:F}", cr)
-
-            Else
-                'If rdbStudentLeddger.Checked = True Then
-                TotalAmount = TotalAmount + CDbl(dgItem1.Cells(7).Text)
-
-                dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
-                amount = dgItem1.Cells(7).Text
-                dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "+"
-                dr = dr + amount
-                txtDebitAmount.Text = String.Format("{0:N}", dr)
-
-                'Else
-                'If Not dgItem1.Cells(3).Text = "Receipt" Then
-                '    TotalAmount = TotalAmount - CDbl(dgItem1.Cells(7).Text)
-
-                '    dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
-                '    amount = dgItem1.Cells(7).Text
-                '    dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "+"
-                '    dr = dr + amount
-                '    txtDebitAmount.Text = String.Format("{0:N}", dr)
-
-                'Else
-                '    TotalAmount = TotalAmount + CDbl(dgItem1.Cells(7).Text)
-
-                '    dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
-                '    amount = dgItem1.Cells(7).Text
-                '    dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "-"
-                '    cr = cr + amount
-                '    txtCreditAmount.Text = String.Format("{0:N}", cr)
-                'End If
-                'End If
-
-                'dgItem1.Cells(8).Text = String.Format("{0:F}", TotalAmount)
-                'amount = dgItem1.Cells(7).Text
-                'dgItem1.Cells(7).Text = String.Format("{0:F}", amount) & "+"
-                'dr = dr + amount
-                'txtDebitAmount.Text = String.Format("{0:F}", dr)
-
-            End If
-
-        Next
-        ' txtoutamount.Text = String.Format("{0:F}", CDbl(txtDebitAmt.Text) - CDbl(txtCreditAmt.Text))
-
-        'Added by Hafiz Roslan
-        'Dated: 06/01/2015
-
-        'outstanding amount - Start
-        Dim debitAmount As Double = 0.0, creditAmount As Double = 0.0
-
-        debitAmount = CDbl(txtDebitAmount.Text)
-        creditAmount = CDbl(txtCreditAmount.Text)
-
-        'If debitAmount > creditAmount Then
-        '    txtoutamount.Text = String.Format("{0:F}", debitAmount - creditAmount)
-        'Else
-        '    txtoutamount.Text = String.Format("{0:F}", creditAmount - debitAmount)
-        'End If
-        txtoutamount.Text = String.Format("{0:N}", debitAmount - creditAmount)
-    End Sub
-    ''' <summary>
-    ''' Method to Add Student Manually
-    ''' </summary>
-    ''' <remarks></remarks>
-    Private Sub addSelectStudent()
-        Dim liststuAll As New List(Of AccountsDetailsEn)
-        Dim outamt As Double = 0
-        Dim stuen As New StudentEn
-        Dim bsstu As New AccountsBAL
-        If Not Session("liststu") Is Nothing Then
-            If lblStatus.Value = "Ready" Then
-                Session("AddListStud") = Nothing
-                Session("AddOtherStudent") = Nothing
-                Session("AddFeeType") = Nothing
-                chkSelectAll.Checked = False
-                Dim ebjStu As New StudentEn
-                Dim objStudent As New StudentEn
-                Dim eobjFt As StudentEn
-                Dim mylst As List(Of StudentEn)
-                Dim newListStudentReady As New List(Of StudentEn)
-                Dim newListStudent As New List(Of StudentEn)
-                Dim ListTRD = New List(Of AccountsDetailsEn)
-                Dim ListTRDA = New List(Of AccountsDetailsEn)
-                Dim j As Integer = 0
-                Dim i As Integer = 0
-                Dim k As Integer = 0
-                Dim z As Integer = 0
-                'newListStudentReady = Session("newListStudentReady")
-                mylst = Session("liststu")
-                If Not Session("AddFee") Is Nothing Then
-                    liststuAll = Session("AddFee")
-                Else
-                    liststuAll = New List(Of AccountsDetailsEn)
-                End If
-                If Not Session("newListStudentReady") Is Nothing Then
-                    newListStudentReady = Session("newListStudentReady")
-                    Session("AddFee") = Nothing
-                    newListStudentReady.AddRange(mylst)
-                Else
-                    newListStudentReady = New List(Of StudentEn)
-                End If
-                'newListStudentReady.AddRange(mylst)
-                If Not Session("AddFee") Is Nothing Then
-                    If mylst.Count <> 0 Then
-                        While i < mylst.Count
-                            eobjFt = mylst(i)
-                            While j < liststuAll.Count
-                                For Each dgItem1 In dgView.Items
-                                    If eobjFt.MatricNo = liststuAll(j).MatricNo Then
-
-                                    Else
-                                        objStudent = New StudentEn
-                                        'objStudent.MatricNo = liststuAll(j).MatricNo
-                                        If (liststuAll(j).MatricNo = liststuAll(j).MatricNo > 1 Or eobjFt.MatricNo = eobjFt.MatricNo > 1 Or mylst(i).MatricNo = mylst(i).MatricNo > 1) Then
-
-                                        Else
-                                            objStudent.MatricNo = liststuAll(j).MatricNo
-                                            objStudent.StudentName = liststuAll(j).StudentName
-                                            objStudent.ProgramID = liststuAll(j).ProgramID
-                                            objStudent.CurrentSemester = liststuAll(j).CurrentSemester
-                                            objStudent.ICNo = liststuAll(j).ICNo
-                                            objStudent.TransactionAmount = liststuAll(j).TransactionAmount
-                                            objStudent.PaidAmount = liststuAll(j).PaidAmount
-                                            mylst.Add(objStudent)
-                                            objStudent = Nothing
-                                        End If
-                                    End If
-                                    Exit For
-                                Next
-                                j = j + 1
-                            End While
-                            i = i + 1
-                        End While
-                    End If
-                    newListStudentReady.AddRange(mylst)
-                End If
-
-                'Session("AddStudentForReady") = ListTRD
-                Session("newListStudentReady") = newListStudentReady
-                dgView.DataSource = newListStudentReady
-                dgView.DataBind()
-                For Each dgItem1 In dgView.Items
-                    stuen.MatricNo = dgItem1.Cells(1).Text
-                    Dim ListInvObjects1 As New List(Of AccountsEn)
-                    Dim obj3 As New AccountsBAL
-                    Dim eob3 As New AccountsEn
-
-                    eob3.CreditRef = stuen.MatricNo
-                    eob3.PostStatus = "Posted"
-                    eob3.SubType = "Student"
-                    eob3.TransType = ""
-                    eob3.TransStatus = "Closed"
-
-                    Try
-
-                        ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
-
-                    Catch ex As Exception
-                        LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
-                    End Try
-
-                    dgInvoices1.DataSource = ListInvObjects1
-                    dgInvoices1.DataBind()
-                    ledgerformat()
-                    'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
-                    outamt = Trim(txtoutamount.Text)
-                    'Try
-                    '    outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
-                    'Catch ex As Exception
-                    '    LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
-                    'End Try
-                    dgItem1.Cells(6).Text = String.Format("{0:F}", outamt)
-                Next
-            End If
-        End If
-        'Session("eobj") = Nothing
-        Session("liststu") = Nothing
-        Session("AddFee") = Nothing
-        'Session("newListStudentReady") = Nothing
-        'Session("AddStudentOthers") = Nothing
-        Session("AddStudentForReady") = Nothing
     End Sub
     ''' <summary>
     ''' Method to Add Bankcodes to Dropdown
@@ -3939,6 +4020,8 @@ Partial Class SponsorAllocation
         dgView.DataBind()
 
         Dim list As New List(Of StudentEn)
+        Dim newlist As New List(Of StudentEn)
+        Dim newstulist As New List(Of StudentEn)
         Dim eobj As New StudentEn
         Dim i As Integer = 0
 
@@ -3989,24 +4072,48 @@ Partial Class SponsorAllocation
                 Session("fileSponsor") = Nothing
                 Exit Sub
             End If
+            newlist.AddRange(list)
         Next
+
+
+        If studentList.Count = 0 Then
+
+        Else
+            studentList = newlist.Where(Function(x) newlist.Any(Function(z) x.STsponsercode.Sponsor = txtspcode.Text)).ToList()
+            newstulist = newlist.Where(Function(x) newlist.Any(Function(z) Not x.STsponsercode.Sponsor = txtspcode.Text)).ToList()
+        End If
+        'Session("SponsorShip") = newlist
 
         dgView.DataSource = studentList
         dgView.DataBind()
-
-        For Each dgItem1 In dgView.Items
-            txtAmount = dgItem1.Cells(7).Controls(1)
-            amt = CDbl(dgItem1.Cells(11).Text)
-            txtPocket = dgItem1.Cells(9).Controls(1)
-            pocAmt = CDbl(dgItem1.Cells(12).Text)
-            txtAmount.Text = String.Format("{0:F}", amt)
-            txtPocket.Text = String.Format("{0:F}", pocAmt)
-            stuen.MatricNo = dgItem1.Cells(1).Text
+        dgUnView.DataSource = newstulist
+        dgUnView.DataBind()
+        Dim y As Integer = 0
+        Dim chk As CheckBox
+        Dim sponamt As Double = 0
+        Dim txtSponamt As TextBox
+        Dim txtsponamt2 As TextBox
+        Dim txtAmount2 As TextBox
+        Dim txtCreditamt As TextBox
+        Dim txtCreditamt2 As TextBox
+        Dim txtpamont As TextBox
+        Dim txtpamont2 As TextBox
+        Dim tamt As Double = 0
+        Dim _totalSpon As Double = 0
+        Dim spon As Double = 0
+        For Each dgitem As DataGridItem In dgUnView.Items
+            txtsponamt2 = dgitem.Cells(6).Controls(1)
+            txtAmount2 = dgitem.Cells(8).Controls(1)
+            txtCreditamt2 = dgitem.Cells(10).Controls(1)
+            txtpamont2 = dgitem.Cells(11).Controls(1)
+            txtsponamt2.Text = String.Format("{0:F}", spon)
+            txtAmount2.Text = String.Format("{0:F}", spon)
+            txtCreditamt2.Text = String.Format("{0:F}", spon)
+            txtpamont2.Text = String.Format("{0:F}", spon)
             Dim ListInvObjects1 As New List(Of AccountsEn)
             Dim obj3 As New AccountsBAL
             Dim eob3 As New AccountsEn
-
-            eob3.CreditRef = stuen.MatricNo
+            eob3.CreditRef = dgitem.Cells(1).Text
             eob3.PostStatus = "Posted"
             eob3.SubType = "Student"
             eob3.TransType = ""
@@ -4024,20 +4131,116 @@ Partial Class SponsorAllocation
             dgInvoices1.DataBind()
             ledgerformat()
             'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+            'outamt = Trim(txtoutamount.Text)
             outamt = Trim(txtoutamount.Text)
-            'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
-            dgItem1.Cells(6).Text = String.Format("{0:F}", outamt)
-            'NoKelompok = dgItem1.Cells(13).Controls(1)
-            'NoWarran = dgItem1.Cells(14).Controls(1)
-            'amaunWarran = dgItem1.Cells(15).Controls(1)
-            'noAkaunPelajar = dgItem1.Cells(16).Controls(1)
-
-            'dgItem1.Cells(13).Text = eobj.NoKelompok
-            'dgItem1.Cells(14).Text = eobj.NoWarran
-            'dgItem1.Cells(15).Text = eobj.AmaunWarran
-            'dgItem1.Cells(16).Text = eobj.noAkaun
+            dgitem.Cells(7).Text = String.Format("{0:F}", outamt)
         Next
+        While y < studentList.Count
+            For Each dgItem1 In dgView.Items
+                If dgItem1.Cells(1).Text = studentList(y).MatricNo Then
+                    chk = dgItem1.Cells(0).Controls(1)
+                    'chk.Checked = True
+                    stuen.BatchCode = Trim(txtbatchspcode.Text)
+                    stuen.MatricNo = studentList(y).MatricNo
 
+                    sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
+
+                    txtSponamt = dgItem1.Cells(6).Controls(1)
+                    txtAmount = dgItem1.Cells(8).Controls(1)
+                    'amt = liststuAll(j).TransactionAmount
+                    txtCreditamt = dgItem1.Cells(10).Controls(1)
+                    txtpamont = dgItem1.Cells(11).Controls(1)
+                    tamt = 0
+                    txtSponamt.Text = String.Format("{0:F}", sponamt)
+
+                    txtpamont.Text = String.Format("{0:F}", tamt)
+
+
+                    Exit For
+                End If
+            Next
+            y = y + 1
+            _totalSpon = _totalSpon + sponamt
+        End While
+        Dim co As Integer = 0
+        Dim _sponamt As Double
+        'Dim z As Integer = 0
+        Dim _available As Double
+        _available = txtAllAmount.Text
+        Dim _txtSpon As TextBox
+
+        _sponamt = _available / studentList.Count
+
+        For Each dgItem1 In dgView.Items
+            'If dgItem1.Cells(1).Text = liststuAll(j).MatricNo Then
+            _txtSpon = dgItem1.FindControl("txtsponamt")
+            If _txtSpon.Text = "" Then
+                _txtSpon.Text = 0
+            End If
+            txtAmount = dgItem1.Cells(8).Controls(1)
+            'amt = liststuAll(j).TransactionAmount
+            txtCreditamt = dgItem1.Cells(10).Controls(1)
+            txtpamont = dgItem1.Cells(11).Controls(1)
+            sponamt = _txtSpon.Text
+            Dim ListInvObjects1 As New List(Of AccountsEn)
+            Dim obj3 As New AccountsBAL
+            Dim eob3 As New AccountsEn
+            eob3.CreditRef = dgItem1.Cells(1).Text
+            eob3.PostStatus = "Posted"
+            eob3.SubType = "Student"
+            eob3.TransType = ""
+            eob3.TransStatus = "Closed"
+
+            Try
+
+                ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+
+            Catch ex As Exception
+                LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
+            End Try
+
+            dgInvoices1.DataSource = ListInvObjects1
+            dgInvoices1.DataBind()
+            ledgerformat()
+            'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+            'outamt = Trim(txtoutamount.Text)
+            outamt = Trim(txtoutamount.Text)
+            If _totalSpon > _available Or _totalSpon = 0 Then
+                _txtSpon.Text = String.Format("{0:F}", _sponamt)
+            Else
+                _txtSpon.Text = String.Format("{0:F}", sponamt)
+            End If
+            sponamt = _txtSpon.Text
+
+            If outamt >= 0 And outamt <= sponamt Then
+                txtAmount.Text = String.Format("{0:F}", outamt)
+            ElseIf outamt <= 0 Then
+                amt = 0
+                txtAmount.Text = String.Format("{0:F}", amt)
+            ElseIf outamt >= 0 And outamt > sponamt Then
+                amt = 0
+                txtAmount.Text = String.Format("{0:F}", sponamt)
+            End If
+            If sponamt >= outamt Then
+                If txtAmount.Text = "" Then
+                    txtAmount.Text = 0.0
+                End If
+                txtCreditamt.Text = String.Format("{0:F}", sponamt - txtAmount.Text)
+            Else
+                amt = 0
+                txtCreditamt.Text = String.Format("{0:F}", amt)
+            End If
+            txtpamont.Text = String.Format("{0:F}", tamt)
+            If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
+                dgItem1.Cells(10).Enabled = False
+                dgItem1.Cells(11).Enabled = False
+            End If
+            dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
+            dgItem1.Cells(14).Text = txtCreditamt.Text
+            dgItem1.Cells(13).Text = txtpamont.Text
+            'Exit For
+            'End If
+        Next
         Session("spt") = Session("SPncode")
         Session("spnObj") = Nothing
         Session("liststu") = Nothing
