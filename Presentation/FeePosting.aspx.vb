@@ -482,137 +482,142 @@ Partial Class FeePosting
             Dim _listAFC As New List(Of AFCEn)
             Dim list As List(Of Integer) = DirectCast(ViewState("SelectedRecords"), List(Of Integer))
 
-            If list.Count > 0 Then
+            If list Is Nothing Then
+                Throw New Exception("Select at least one data to save.")
+            Else
+                If list.Count > 0 Then
 
-                For Each idx As Integer In list
+                    For Each idx As Integer In list
 
-                    If rbSemester.Checked = True Then
-                        FeeFor = "Semester"
-                    Else
-                        FeeFor = "Annual"
-                    End If
+                        If rbSemester.Checked = True Then
+                            FeeFor = "Semester"
+                        Else
+                            FeeFor = "Annual"
+                        End If
 
-                    _AFCEn = New AFCEn()
+                        _AFCEn = New AFCEn()
 
-                    _AFCEn.SAFC_Code = ListProgramInfoEn(idx).Faculty
+                        _AFCEn.SAFC_Code = ListProgramInfoEn(idx).Faculty
 
-                    If Not String.IsNullOrEmpty(ListProgramInfoEn(idx).Semester.Replace("/", "").Replace("-", "")) Then
-                        _AFCEn.Semester = ListProgramInfoEn(idx).Semester.Replace("/", "").Replace("-", "")
-                    Else
-                        Throw New Exception("Save Failed - Semester Is Empty.")
-                    End If
+                        If Not String.IsNullOrEmpty(ListProgramInfoEn(idx).Semester.Replace("/", "").Replace("-", "")) Then
+                            _AFCEn.Semester = ListProgramInfoEn(idx).Semester.Replace("/", "").Replace("-", "")
+                        Else
+                            Throw New Exception("Save Failed - Semester Is Empty.")
+                        End If
 
-                    _AFCEn.CurrentSemester = ListProgramInfoEn(idx).CurrentSemester
-                    _AFCEn.DueDate = Trim(txtDueDate.Text)
-                    _AFCEn.TransDate = Trim(txtInvoiceDate.Text)
-                    _AFCEn.Bdate = Trim(txtBatchDate.Text)
-                    _AFCEn.PostedFor = FeeFor
-                    _AFCEn.Reference = "Ready"
-                    Dim d1, m1, y1, d2, m2, y2 As String
+                        _AFCEn.CurrentSemester = ListProgramInfoEn(idx).CurrentSemester
+                        _AFCEn.DueDate = Trim(txtDueDate.Text)
+                        _AFCEn.TransDate = Trim(txtInvoiceDate.Text)
+                        _AFCEn.Bdate = Trim(txtBatchDate.Text)
+                        _AFCEn.PostedFor = FeeFor
+                        _AFCEn.Reference = "Ready"
+                        Dim d1, m1, y1, d2, m2, y2 As String
                         If _AFCEn.CurrentSemester.Length = 9 Then
-                        d1 = Mid(_AFCEn.CurrentSemester, 1, 4)
-                        m1 = Mid(_AFCEn.CurrentSemester, 5, 4)
-                        y1 = Mid(_AFCEn.CurrentSemester, 9, 2)
-                        Dim semestercode As String = d1 + "/" + m1 + "-" + y1
-                        _AFCEn.Description = "AFC-" & semestercode
+                            d1 = Mid(_AFCEn.CurrentSemester, 1, 4)
+                            m1 = Mid(_AFCEn.CurrentSemester, 5, 4)
+                            y1 = Mid(_AFCEn.CurrentSemester, 9, 2)
+                            Dim semestercode As String = d1 + "/" + m1 + "-" + y1
+                            _AFCEn.Description = "AFC-" & semestercode
                         Else
-                        _AFCEn.Description = "AFC-" & _AFCEn.CurrentSemester
+                            _AFCEn.Description = "AFC-" & _AFCEn.CurrentSemester
                         End If
-                    '_AFCEn.Description = "AFC-" & _AFCEn.CurrentSemester
-                    _AFCEn.Updatetime = DateTime.Now
-                    _AFCEn.Updatedby = Session("User")
+                        '_AFCEn.Description = "AFC-" & _AFCEn.CurrentSemester
+                        _AFCEn.Updatetime = DateTime.Now
+                        _AFCEn.Updatedby = Session("User")
 
-                    'afcdetails - start
-                    _AFCDetailsEn = New AFCDetailsEn
-                    Dim ListAFCDetailsEn As New List(Of AFCDetailsEn)
-                    'ListAFCDetailsEn.Clear()
-                    _AFCDetailsEn.ProgramID = ListProgramInfoEn(idx).ProgramID
-                    _AFCDetailsEn.Faculty = ListProgramInfoEn(idx).Faculty
-                    _AFCDetailsEn.BidangCode = ListProgramInfoEn(idx).BidangCode
-                    _AFCEn.PostStatus = ddlstatus.SelectedValue
-                    ListAFCDetailsEn.Add(_AFCDetailsEn)
-                    _AFCDetailsEn = Nothing
-                    'afcdetails - end
+                        'afcdetails - start
+                        _AFCDetailsEn = New AFCDetailsEn
+                        Dim ListAFCDetailsEn As New List(Of AFCDetailsEn)
+                        'ListAFCDetailsEn.Clear()
+                        _AFCDetailsEn.ProgramID = ListProgramInfoEn(idx).ProgramID
+                        _AFCDetailsEn.Faculty = ListProgramInfoEn(idx).Faculty
+                        _AFCDetailsEn.BidangCode = ListProgramInfoEn(idx).BidangCode
+                        _AFCEn.PostStatus = ddlstatus.SelectedValue
+                        ListAFCDetailsEn.Add(_AFCDetailsEn)
+                        _AFCDetailsEn = Nothing
+                        'afcdetails - end
 
-                    _AFCEn.AFCDetailslist = ListAFCDetailsEn
-                    If (ListAFCDetailsEn.Count = 0) Then
-                        lblMsg.Text = "Select At Least One Program "
-                        Exit Sub
-                        _AFCEn.AFCDetailslist = New List(Of AFCDetailsEn)
-                    End If
-
-                    _AFCEn.SASI_Name = ListProgramInfoEn(idx).ProgramID
-
-                    'get the student matric no for the given program details
-                    ListStudentEn = _ProgramInfoBAL.GetProgramInfoListAllMatricNo(_AFCEn)
-
-                    'Loop thro the Student List - Start
-                    For Index = 0 To ListStudentEn.Count - 1
-
-                        'Get Matric No
-                        MatricNo = ListStudentEn(Index).MatricNo
-
-                        If Index = 0 Then
-                            StudentMatricNos = clsGeneric.AddQuotes(MatricNo)
-                        Else
-                            StudentMatricNos &= clsGeneric.AddComma() & clsGeneric.AddQuotes(MatricNo)
+                        _AFCEn.AFCDetailslist = ListAFCDetailsEn
+                        If (ListAFCDetailsEn.Count = 0) Then
+                            lblMsg.Text = "Select At Least One Program "
+                            Exit Sub
+                            _AFCEn.AFCDetailslist = New List(Of AFCDetailsEn)
                         End If
 
-                    Next
-                    'Loop thro the Student List - Stop
+                        _AFCEn.SASI_Name = ListProgramInfoEn(idx).ProgramID
 
-                    _AFCEn.CreditRef = StudentMatricNos
-                    StudentMatricNos = String.Empty
-                    lblMsg.Visible = True
-                    Status = "Ready"
-                    Batch = ""
+                        'get the student matric no for the given program details
+                        ListStudentEn = _ProgramInfoBAL.GetProgramInfoListAllMatricNo(_AFCEn)
 
-                    _AFCEn_1 = New AFCBAL().CheckAFC(_AFCEn)
-                    MatricNo = New AFCBAL().CheckNewStudentAFC(_AFCEn)
+                        'Loop thro the Student List - Start
+                        For Index = 0 To ListStudentEn.Count - 1
 
-                    'if batch code available - Start
-                    If Not FormHelp.IsBlank(_AFCEn_1.BatchCode) Then
+                            'Get Matric No
+                            MatricNo = ListStudentEn(Index).MatricNo
 
-                        If (_AFCEn_1.BatchCode = "NOFEESTRUCTURE") Then
-                            If String.IsNullOrEmpty(ListProgramInfoEn(idx).BidangCode) Then
-                                ErrorDescription = "No Bidang Code for program " & _AFCEn_1.Reference
+                            If Index = 0 Then
+                                StudentMatricNos = clsGeneric.AddQuotes(MatricNo)
                             Else
-                                ErrorDescription = "No Fee structure for program " & _AFCEn_1.Reference
+                                StudentMatricNos &= clsGeneric.AddComma() & clsGeneric.AddQuotes(MatricNo)
                             End If
 
-                            lblMsg.Text = ErrorDescription
-                            lblMsg.Visible = True
-                            Exit Sub
+                        Next
+                        'Loop thro the Student List - Stop
 
-                        ElseIf (_AFCEn_1.BatchCode = "NOHOSTELFEE") Then
-                            ErrorDescription = "No Hostel Fee For Student in program " & _AFCEn_1.Reference
-                            lblMsg.Text = ErrorDescription
-                            lblMsg.Visible = True
-                            Exit Sub
+                        _AFCEn.CreditRef = StudentMatricNos
+                        StudentMatricNos = String.Empty
+                        lblMsg.Visible = True
+                        Status = "Ready"
+                        Batch = ""
 
-                        Else
-                            'modified by Hafiz @ 21/10/2016
-                            If Not FormHelp.IsBlank(MatricNo) Then
-                                _listAFC.Add(_AFCEn)
-                            Else
+                        _AFCEn_1 = New AFCBAL().CheckAFC(_AFCEn)
+                        MatricNo = New AFCBAL().CheckNewStudentAFC(_AFCEn)
+
+                        'if batch code available - Start
+                        If Not FormHelp.IsBlank(_AFCEn_1.BatchCode) Then
+
+                            If (_AFCEn_1.BatchCode = "NOFEESTRUCTURE") Then
+                                If String.IsNullOrEmpty(ListProgramInfoEn(idx).BidangCode) Then
+                                    ErrorDescription = "No Bidang Code for program " & _AFCEn_1.Reference
+                                Else
+                                    ErrorDescription = "No Fee structure for program " & _AFCEn_1.Reference
+                                End If
+
                                 lblMsg.Text = ErrorDescription
                                 lblMsg.Visible = True
                                 Exit Sub
+
+                            ElseIf (_AFCEn_1.BatchCode = "NOHOSTELFEE") Then
+                                ErrorDescription = "No Hostel Fee For Student in program " & _AFCEn_1.Reference
+                                lblMsg.Text = ErrorDescription
+                                lblMsg.Visible = True
+                                Exit Sub
+
+                            Else
+                                'modified by Hafiz @ 21/10/2016
+                                If Not FormHelp.IsBlank(MatricNo) Then
+                                    _listAFC.Add(_AFCEn)
+                                Else
+                                    lblMsg.Text = ErrorDescription
+                                    lblMsg.Visible = True
+                                    Exit Sub
+                                End If
+
                             End If
 
+                        Else
+                            'modified by Hafiz @ 21/10/2016
+                            _listAFC.Add(_AFCEn)
+
                         End If
+                        'if batch code available - Stop
 
-                    Else
-                        'modified by Hafiz @ 21/10/2016
-                        _listAFC.Add(_AFCEn)
+                    Next
 
-                    End If
-                    'if batch code available - Stop
+                Else
+                    Throw New Exception("Select at least one data to save.")
+                End If
 
-                Next
-
-            Else
-                Throw New Exception("Select at least one data to save.")
             End If
 
             If _listAFC.Count > 0 Then
@@ -805,14 +810,6 @@ Partial Class FeePosting
                 Return False
             End Try
         End If
-        'If (rbSemester.Checked) Then
-        '    If ddlSemester.SelectedIndex = 0 Then
-        '        lblMsg.Text = "Please Select Semester"
-        '        lblMsg.Visible = True
-        '        ddlSemester.Focus()
-        '        Return False
-        '    End If
-        'End If
 
         'Invoice date
         If Trim(txtInvoiceDate.Text).Length < 10 Then
@@ -1848,13 +1845,16 @@ Partial Class FeePosting
 
             If String.IsNullOrEmpty(txtBatchNo.Text) Then
                 For Each dgItem As GridViewRow In dgView.Rows
+
                     Dim chk As CheckBox = dgItem.Cells(0).Controls(1)
+
                     If chk.Checked = True Then
                         _BatchId = dgItem.Cells(6).Text
                         LoadGetData(_BatchId)
                         CheckWorkflowStatus(_BatchId)
                         Exit For
                     End If
+
                 Next
             Else
                 ClearCheckedData()
@@ -1895,6 +1895,13 @@ Partial Class FeePosting
 
     Sub LoadGetData(ByVal _BatchId As String)
         GetData(ddlFaculty.SelectedValue, ddlSemester.SelectedValue, ddlBidang.SelectedValue, _BatchId, ddlCurrSem.SelectedValue)
+
+        Dim ChkBoxHeader As CheckBox = DirectCast(dgView.HeaderRow.FindControl("chkboxSelectAll"), CheckBox)
+        If Not String.IsNullOrEmpty(_BatchId) Then
+            ChkBoxHeader.Enabled = False
+        Else
+            ChkBoxHeader.Enabled = True
+        End If
     End Sub
 
     Sub ClearCheckedData()

@@ -191,6 +191,7 @@ Partial Class Receipts
 
                 If constr(1) = "St" Then
                     ddlReceiptFor.SelectedValue = "St"
+                    sCtrlAmt.Visible = True
                     lblCtrlAmt.Visible = True
                     txtCtrlAmt.Visible = True
                 ElseIf constr(1) = "Sp" Then
@@ -388,7 +389,7 @@ Partial Class Receipts
 
             If Session("ExceedLmt") = True Then
                 lblMsg.Visible = True
-                lblMsg.Text = "Total Amount of Receipt Must Not Exceed Control Amount"
+                lblMsg.Text = "Total Amount of Receipt Must Equals To Control Amount"
                 txtCtrlAmt.Focus()
                 Return
             End If
@@ -763,7 +764,12 @@ Partial Class Receipts
                             txtCtrlAmt.Focus()
                             Session("ExceedLmt") = True
 
-                            Throw New Exception("Total Amount of Receipt Must Not Exceed Control Amount")
+                            Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+                        ElseIf totalAmt < ctrlamt Then
+                            txtCtrlAmt.Focus()
+                            Session("ExceedLmt") = True
+
+                            Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
                         End If
                     End If
 
@@ -1229,7 +1235,13 @@ Partial Class Receipts
                     txtCtrlAmt.Focus()
                     Session("ExceedLmt") = True
 
-                    Throw New Exception("Total Amount of Receipt Must Not Exceed Control Amount")
+                    Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+                ElseIf CDec(txtAllocateAmount.Text) < amt Then
+                    txtCtrlAmt.Focus()
+                    Session("ExceedLmt") = True
+
+                    Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+
                 End If
             End If
         Catch ex As Exception
@@ -2224,6 +2236,7 @@ Partial Class Receipts
             lblStuSpn.Visible = False
             searchStud.Visible = False
             btnSearchStud.Visible = False
+            sCtrlAmt.Visible = True
             lblCtrlAmt.Visible = True
             txtCtrlAmt.Visible = True
             lblIdtnStud.Text = "Search Student"

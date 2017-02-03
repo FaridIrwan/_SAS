@@ -32,7 +32,7 @@
     <asp:Panel ID="Panel1" runat="server" Width="100%">
         <table style="background-image: url(images/Sample.png);">
             <tr>
-                <td style="width: 4px; height: 14px"></td>
+                <td class="auto-style1"></td>
                 <td style="width: 14px; height: 14px"></td>                
                 <td>
                     <table style="border-collapse: collapse;" class="menuoff" onmouseover="className='menuon';"
@@ -283,4 +283,14 @@
         </tr>
     <%--<asp:Button ID="btnHiddenApp" runat="Server" OnClick="btnHiddenApp_Click" Style="display: none" />--%>
 </asp:Content>
+
+<asp:Content ID="Content2" runat="server" contentplaceholderid="head">
+    <style type="text/css">
+        .auto-style1 {
+            height: 14px;
+            width: 6px;
+        }
+    </style>
+</asp:Content>
+
 

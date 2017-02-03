@@ -254,14 +254,13 @@
             var dt2 = parseInt(str2.substring(0, 2), 10);
             var mon2 = parseInt(str2.substring(3, 5), 10);
             var yr2 = parseInt(str2.substring(6, 10), 10);
-            var date1 = new Date(yr1, mon1, dt1);
-            var date2 = new Date(yr2, mon2, dt2);
+            var date1 = new Date(yr1, mon1-1, dt1);
+            var date2 = new Date(yr2, mon2-1, dt2);
 
             if (date2 < date1) {
                 alert("Batch Date Cannot be Greater than Current Date");
-                document.getElementById("<%=txtBatchDate.ClientID%>").value = "";
+                <%--document.getElementById("<%=txtBatchDate.ClientID%>").value = "";--%>
                 document.getElementById("<%=txtBatchDate.ClientID%>").focus();
-                //"");
                 return false;
             }
 
@@ -270,7 +269,6 @@
                 document.getElementById("<%=txtReceiptDate.ClientID%>").focus();
                 return false;
             }
-
 
             var len = document.getElementById("<%=txtReceiptDate.ClientID%>").value
             var RegExPattern = /^((((0?[1-9]|[12]\d|3[01])[\.\-\/](0?[13578]|1[02])[\.\-\/]((1[6-9]|[2-9]\d)?\d{2}))|((0?[1-9]|[12]\d|30)[\.\-\/](0?[13456789]|1[012])[\.\-\/]((1[6-9]|[2-9]\d)?\d{2}))|((0?[1-9]|1\d|2[0-8])[\.\-\/]0?2[\.\-\/]((1[6-9]|[2-9]\d)?\d{2}))|(29[\.\-\/]0?2[\.\-\/]((1[6-9]|[2-9]\d)?(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)|00)))|(((0[1-9]|[12]\d|3[01])(0[13578]|1[02])((1[6-9]|[2-9]\d)?\d{2}))|((0[1-9]|[12]\d|30)(0[13456789]|1[012])((1[6-9]|[2-9]\d)?\d{2}))|((0[1-9]|1\d|2[0-8])02((1[6-9]|[2-9]\d)?\d{2}))|(2902((1[6-9]|[2-9]\d)?(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)|00))))$/;
@@ -298,14 +296,13 @@
             var dt2 = parseInt(str2.substring(0, 2), 10);
             var mon2 = parseInt(str2.substring(3, 5), 10);
             var yr2 = parseInt(str2.substring(6, 10), 10);
-            var date1 = new Date(yr1, mon1, dt1);
-            var date2 = new Date(yr2, mon2, dt2);
+            var date1 = new Date(yr1, mon1-1, dt1);
+            var date2 = new Date(yr2, mon2-1, dt2);
 
             if (date2 < date1) {
                 alert("Receipt Date Cannot be Greater than Current Date");
-                document.getElementById("<%=txtReceiptDate.ClientID%>").value = "";
+                <%--document.getElementById("<%=txtReceiptDate.ClientID%>").value = ""; --%>
                 document.getElementById("<%=txtReceiptDate.ClientID%>").focus();
-                //"");
                 return false;
             }
             var str1 = document.getElementById("<%=txtReceiptDate.ClientID %>").value;
@@ -316,28 +313,27 @@
             var dt2 = parseInt(str2.substring(0, 2), 10);
             var mon2 = parseInt(str2.substring(3, 5), 10);
             var yr2 = parseInt(str2.substring(6, 10), 10);
-            var date1 = new Date(yr1, mon1, dt1);
-            var date2 = new Date(yr2, mon2, dt2);
+            var date1 = new Date(yr1, mon1-1, dt1);
+            var date2 = new Date(yr2, mon2-1, dt2);
 
             if (date2 > date1) {
                 alert("Transaction Date Cannot be Lesser than Batch Date");
-                document.getElementById("<%=txtReceiptDate.ClientID%>").value = "";
+                <%--document.getElementById("<%=txtReceiptDate.ClientID%>").value = "";--%>
                 document.getElementById("<%=txtReceiptDate.ClientID%>").focus();
-                //"");
                 return false;
             }
 
             //added by Hafiz @ 09/12/2016
             //Total Amount Should Be Equal to Control Amount - START
-            var Total_Amount = document.getElementById("<%=txtAllocateAmount.ClientID%>");
+            <%--var Total_Amount = document.getElementById("<%=txtAllocateAmount.ClientID%>");
             var Control_Amount = document.getElementById("<%=txtCtrlAmt.ClientID%>");
 
             if (Total_Amount.value < Control_Amount.value)
             {
-                alert("Total Amount Should Not Be Less Than Control Amount");
+                alert("Total Amount must be equal to Control Amount");
                 Total_Amount.focus();
                 return false;
-            }
+            }--%>
             //Total Amount Should Be Equal to Control Amount - END
 
             return true;
@@ -721,14 +717,14 @@
                                     </td>
                                     <%--added by Hafiz @ 04/6/2016 - (Control amount - start) --%>
                                     <td style="width: 534px; height: 25px; text-align: right">
-                                        <span id="sCtrlAmt" runat="server" style="color: #ff0000">*</span>
+                                        <span id="sCtrlAmt" runat="server" style="color: #ff0000" visible="false">*</span>
                                     </td>
                                     <td style="width: 193px; height: 25px; text-align: left">
                                         <span style="width: 193px; height: 25px; text-align: left;">
                                             <asp:Label ID="lblCtrlAmt" runat="server" Text="Control Amount" Width="85px" visible="false"></asp:Label></span>
                                     </td>
                                     <td style="width: 33px; height: 25px">
-                                        <asp:TextBox ID="txtCtrlAmt" runat="server" MaxLength="20" Width="96px" Style="text-align:right" ToolTip=" Total amount of receipt must not exceed this amount." 
+                                        <asp:TextBox ID="txtCtrlAmt" runat="server" MaxLength="20" Width="96px" Style="text-align:right" ToolTip=" Total amount of receipt must equals to this amount." 
                                             AutoPostBack="True" OnTextChanged="txtCtrlAmt_TextChanged" visible="false"></asp:TextBox>
                                     </td>
                                     <%--added by Hafiz @ 04/6/2016 - (Control amount - end) --%>
