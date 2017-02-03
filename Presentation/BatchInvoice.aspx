@@ -1314,6 +1314,7 @@
                                                         </asp:BoundColumn>
                                                         <asp:BoundColumn DataField="TaxId" Visible="false"></asp:BoundColumn>
                                                         <asp:BoundColumn DataField="TransactionID" Visible="false"></asp:BoundColumn>
+                                                        <asp:BoundColumn DataField="Transstatus" HeaderText="Status"></asp:BoundColumn>
                                                     </Columns>
                                                 </asp:DataGrid>
                                             </td>
@@ -1677,6 +1678,19 @@
                                  <tr>
                                 <td>
                                     <asp:Button ID="btnLoadFeeView3" runat="server" Text="Load Fee Type" Visible="false" />
+                                     &nbsp;
+                                     <asp:Label ID="lblSemyear" runat="server" Text="   Semester Year" Width="82px"></asp:Label>
+                                     <asp:DropDownList ID="ddlsemyear" runat="server" AppendDataBoundItems="true" Width="150px">
+                                                        
+                                                        </asp:DropDownList>
+                                     &nbsp;
+                                     <asp:Label ID="lblTransstatus" runat="server" Text="   Status" Width="82px"></asp:Label>
+                                     <asp:DropDownList ID="ddltransstatus" runat="server" AppendDataBoundItems="true" Width="150px">
+                                                        <asp:ListItem Value="-1">All</asp:ListItem>
+                                             <asp:ListItem Value="Open">Open</asp:ListItem>
+                                                <asp:ListItem Value="Closed">Closed</asp:ListItem>
+                                                <%--<asp:ListItem Value="3">3</asp:ListItem>--%>
+                                                        </asp:DropDownList>
                                 </td>
                             </tr>
                                 <tr>

@@ -692,9 +692,9 @@ namespace HTS.SAS.DataAccessObjects
             {
                 sqlCmd = "INSERT INTO SAS_AccountsDetails(TransID,TransTempCode,TransCode,RefCode,Quantity,TransAmount," +
                     "Tax,Discount,TaxAmount,DiscountAmount,PaidAmount,TempAmount,TempPaidAmount,TransStatus,PostStatus,Ref1," +
-                    "Ref2,Ref3,Priority,noKelompok,noWarran,amaunWarran,noAkaunPelajar,statusBayaran,Internal_Use,taxcode) VALUES (@TransID,@TransTempCode,@TransCode,@RefCode,@Quantity,@TransAmount,@Tax," +
+                    "Ref2,Ref3,Priority,noKelompok,noWarran,amaunWarran,noAkaunPelajar,statusBayaran,Internal_Use,taxcode,inv_no) VALUES (@TransID,@TransTempCode,@TransCode,@RefCode,@Quantity,@TransAmount,@Tax," +
                     "@Discount,@TaxAmount,@DiscountAmount,@PaidAmount,@TempAmount,@TempPaidAmount,@TransStatus,@PostStatus," +
-                    "@Ref1,@Ref2,@Ref3,@Priority,@noKelompok,@noWarran,@amaunWarran,@noAkaunPelajar,@statusBayaran,@Internal_Use,@TaxCode) ";
+                    "@Ref1,@Ref2,@Ref3,@Priority,@noKelompok,@noWarran,@amaunWarran,@noAkaunPelajar,@statusBayaran,@Internal_Use,@TaxCode,@Inv_no) ";
 
                 if (!FormHelp.IsBlank(sqlCmd))
                 {
@@ -723,6 +723,7 @@ namespace HTS.SAS.DataAccessObjects
                     _DatabaseFactory.AddInParameter(ref cmd, "@amaunWarran", DbType.String, argEn.AmaunWarran);
                     _DatabaseFactory.AddInParameter(ref cmd, "@statusBayaran", DbType.String, argEn.StatusBayaran);
                     _DatabaseFactory.AddInParameter(ref cmd, "@Internal_Use", DbType.String, argEn.Internal_Use);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Inv_no", DbType.String, argEn.Inv_no);
                     _DbParameterCollection = cmd.Parameters;
                   
                     switch (Category)

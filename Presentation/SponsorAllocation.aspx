@@ -751,7 +751,7 @@
                                 <td style="width: 34px; height: 25px;">
                                 </td>
                                 <td style="width: 1209px; height: 25px;">
-                                    <asp:Button ID="btnupload" runat="server" Text="Select student details template" Visible ="False" />
+                                    <asp:Button ID="btnupload" runat="server" Text="Upload student" />
                                 </td>
                                 <td colspan="1" style="width: 6448px; height: 25px">
                                     <asp:Image ID="Image1" runat="server" Height="20px" ImageUrl="~/images/find_img.png"
@@ -941,12 +941,12 @@
                             <td style="width: 113px">
                                 <!--<asp:Image ID="imgLeft1" runat="server" ImageUrl="images/b_orange_left.gif" ImageAlign="AbsBottom" />-->
                                 <asp:Button ID="btnBatchInvoice" runat="server" CssClass="TabButton" Height="24px"
-                                    OnClick="btnBatchInvoice_Click" Text="Active" Width="108px" Visible ="False"/><!--<asp:Image ID="imgRight1" runat="server" ImageUrl="images/b_orange_right.gif" ImageAlign="AbsBottom" />-->
+                                    OnClick="btnBatchInvoice_Click" Text="Active" Width="108px"/><!--<asp:Image ID="imgRight1" runat="server" ImageUrl="images/b_orange_right.gif" ImageAlign="AbsBottom" />-->
                             </td>
                             <td style="width: 139px">
                                 <!--<asp:Image ID="imgLeft2" runat="server" ImageUrl="images/b_orange_left.gif" ImageAlign="AbsBottom" />-->
                                 <asp:Button ID="btnSelection" runat="server" CssClass="TabButton" Height="25px" Text="InActive"
-                                    Width="108px" OnClick="btnSelection_Click" Visible ="False"/><!--<asp:Image ID="imgRight2" runat="server" ImageUrl="images/b_orange_right.gif" ImageAlign="AbsBottom" />-->
+                                    Width="108px" OnClick="btnSelection_Click"/><!--<asp:Image ID="imgRight2" runat="server" ImageUrl="images/b_orange_right.gif" ImageAlign="AbsBottom" />-->
                             </td>
                         </tr>
                     </table>
@@ -1062,8 +1062,8 @@
                                 </Columns>
                             </asp:DataGrid></asp:View>
                         <asp:View ID="View2" runat="server">
-                            <asp:DataGrid ID="dgUnView" runat="server" AutoGenerateColumns="False" DataKeyField="MatricNo"
-                                Width="100%" PageSize="1">
+                           <asp:DataGrid ID="dgUnView" runat="server" AutoGenerateColumns="False" DataKeyField="MatricNo"
+                                Width="100%" PageSize="1" OnSelectedIndexChanged="dgView_SelectedIndexChanged">
                                 <FooterStyle CssClass="dgFooterStyle" Height="20px" />
                                 <SelectedItemStyle CssClass="dgSelectedItemStyle" />
                                 <AlternatingItemStyle BackColor="Beige" CssClass="dgAlternatingItemStyle" Font-Bold="False"
@@ -1074,14 +1074,16 @@
                                 <Columns>
                                     <asp:TemplateColumn HeaderText="Select">
                                         <ItemTemplate>
-                                            <asp:CheckBox ID="chk" runat="server" />
+                                            <asp:CheckBox ID="Chk" runat="server" AutoPostBack="True" OnCheckedChanged="Chk_CheckedChanged" />
                                         </ItemTemplate>
                                         <HeaderStyle Width="5%" />
                                     </asp:TemplateColumn>
                                     <asp:BoundColumn DataField="MatricNO" HeaderText="Student MatricNo">
                                         <HeaderStyle Width="12%" />
                                     </asp:BoundColumn>
-                                    <asp:BoundColumn DataField="StudentName" HeaderText="StudentName"></asp:BoundColumn>
+                                    <asp:BoundColumn DataField="StudentName" HeaderText="Name">
+                                        <HeaderStyle Width="10%" />
+                                    </asp:BoundColumn>
                                     <asp:BoundColumn DataField="ProgramID" HeaderText="Program">
                                         <HeaderStyle Width="10%" />
                                     </asp:BoundColumn>
@@ -1089,38 +1091,82 @@
                                         <HeaderStyle Width="10%" />
                                     </asp:BoundColumn>
                                     <asp:BoundColumn HeaderText="Semester" DataField="CurrentSemester">
-                                        <HeaderStyle Width="10%" />
                                     </asp:BoundColumn>
-                                    <asp:BoundColumn HeaderText="OutStanding Amount" DataField="TransactionAmount">
-                                        <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
+
+                                    <asp:TemplateColumn HeaderText="Sponsor Amount">
+                                        <ItemTemplate>
+                                            <asp:TextBox ID="txtsponamt" runat="server" OnTextChanged="txtsponamt_TextChanged"
+                                                Style="text-align: right" Width="86px" AutoPostBack="True"></asp:TextBox>
+                                        </ItemTemplate>
+                                        <HeaderStyle Width="10%" />
+                                    </asp:TemplateColumn>  
+
+                                    <asp:BoundColumn HeaderText="OutStanding Amount">
+                                        <%--<ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
                                             Font-Underline="False" HorizontalAlign="Right" />
                                         <HeaderStyle Font-Bold="True" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
-                                            Font-Underline="False" VerticalAlign="Middle" Width="10%" />
+                                            Font-Underline="False" VerticalAlign="Middle" Width="10%" />--%>
+                                        <HeaderStyle Width="10%" />
                                     </asp:BoundColumn>
+
                                     <asp:TemplateColumn HeaderText="Allocated Amount">
-                                        <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
-                                            Font-Underline="False" HorizontalAlign="Right" />
+                                       <%-- <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
+                                            Font-Underline="False" HorizontalAlign="Right" />--%>
                                         <ItemTemplate>
                                             <asp:TextBox ID="txtAllAmount1" runat="server" AutoPostBack="True" OnTextChanged="txtAllAmount1_TextChanged"
                                                 Style="text-align: right" Width="97px"></asp:TextBox>
                                         </ItemTemplate>
-                                        <HeaderStyle Font-Bold="True" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
-                                            Font-Underline="False" VerticalAlign="Middle" Width="10%" />
+                                        <%--<HeaderStyle Font-Bold="True" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
+                                            Font-Underline="False" VerticalAlign="Middle" Width="10%" />--%>
+                                        <HeaderStyle Width="10%" />
                                     </asp:TemplateColumn>
+
                                     <asp:BoundColumn HeaderText="Balance Amount" Visible="False">
                                         <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
                                             Font-Underline="False" HorizontalAlign="Right" />
                                         <HeaderStyle Font-Bold="True" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
                                             Font-Underline="False" VerticalAlign="Middle" Width="10%" />
                                     </asp:BoundColumn>
+
+                                    <asp:TemplateColumn HeaderText="Credit Amount">
+                                        <ItemTemplate>
+                                            <asp:TextBox ID="txtcreditamt" runat="server" OnTextChanged="txtcreditamt_TextChanged"
+                                                Style="text-align: right" Width="86px" AutoPostBack="True"></asp:TextBox>
+                                        </ItemTemplate>
+                                        <HeaderStyle Width="10%" />
+                                    </asp:TemplateColumn>
                                     <asp:TemplateColumn HeaderText="Pocket Amount">
                                         <ItemTemplate>
                                             <asp:TextBox ID="txtpamont" runat="server" OnTextChanged="txtpamont_TextChanged"
-                                                Style="text-align: right" Width="86px"></asp:TextBox>
+                                                Style="text-align: right" Width="86px" AutoPostBack="True"></asp:TextBox>
                                         </ItemTemplate>
+                                        <HeaderStyle Width="10%" />
                                     </asp:TemplateColumn>
-                                    <asp:BoundColumn DataField="TransactionAmount" HeaderText="Amt" Visible="False">
-                                    </asp:BoundColumn>
+                                    
+                                    <asp:BoundColumn DataField="TransactionAmount" HeaderText="Amt" Visible="False"/>
+                                    <asp:BoundColumn DataField="TransactionAmount" HeaderText="AllocatedAmount" Visible="False"/>
+                                    <asp:BoundColumn DataField="TempAmount" HeaderText="SPocketAmount" Visible="False"/>
+
+                                    <asp:BoundColumn DataField="NoKelompok" HeaderText="NoKelompok" Visible="False" />
+                                    <asp:BoundColumn DataField="NoWarran" HeaderText="NoWarran" Visible="False" />
+                                    <asp:BoundColumn DataField="amaunWarran" HeaderText="amaunWarran" Visible="False" />
+                                    <asp:BoundColumn DataField="noAkaun" HeaderText="noAkaun" Visible="False" />
+                                    
+                                    <asp:TemplateColumn HeaderText="Pocket" Visible="False">
+                                        <ItemTemplate>
+                                            <asp:TextBox ID="txtpockett" runat="server" 
+                                                Style="text-align: right" Width="86px" AutoPostBack="True" Visible="False"></asp:TextBox>
+                                        </ItemTemplate>
+                                        <HeaderStyle Width="10%" />
+                                    </asp:TemplateColumn>
+
+                                    <asp:TemplateColumn HeaderText="Credit" Visible="False">
+                                        <ItemTemplate>
+                                            <asp:TextBox ID="txtcreditt" runat="server" 
+                                                Style="text-align: right" Width="86px" AutoPostBack="True" Visible="False"></asp:TextBox>
+                                        </ItemTemplate>
+                                        <HeaderStyle Width="10%" />
+                                    </asp:TemplateColumn>         
                                 </Columns>
                             </asp:DataGrid>
                           

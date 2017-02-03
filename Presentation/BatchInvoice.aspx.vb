@@ -1698,6 +1698,26 @@ Partial Class BatchInvoice
         ddlIntake.DataBind()
         'Session("faculty") = listfac
     End Sub
+    Private Sub addCurrentyearsem()
+        Dim eIntake As New SemesterSetupEn
+        Dim bIntake As New SemesterSetupBAL
+        Dim listIntake As New List(Of SemesterSetupEn)
+        ddlsemyear.Items.Clear()
+        ddlsemyear.Items.Add(New System.Web.UI.WebControls.ListItem("All", "-1"))
+        'ddlIntake.Items.Add(New ListItem("All", "1"))
+        ddlsemyear.DataTextField = "SemisterSetupCode"
+        ddlsemyear.DataValueField = "SemisterSetupCode"
+        eIntake.SemisterSetupCode = "%"
+
+        Try
+            listIntake = bIntake.GetListSemesterCode(eIntake)
+        Catch ex As Exception
+            LogError.Log("SponsorInvoice", "addCurrentyearsem", ex.Message)
+        End Try
+        ddlsemyear.DataSource = listIntake
+        ddlsemyear.DataBind()
+        'Session("faculty") = listfac
+    End Sub
     ''' <summary>
     ''' Method to Load Student Category Dropdown
     ''' </summary>
@@ -2428,6 +2448,7 @@ Partial Class BatchInvoice
             If Request.QueryString("Formid") = "Inv" Then
                 eob.TransType = "Credit"
                 eob.Category = "Invoice"
+                
             ElseIf Request.QueryString("Formid") = "CN" Then
                 eob.TransType = "Debit"
                 eob.Category = "Credit Note"
@@ -3464,34 +3485,34 @@ Partial Class BatchInvoice
                 Dim code As TextBox
                 Dim choice As String = "Compared"
                 Dim NewFeeStud As List(Of StudentEn)
-                For Each dgitem In dgView.Items
-                    chkBox = dgitem.Cells(0).Controls(1)
-                    If chkBox.Checked = True Then
-                        txt = dgitem.Cells(dgViewCell.Fee_Amount).Controls(1)
-                        Matricno = dgitem.Cells(1).Text
-                        refcode = dgView.DataKeys(dgitem.ItemIndex).ToString
-                        amount = Convert.ToDouble(txt.Text)
-                        transid = dgitem.Cells(dgViewCell.Transid).Text
-                        Addfeestudent = stud.GetPostedFee(Matricno, choice, amount, refcode, transid)
-                        If Addfeestudent.Count > 0 Then
-                            For Each item In Addfeestudent
-                                totamt = item.TransactionAmount - item.PaidAmount
-                                If totamt < amount Then
-                                    lblMsg.Text = "Amount for Matricno " + item.MatricNo + " and fee Code " + item.ReferenceCode + " exceeded the available amount."
-                                    lblMsg.Text += " Available amount is " & totamt & ""
-                                    lblMsg.Visible = True
-                                    Exit Sub
-                                End If
-                            Next
-                        End If
+                'For Each dgitem In dgView.Items
+                '    chkBox = dgitem.Cells(0).Controls(1)
+                '    If chkBox.Checked = True Then
+                '        txt = dgitem.Cells(dgViewCell.Fee_Amount).Controls(1)
+                '        Matricno = dgitem.Cells(1).Text
+                '        refcode = dgView.DataKeys(dgitem.ItemIndex).ToString
+                '        amount = Convert.ToDouble(txt.Text)
+                '        transid = dgitem.Cells(dgViewCell.Transid).Text
+                '        Addfeestudent = stud.GetPostedFee(Matricno, choice, amount, refcode, transid)
+                '        If Addfeestudent.Count > 0 Then
+                '            For Each item In Addfeestudent
+                '                totamt = item.TransactionAmount - item.PaidAmount
+                '                If totamt < amount Then
+                '                    lblMsg.Text = "Amount for Matricno " + item.MatricNo + " and fee Code " + item.ReferenceCode + " exceeded the balance paid amount."
+                '                    lblMsg.Text += " Balance paid amount is " & totamt & ""
+                '                    lblMsg.Visible = True
+                '                    Exit Sub
+                '                End If
+                '            Next
+                '        End If
 
-                        If txt.Text = 0 Then
-                            lblMsg.Visible = True
-                            lblMsg.Text = "Amount Cannot be Zero"
-                            Exit Sub
-                        End If
-                    End If
-                Next
+                '        If txt.Text = 0 Then
+                '            lblMsg.Visible = True
+                '            lblMsg.Text = "Amount Cannot be Zero"
+                '            Exit Sub
+                '        End If
+                '    End If
+                'Next
             Else
                 For Each dgitem In dgView.Items
                     chkBox = dgitem.Cells(0).Controls(1)
@@ -4115,6 +4136,7 @@ Partial Class BatchInvoice
     Protected Overloads Sub LoadFields()
         trPrint.Visible = False
         addIntake()
+        addCurrentyearsem()
     End Sub
 
     Protected Sub btnHidden_Click(ByVal sender As Object, ByVal e As System.EventArgs)
@@ -4754,7 +4776,19 @@ Partial Class BatchInvoice
             lblMsg.Text = "Please select student"
             Exit Sub
         End If
+        If Addfee.Count = 0 Then
 
+        Else
+            If ddlsemyear.SelectedValue = "-1" And ddltransstatus.SelectedValue <> "-1" Then
+                Addfee = Addfee.Where(Function(x) Addfee.Any(Function(y) x.TransStatus = ddltransstatus.SelectedValue)).ToList()
+            ElseIf ddlsemyear.SelectedValue <> "-1" And ddltransstatus.SelectedValue = "-1" Then
+                Addfee = Addfee.Where(Function(x) Addfee.Any(Function(y) x.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
+            ElseIf ddlsemyear.SelectedValue <> "-1" And ddltransstatus.SelectedValue <> "-1" Then
+                Addfee = Addfee.Where(Function(x) Addfee.Any(Function(y) x.TransStatus = ddltransstatus.SelectedValue And x.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
+            ElseIf ddlsemyear.SelectedValue = "-1" And ddltransstatus.SelectedValue = "-1" Then
+
+            End If
+        End If
         getStudentDetailsChange = Addfee
 
 
@@ -4818,7 +4852,7 @@ Partial Class BatchInvoice
             Session(ReceiptsClass.SessionStuChgMatricNo) = StuChgMatricNo
             hfStudentCount.Value = StuChgMatricNo.Count
             If Addfee.Count > 0 Then
-                dgView.DataSource = newStuList
+                dgView.DataSource = newStuList.OrderBy(Function(x) x.TransStatus)
                 dgView.DataBind()
                 Dim chk As CheckBox
                 Dim dgitem As DataGridItem
