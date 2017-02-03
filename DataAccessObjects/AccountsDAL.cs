@@ -147,7 +147,7 @@ namespace HTS.SAS.DataAccessObjects
             "AND (SAS_Accounts.Category = 'Credit Note') " +
             "AND (SAS_Accounts.Subtype = 'Sponsor') " +
             "AND (SAS_Accounts.PostStatus = 'Posted') " +
-            "AND (SAS_Accounts.CreditRef1 = '') and SAS_Accounts.tempamount<>0 ) ";
+            "AND (SAS_Accounts.CreditRef1 = '') and SAS_Accounts.tempamount<>0 ) order by transdate desc ";
 
             try
             {
@@ -2607,7 +2607,24 @@ namespace HTS.SAS.DataAccessObjects
 
                         if (argEn.SubCategory == "UpdatePaidAmount")
                         {
+                            string inv = "";
+                            IDataReader _IDataReader = null;
                             newAccDetails.Internal_Use = data.TransactionID.ToString();
+                            string sqlget = "Select distinct transcode from sas_accountsdetails where transid = '" + data.TransactionID + "'";
+                            //Build Sql Statement - Stop
+
+                            //Get Batch Details - Start
+                            _IDataReader = _DatabaseFactory.ExecuteReader(
+                                Helper.GetDataBaseType, DataBaseConnectionString, sqlget).CreateDataReader();
+                            //Get Batch Details - Stop
+
+                            //loop thro the batch details - start
+                            while (_IDataReader.Read())
+                            {
+                                //Get transcode
+                                inv = clsGeneric.NullToString(_IDataReader["transcode"]);
+                            }
+                            newAccDetails.Inv_no = inv;
                         }
                         else
                         {
@@ -5315,7 +5332,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             loItem.ChequeDate = GetValue<DateTime>(argReader, "ChequeDate");
             loItem.ChequeNo = GetValue<string>(argReader, "ChequeNo");
             loItem.VoucherNo = GetValue<string>(argReader, "VoucherNo");
-            loItem.CurSem = GetValue<int>(argReader, "CurSem");
+            
             loItem.PocketAmount = GetValue<string>(argReader, "PocketAmount");
             loItem.SubReferenceOne = GetValue<string>(argReader, "SubRef1");
             loItem.SubReferenceTwo = GetValue<string>(argReader, "SubRef2");
@@ -5341,6 +5358,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             else
             {
                 loItem.ControlAmt = MaxGeneric.clsGeneric.NullToDecimal(GetValue<decimal>(argReader, "control_amt"));
+                loItem.CurSem = GetValue<int>(argReader, "CurSem");
             }
 
             //end modified
@@ -6181,12 +6199,12 @@ public double GetSponserStuAllocateAmount(string BatchId)
                 "DebitRef,DebitRef1,Category,SubCategory,TransType,SubType,SourceType,TransDate,DueDate,BatchCode,BatchIntake,BatchDate,"
                 + " CrRef1,CrRef2,Description,Currency,BatchTotal,Tax,Discount,TaxAmount,DiscountAmount,TransAmount," +
                 "PaidAmount,TransStatus,TempAmount,TempPaidAmount,PaymentMode,BankCode,PayeeName,ChequeDate,ChequeNo,VoucherNo,"
-                + "PocketAmount,SubRef1,SubRef2,SubRef3,PostStatus,IntStatus,CreatedBy,CreatedTimeStamp,PostedBy,PostedTimeStamp,IntCode,GLCode,UpdatedBy,UpdatedTime,sasr_code, Internal_Use)"
+                + "PocketAmount,SubRef1,SubRef2,SubRef3,PostStatus,IntStatus,CreatedBy,CreatedTimeStamp,PostedBy,PostedTimeStamp,IntCode,GLCode,UpdatedBy,UpdatedTime,sasr_code, Internal_Use,cursemyr)"
                 + "VALUES (@TransTempCode,@TransCode,@CreditRef,@CreditRef1,@DebitRef,@DebitRef1,@Category,@SubCategory,@TransType,@SubType,@SourceType,"
                + " @TransDate,@DueDate,@BatchCode,@BatchIntake,@BatchDate,@CrRef1,@CrRef2,@Description,@Currency,@BatchTotal,@Tax,@Discount,@TaxAmount,"
                 + "@DiscountAmount,@TransAmount,@PaidAmount,@TransStatus,@TempAmount,@TempPaidAmount,@PaymentMode,@BankCode,@PayeeName,@ChequeDate,"
                 + "@ChequeNo,@VoucherNo,@PocketAmount,@SubRef1,@SubRef2,@SubRef3,@PostStatus,@IntStatus,@CreatedBy,@CreatedDateTime,@PostedBy,"
-                + "@PostedDateTime,@IntCode,@GLCode,@UpdatedBy,@UpdatedTime,@SponsorId, @Internal_Use);" +
+                + "@PostedDateTime,@IntCode,@GLCode,@UpdatedBy,@UpdatedTime,@SponsorId, @Internal_Use, @cursemyr);" +
                 "select max(transid) from SAS_SponsorInvoice;";
 
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -6256,6 +6274,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     _DatabaseFactory.AddInParameter(ref cmd, "@BatchIntake", DbType.String, argEn.BatchIntake);
                     _DatabaseFactory.AddInParameter(ref cmd, "@SponsorId", DbType.String, argEn.SponsorID);
                     _DatabaseFactory.AddInParameter(ref cmd, "@Internal_Use", DbType.String, argEn.Internal_Use);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@cursemyr", DbType.String, argEn.currsemyear);
                     _DbParameterCollection = cmd.Parameters;
 
 
@@ -7181,6 +7200,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     String creditref = GetValue<string>(_IDataReader, "creditref");
                     StuAllAmt = paidamount - transamount;
                     double pamt = GetValue<double>(_IDataReader, "discountamount");
+                    string transcode = GetValue<string>(_IDataReader, "transcode");
                     if (category == "Allocation")
                     {
                         UpdateStatement += "UPDATE sas_accounts SET allocateamount = " + StuAllAmt + clsGeneric.AddComma() + "postedby = " + clsGeneric.AddQuotes(UserId) + ",";
@@ -7188,7 +7208,11 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     }
                     if (category == "SPA" && desc == "Sponsor Allocation Amount")
                     {
-                        if (UpdatePaidAmountSPAReceipt(pamt, creditref)) { return true; }
+                        bool allocated = UpdatePaidAmountSPAReceipt(pamt, creditref, category, TransId);
+                    }
+                    if (category == "SPA" && desc == "Sponsor Pocket Amount")
+                    {
+                        bool pocket = InsertPocketAmountsAccountsdetails(TransId, transcode, transamount);
                     }
                     if (category == "Payment" && subtype == "Sponsor")
                     {
@@ -9140,6 +9164,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
                         "sad inner join sas_accounts sa on sa.transid = sad.transid" +
                         " WHERE sa.category = 'Credit Note' and sa.subcategory = 'UpdatePaidAmount' and sa.batchcode = "
                         + clsGeneric.AddQuotes(BatchCode);
+
+                    SqlStatement += " order by sad.transstatus = (select transstatus from sas_accountsdetails where transid = sad.internal_use::int and refcode = sad.refcode ) desc";
                     //Build Sql Statement - Stop
                     //Get Batch Details - Start
                     _IDataReader = _DatabaseFactory.ExecuteReader(
@@ -9159,57 +9185,83 @@ public double GetSponserStuAllocateAmount(string BatchId)
                         use = clsGeneric.NullToString(_IDataReader["internal_use"]);
                         matric = clsGeneric.NullToString(_IDataReader["creditref"]);
 
-                        string sqlChanges = "select sad.transid,sad.transamount,Case when sad.taxamount is null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount is null then 0 else sad.paidamount end as paidamount from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st " +
+                        string sqlChanges = "select sad.transstatus,sad.transid,sad.transamount,Case when sad.taxamount is null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount is null then 0 else sad.paidamount end as paidamount from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st " +
                         " on st.saft_code = sad.refcode left join sas_student ss on ss.sasi_matricno = sa.creditref" +
-                        " where sa.poststatus = 'Posted' and sad.transstatus = 'Open' and sa.creditref = '" + matric + "' and sad.refcode = '" + refcode + "' and " +
+                        " where sa.poststatus = 'Posted' and sa.creditref = '" + matric + "' and sad.refcode = '" + refcode + "' and " +
                     " sa.category in ('Debit Note','AFC','Invoice') and sad.transamount <> 0 and sad.transid = '" + use + "' ";
                         using (IDataReader drTrack = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
                            DataBaseConnectionString, sqlChanges).CreateDataReader())
                         {
                             while (drTrack.Read())
                             {
-                                oldamount = Convert.ToDouble(drTrack["transamount"]);
-                                newTransId = clsGeneric.NullToInteger(drTrack["transid"]);
-                                newamount = Convert.ToDouble(drTrack["paidamount"]);
-                                toldamount = oldamount - newamount;  
-                                if (toldamount > paidamt)
+                                string status = clsGeneric.NullToString(drTrack["transstatus"]);
+                                if (status == "Closed")
                                 {
-                                    if (newamount == 0)
-                                    {
-                                        
-                                    }
-                                    else if (newamount > 0)
-                                    {
-                                        paidamt = newamount + paidamt;
-                                    }
+                                    bool a = UpdatePaidAmountSPAReceipt(paidamt, matric,"Credit Note",1);
                                 }
-                                else if (toldamount <= paidamt)
+                                else
                                 {
+                                    oldamount = Convert.ToDouble(drTrack["transamount"]);
+                                    newTransId = clsGeneric.NullToInteger(drTrack["transid"]);
+                                    newamount = Convert.ToDouble(drTrack["paidamount"]);
+                                    toldamount = oldamount - newamount;
+                                    if (toldamount > paidamt)
+                                    {
+                                        if (newamount == 0)
+                                        {
 
-                                    if (newamount == 0)
-                                    {
-                                        paidamt = toldamount;
+                                        }
+                                        else if (newamount > 0)
+                                        {
+                                            paidamt = newamount + paidamt;
+                                        }
                                     }
-                                    else if (newamount > 0)
+                                    else if (toldamount <= paidamt)
                                     {
-                                        //pamt = transamount - paid;
-                                        paidamt = oldamount;
+
+                                        if (newamount == 0)
+                                        {
+                                            paidamt = toldamount;
+                                        }
+                                        else if (newamount > 0)
+                                        {
+                                            //pamt = transamount - paid;
+                                            paidamt = oldamount;
+                                        }
+                                        //amount = paid;
                                     }
-                                    //amount = paid;
-                                }
-                                balance = oldamount - paidamt;
-                                if (balance == 0)
-                                {
-                                    string sqlupdate = "UPDATE SAS_AccountsDetails SET Transstatus = @TransStatus WHERE TransID = @TransID And refcode = @RefCode";
-                                    if (!FormHelp.IsBlank(sqlupdate))
+                                    balance = oldamount - paidamt;
+                                    if (balance == 0)
                                     {
-                                        DbCommand cmd1 = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlupdate, DataBaseConnectionString);
-                                        _DatabaseFactory.AddInParameter(ref cmd1, "@TransID", DbType.Int32, Int32.Parse(use));
-                                        _DatabaseFactory.AddInParameter(ref cmd1, "@RefCode", DbType.String, refcode);
-                                        _DatabaseFactory.AddInParameter(ref cmd1, "@TransStatus", DbType.String, transstatus);
-                                        _DbParameterCollection = cmd1.Parameters;
-                                        int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd1,
-                                                    DataBaseConnectionString, sqlupdate, _DbParameterCollection);
+                                        string sqlupdate = "UPDATE SAS_AccountsDetails SET Transstatus = @TransStatus WHERE TransID = @TransID And refcode = @RefCode";
+                                        if (!FormHelp.IsBlank(sqlupdate))
+                                        {
+                                            DbCommand cmd1 = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlupdate, DataBaseConnectionString);
+                                            _DatabaseFactory.AddInParameter(ref cmd1, "@TransID", DbType.Int32, Int32.Parse(use));
+                                            _DatabaseFactory.AddInParameter(ref cmd1, "@RefCode", DbType.String, refcode);
+                                            _DatabaseFactory.AddInParameter(ref cmd1, "@TransStatus", DbType.String, transstatus);
+                                            _DbParameterCollection = cmd1.Parameters;
+                                            int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd1,
+                                                        DataBaseConnectionString, sqlupdate, _DbParameterCollection);
+                                            if (liRowAffected > -1)
+                                                lbRes = true;
+                                            else
+                                                throw new Exception("Update Failed! No Row has been updated...");
+                                        }
+                                    }
+                                    string sqlCmd = "UPDATE SAS_AccountsDetails SET PaidAmount = @PaidAmount WHERE TransID = @TransID And refcode = @RefCode";
+
+                                    if (!FormHelp.IsBlank(sqlCmd))
+                                    {
+                                        DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmd, DataBaseConnectionString);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, Int32.Parse(use));
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, refcode);
+                                        //_DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, balance);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, paidamt);
+                                        _DbParameterCollection = cmd.Parameters;
+
+                                        int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+                                                    DataBaseConnectionString, sqlCmd, _DbParameterCollection);
                                         if (liRowAffected > -1)
                                             lbRes = true;
                                         else
@@ -9219,24 +9271,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                             }
                             drTrack.Close();
                         }
-                        string sqlCmd = "UPDATE SAS_AccountsDetails SET PaidAmount = @PaidAmount WHERE TransID = @TransID And refcode = @RefCode";
-
-                        if (!FormHelp.IsBlank(sqlCmd))
-                        {
-                            DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmd, DataBaseConnectionString);
-                            _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, Int32.Parse(use));
-                            _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, refcode);
-                            //_DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, balance);
-                            _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, paidamt);
-                            _DbParameterCollection = cmd.Parameters;
-
-                            int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
-                                        DataBaseConnectionString, sqlCmd, _DbParameterCollection);
-                            if (liRowAffected > -1)
-                                lbRes = true;
-                            else
-                                throw new Exception("Update Failed! No Row has been updated...");
-                        }
+                       
 
                         //if update statement successful - Stop
 
@@ -9358,10 +9393,10 @@ public double GetSponserStuAllocateAmount(string BatchId)
         //added by Farid @ 09/01/2017
         //update paid amount for receipt student and sponsor allocation(student)
 
-        public bool UpdatePaidAmountSPAReceipt(double transamount, string creditref)
+        public bool UpdatePaidAmountSPAReceipt(double transamount, string creditref, string category, int transactionid)
         {
             List<AccountsEn> list_stud = new List<AccountsEn>();
-
+            IDataReader _IDataReader = null;
             //Check paid amount For Each Student
             double balance = 0.0;
             double paid = 0.0;
@@ -9369,7 +9404,19 @@ public double GetSponserStuAllocateAmount(string BatchId)
             double amount = 0.0;
             List<AccountsDetailsEn> listStud = new List<AccountsDetailsEn>();
             AccountsDetailsEn studEn = new AccountsDetailsEn();
+            string transcode = "";
 
+            string sqlgettranscode = "Select distinct transcode from sas_accounts where transid = '" + transactionid + "'";
+            _IDataReader = _DatabaseFactory.ExecuteReader(
+    Helper.GetDataBaseType, DataBaseConnectionString, sqlgettranscode).CreateDataReader();
+            //Get Batch Details - Stop
+
+            //loop thro the batch details - start
+            while (_IDataReader.Read())
+            {
+                //Get Transaction Id
+                transcode = clsGeneric.NullToString(_IDataReader["transcode"]);
+            }
                 //string semintake = argEn.Semester;
 
                 listStud = GetFeeCodesPriority(creditref);
@@ -9441,15 +9488,59 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                         throw new Exception("Update Failed! No Row has been updated...");
                                 }
                             }
-                            //{
-                                
-                            //}
+                            if (category == "SPA" || category == "Receipt")
+                            {
+                                try
+                                {
+                                    string insert = "INSERT INTO SAS_AccountsDetails(TransID,TransCode,RefCode,TransAmount," +
+                                        "Tax,Discount,TaxAmount,DiscountAmount,PaidAmount,TempAmount,TempPaidAmount,TransStatus,PostStatus," +
+                                        "inv_no) VALUES (@TransID,@TransCode,@RefCode,@TransAmount,@Tax," +
+                                        "@Discount,@TaxAmount,@DiscountAmount,@PaidAmount,@TempAmount,@TempPaidAmount,@TransStatus,@PostStatus," +
+                                        "@Inv_no) ";
+
+                                    if (!FormHelp.IsBlank(insert))
+                                    {
+                                        DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, insert, DataBaseConnectionString);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, transactionid);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, transcode);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, listStud[i].ReferenceCode);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, listStud[i].TransactionAmount);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, 0);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, amount);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, "Open");
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, "Posted");
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@Inv_no", DbType.String, listStud[i].TransactionCode);
+                                        _DbParameterCollection = cmd.Parameters;
+
+
+
+                                        int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+                                            DataBaseConnectionString, insert, _DbParameterCollection);
+
+                                        if (liRowAffected > -1)
+                                        { }
+                                        else
+                                        { }
+
+                                    }
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw ex;
+                                }
+                            }
                         }
                         if (paid < transamount)
                         {
                             transamount = transamount - paid;
                         }
-                        else if (paid > transamount)
+                        else if (paid >= transamount)
                         {
                             transamount = 0;
                         }
@@ -9470,6 +9561,56 @@ public double GetSponserStuAllocateAmount(string BatchId)
                             int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
                                  DataBaseConnectionString, sqlupdate);
                         }
+                       
+                       
+                    }
+                    //insert overpaidamount
+                    if (transamount > 0) 
+                    {
+                    try
+                    {
+                        string overpaid = "INSERT INTO SAS_AccountsDetails(TransID,TransCode,RefCode,TransAmount," +
+                            "Tax,Discount,TaxAmount,DiscountAmount,PaidAmount,TempAmount,TempPaidAmount,TransStatus,PostStatus" +
+                            ") VALUES (@TransID,@TransCode,@RefCode,@TransAmount,@Tax," +
+                            "@Discount,@TaxAmount,@DiscountAmount,@PaidAmount,@TempAmount,@TempPaidAmount,@TransStatus,@PostStatus" +
+                            ") ";
+
+                        if (!FormHelp.IsBlank(overpaid))
+                        {
+                            DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, overpaid, DataBaseConnectionString);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, transactionid);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, transcode);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, "EXTR");
+                            _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, transamount);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, 0);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, 0);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, "Open");
+                            _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, "Posted");
+                            //_DatabaseFactory.AddInParameter(ref cmd, "@Inv_no", DbType.String, listStud[i].TransactionCode);
+                            _DbParameterCollection = cmd.Parameters;
+
+
+
+                            int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+                                DataBaseConnectionString, overpaid, _DbParameterCollection);
+
+                            if (liRowAffected > -1)
+                            { }
+                            else
+                            { }
+
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
                     }
                 }
                 return true;
@@ -9490,7 +9631,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             //StudentEn loItem = new StudentEn();
             StudentDAL lostuds = new StudentDAL();
             List<AccountsDetailsEn> loStudEn = new List<AccountsDetailsEn>();
-            SQLSTR = "select sad.transid,sad.refcode,sad.transamount,COALESCE(sad.paidamount,0) paidamount,sf.saft_desc,sf.saft_priority " +
+            SQLSTR = "select sad.transcode,sad.transid,sad.refcode,sad.transamount,COALESCE(sad.paidamount,0) paidamount,sf.saft_desc,sf.saft_priority " +
                      "from sas_accountsdetails sad inner join sas_feetypes sf on sf.saft_code = sad.refcode "+
                      "inner join sas_accounts sa on sa.transid = sad.transid where "+
                      " sa.category in ('AFC','Debit Note','Invoice') and sa.poststatus = 'Posted' and sad.transstatus = 'Open' "+
@@ -9507,7 +9648,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                         while (loReader.Read())
                         {
                             AccountsDetailsEn loItem = new AccountsDetailsEn();
-                            //loItem.TransactionID = GetValue<Int32>(loReader, "transid");
+                            loItem.TransactionCode = GetValue<string>(loReader, "transcode");
                             loItem.ReferenceCode = GetValue<string>(loReader, "refcode");
                             loItem.TransactionID = GetValue<int>(loReader, "transid");
                             loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
@@ -9547,7 +9688,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                         {
                             AccountsEn loItem = LoadObject(loReader);
 
-                            if (UpdatePaidAmountSPAReceipt(loItem.TransactionAmount, loItem.CreditRef))
+                            if (UpdatePaidAmountSPAReceipt(loItem.TransactionAmount, loItem.CreditRef, loItem.Category, loItem.TranssactionID))
                             {
                                 result = true;
                             }
@@ -9561,6 +9702,67 @@ public double GetSponserStuAllocateAmount(string BatchId)
             {
                 throw ex;
             }
+        }
+
+        #endregion
+
+        #region InsertPocketAmountsAccountsdetails
+
+        /// <summary>
+        /// Method to Update Pocket Amounts
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input.PaidAmount,Updateby,UpdatedTime,SubreferenceOne,CreditRef are Input Properties</param>
+        /// <returns>Returns Bool</returns>
+        public bool InsertPocketAmountsAccountsdetails(int transid,string transcode,double transamount)
+        {
+            bool lbRes = false;
+            string sqlCmd;
+
+            try
+            {
+                string insertpocket = "INSERT INTO SAS_AccountsDetails(TransID,TransCode,RefCode,TransAmount," +
+                    "Tax,Discount,TaxAmount,DiscountAmount,PaidAmount,TempAmount,TempPaidAmount,TransStatus,PostStatus" +
+                    ") VALUES (@TransID,@TransCode,@RefCode,@TransAmount,@Tax," +
+                    "@Discount,@TaxAmount,@DiscountAmount,@PaidAmount,@TempAmount,@TempPaidAmount,@TransStatus,@PostStatus" +
+                    ") ";
+
+                if (!FormHelp.IsBlank(insertpocket))
+                {
+                    DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, insertpocket, DataBaseConnectionString);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, transid);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, transcode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, "EXPN");
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, transamount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, 0);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, 0);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, "Open");
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, "Posted");
+                    //_DatabaseFactory.AddInParameter(ref cmd, "@Inv_no", DbType.String, listStud[i].TransactionCode);
+                    _DbParameterCollection = cmd.Parameters;
+
+
+
+                    int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+                        DataBaseConnectionString, insertpocket, _DbParameterCollection);
+
+                    if (liRowAffected > -1)
+                    { }
+                    else
+                    { }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return true;
         }
 
         #endregion

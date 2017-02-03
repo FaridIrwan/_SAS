@@ -193,6 +193,9 @@ Partial Class FeePosting
         Dim eob As New ProgramInfoEn
         Dim AFCBAL As New AFCBAL
         Dim _CheckBox As CheckBox = Nothing
+        Dim fsObj As New FeeStructDAL
+        Dim feestructList As New List(Of FeeStructEn)
+        Dim semester As String = String.Empty
 
         Session("listprog") = Nothing
         If strValue = "-1" Or strValue = "1" Then
@@ -299,7 +302,22 @@ Partial Class FeePosting
             'Status = AFCBAL.IsPosted(dgItem1.Cells(4).Text, dgItem1.Cells(5).Text, dgItem1.Cells(1).Text)
             link = dgItem1.Cells(8).Controls(1)
             link.Attributes.Add("onClick", "OpenWindow1('about:blank')")
-            link.NavigateUrl = "FeeStructure.aspx?Formid=FS&IsFeePosting=1&ProgramId=" & dgItem1.Cells(1).Text & "&Semester=" & dgItem1.Cells(5).Text.Replace("/", "").Replace("-", "") & "&PostStatus=" _
+
+            feestructList = fsObj.GetListCurrentEffectiveSemester(dgItem1.Cells(9).Text)
+
+            For Index = 0 To feestructList.Count - 1
+                If Index = feestructList.Count - 1 Then
+                    semester = feestructList(Index).STCode
+                    Exit For
+                Else
+                    If dgItem1.Cells(5).Text.Replace("/", "").Replace("-", "") >= feestructList(Index).STCode Then
+                        semester = feestructList(Index).STCode
+                        Exit For
+                    End If
+                End If
+            Next
+
+            link.NavigateUrl = "FeeStructure.aspx?Formid=FS&IsFeePosting=1&ProgramId=" & dgItem1.Cells(1).Text & "&Semester=" & semester & "&PostStatus=" _
                             & ddlstatus.SelectedValue & "&BatchCode=" & dgItem1.Cells(6).Text & "&Faculty=" & dgItem1.Cells(4).Text & "&BidangCode=" & dgItem1.Cells(9).Text _
                             & "&CurrSem=" & dgItem1.Cells(10).Text
             link.Target = "MyPopup"

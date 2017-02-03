@@ -58,6 +58,7 @@ namespace HTS.SAS.Entities
         //added by farid on 12042016
         private string csMatricNumber;
         private string csTaxCode;
+        private string csInvNo;
 
         [System.Xml.Serialization.XmlElement]
         ////[DataMember]
@@ -447,6 +448,12 @@ namespace HTS.SAS.Entities
         {
             get { return csTaxCode; }
             set { csTaxCode = value; }
+        }
+        [System.Xml.Serialization.XmlElement]
+        public string Inv_no
+        {
+            get { return csInvNo; }
+            set { csInvNo = value; }
         }
     }
 }

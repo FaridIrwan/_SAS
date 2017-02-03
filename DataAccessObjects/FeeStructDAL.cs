@@ -71,6 +71,42 @@ namespace HTS.SAS.DataAccessObjects
 
         #endregion
 
+        #region GetList Current Effective Semester
+
+        /// <summary>
+        /// Method to Get List of FeeStructure
+        /// </summary>
+        /// <returns>Returns List of FeeStructure</returns>
+        public List<FeeStructEn> GetListCurrentEffectiveSemester(string strBidang)
+        {
+            List<FeeStructEn> loEnList = new List<FeeStructEn>();
+            string sqlCmd = string.Format("select * from sas_feestruct where sabp_code = '{0}' order by sast_code desc", strBidang);
+
+            try
+            {
+                if (!FormHelp.IsBlank(sqlCmd))
+                {
+                    using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                        DataBaseConnectionString, sqlCmd).CreateDataReader())
+                    {
+                        while (loReader.Read())
+                        {
+                            FeeStructEn loItem = LoadObject(loReader);
+                            loEnList.Add(loItem);
+                        }
+                        loReader.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return loEnList;
+        }
+
+        #endregion
+
         //#region GetFeeStructure 
 
         ///// <summary>

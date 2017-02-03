@@ -16,7 +16,7 @@
                 <td style="width: 100px">
                     <asp:FileUpload ID="File1" runat="server" /></td>
                 <td style="width: 100px">
-                    <asp:Button ID="btnselect" runat="server" Text="Close" /></td>
+                    <asp:Button ID="btnselect" runat="server" Text="Select" /></td>
             </tr>
             <tr>
                 <td style="width: 23px">

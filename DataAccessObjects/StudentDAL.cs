@@ -1066,8 +1066,8 @@ namespace HTS.SAS.DataAccessObjects
             }
 
             string sqlCmd = "";
-          
-            sqlCmd = @"select distinct sad.transid,stu.sasi_name,stu.sasi_matricno,stu.sasi_crdithrs,stu.sasi_pgid,prog.sapg_programbm,stu.sasi_icno,stu.sasc_code,stu.sasi_cursemyr,
+
+            sqlCmd = @"select distinct COALESCE(sa.cursem,0) cursem,sad.transid,stu.sasi_name,stu.sasi_matricno,stu.sasi_crdithrs,stu.sasi_pgid,prog.sapg_programbm,stu.sasi_icno,stu.sasc_code,sa.cursemyr as sasi_cursemyr,
 sad.transamount - sad.paidamount as transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
  ( SELECT CASE WHEN SUM(acc.transamount) IS NULL THEN 0
                     ELSE SUM(acc.transamount) END 
@@ -1109,7 +1109,7 @@ where sspon.sass_sponsor = " + clsGeneric.AddQuotes(Sponsor) +
                              " and sa.poststatus = 'Posted' and sa.category in ('AFC','Invoice','Debit Note') and sa.subtype = 'Student'" +
             " and stu.sasi_reg_status =  " + Helper.StuRegistered + " and stu.sass_code = " + clsGeneric.AddQuotes(Helper.StuActive) +
 " and sad.transstatus = 'Open'" +
-" and TO_DATE( sspon.SASS_sDATE,'DD/MM/YYYY') <= current_date and sad.transamount > 0  " +
+" and TO_DATE( sspon.SASS_sDATE,'DD/MM/YYYY') <= current_date and sad.transamount > 0 " +
                 
 
            " order by sasi_matricno";
@@ -1125,6 +1125,7 @@ where sspon.sass_sponsor = " + clsGeneric.AddQuotes(Sponsor) +
                         {
                             StudentEn loItem = new StudentEn();
                             //AccountsEn accountsitem = new AccountsEn();
+                            loItem.CurSem = GetValue<int>(loReader, "cursem");
                             loItem.TransactionID = GetValue<int>(loReader, "transid");
                             loItem.MatricNo = GetValue<string>(loReader, "sasi_matricno");
                             loItem.CrditHrDiff = GetValue<double>(loReader, "sasi_crdithrs");
@@ -4296,7 +4297,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                       
                         
                       
-                        select Distinct  SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, SASI_Name,  stu.SASI_PgId, prog.sapg_program,  stu.sasi_intake,  stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type,
+                        select Distinct SAS_SponsorInvoice.cursemyr, SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, SASI_Name,  stu.SASI_PgId, prog.sapg_program,  stu.sasi_intake,  stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type,
                         ( SELECT CASE WHEN SUM(SAS_SponsorInvoice.transamount) IS NULL THEN 0
                         ELSE Sum(sas_sponsorinvoicedetails.transamount) end from sas_sponsorinvoicedetails where transid in (select transid from sas_sponsorinvoice where batchcode = " + clsGeneric.AddQuotes(batchcode) + 
                         @" and creditref = stu.SASI_MatricNo) )AS  TransactionAMT,                          
@@ -4347,7 +4348,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                         left join sas_feetypes ft on ft.saft_code = fsa.saft_code and fsd.saft_code = fsa.saft_code    
                         
                        where sspon.SASS_Sponsor = " + clsGeneric.AddQuotes(Sponsor) + " and SAS_SponsorInvoice.BatchCode = " + clsGeneric.AddQuotes(batchcode) +
-                       " Group By SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, stu.SASI_Name, stu.SASI_PgId,prog.sapg_program, stu.sasi_intake, stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type order by stu.SASI_MatricNo ";
+                       " Group By SAS_SponsorInvoice.cursemyr,SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, stu.SASI_Name, stu.SASI_PgId,prog.sapg_program, stu.sasi_intake, stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type order by stu.SASI_MatricNo ";
 
             try
             {
@@ -4373,6 +4374,25 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             loItem.ProgramID = GetValue<string>(loReader, "SASI_PgId");
                             loItem.SponsorCode = GetValue<string>(loReader, "SASS_Sponsor");
                             loItem.ProgramType = GetValue<string>(loReader, "sapg_program");
+                            //loItem.CurSem = GetValue<int>(loReader, "cursem");
+                            
+                            string code = GetValue<string>(loReader, "cursemyr");
+                            string d1, m1, y1, d2, m2, y2;
+                            if (code != null)
+                            {
+                               
+                                    //d1 = code.Substring(0, 4);
+                                    //m1 = code.Substring(4, 4);
+                                    //y1 = code.Substring(8, 1);
+                                    //string semestercode = d1 + "/" + m1 + "-" + y1;
+                                loItem.CurretSemesterYear = GetValue<string>(loReader, "cursemyr"); 
+                            }
+                            else
+                            {
+                                loItem.CurretSemesterYear = "-1";
+                            }
+                            
+                           
                             loEnList.Add(loItem);
                         }
                         loReader.Close();
@@ -4598,11 +4618,11 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
             double amount2 = 0;
             if (option == "Get")
             {
-                sqlCmd = "select distinct sad.transid,ss.sasi_name,sa.creditref,sad.refcode,st.saft_desc::text || ' | ' || sa.description::text AS saft_desc,st.saft_priority,saft_taxmode,sad.transamount,"+
+                sqlCmd = "select distinct sa.cursemyr,sad.transid,ss.sasi_name,sa.creditref,sad.refcode,st.saft_desc::text || ' | ' || sa.description::text AS saft_desc,st.saft_priority,saft_taxmode,sad.transamount," +
                     "Case when sad.taxamount Is Null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount Is Null then 0 else sad.paidamount end as paidamount," +
-                    " sa.category from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st on st.saft_code = sad.refcode" +
+                    " sad.transstatus from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st on st.saft_code = sad.refcode" +
                     " left join sas_student ss on ss.sasi_matricno = sa.creditref" +
-                    " where sa.poststatus = 'Posted' and sad.transstatus = 'Open' and " +
+                    " where sa.poststatus = 'Posted' and " +
                     "sa.category in ('Debit Note','AFC','Invoice') " +
                     " and sad.transamount <> 0" +
                     " and sa.creditref = '" + Matricno + "'";
@@ -4612,7 +4632,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                 sqlCmd = "select distinct sad.transid,ss.sasi_name,sa.creditref,sad.refcode,st.saft_desc::text || ' | ' || sa.description::text AS saft_desc,st.saft_priority,saft_taxmode,sad.transamount,sad.taxamount,Case when sad.paidamount is null then 0 else sad.paidamount end as paidamount,sa.category" +
                 "  from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st on st.saft_code = sad.refcode" +
                 " left join sas_student ss on ss.sasi_matricno = sa.creditref" +
-                " where sa.poststatus = 'Posted' and sad.transstatus = 'Open' and " +
+                " where sa.poststatus = 'Posted' and " +
                 "sa.category in ('Debit Note','AFC','Invoice') " +
                 " and sad.transamount <> 0" +
                 " and sad.transid = '" + transid + "'" +
@@ -4634,9 +4654,17 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             if (option == "Get")
                             {
                                 loItem.PaidAmount = GetValue<double>(loReader, "paidamount");
-                                
-                                amount2 = loItem.TransactionAmount - loItem.PaidAmount;
-                                loItem.TransactionAmount = amount2;
+                                loItem.TransStatus = GetValue<string>(loReader, "transstatus");
+                                if (loItem.TransStatus == "Closed")
+                                {
+                                    loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
+                                }
+                                else
+                                {
+                                    amount2 = loItem.TransactionAmount - loItem.PaidAmount;
+                                    loItem.TransactionAmount = amount2;
+                                }
+                                loItem.CurretSemesterYear = GetValue<string>(loReader, "cursemyr");
                             }
                             loItem.MatricNo = GetValue<string>(loReader, "creditref");
                             loItem.StudentName = GetValue<string>(loReader, "sasi_name");
@@ -4650,7 +4678,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             calculate = (loItem.TransactionAmount - loItem.GSTAmount);
                             loItem.TempAmount = calculate;
                             loItem.TempPaidAmount = loItem.TransactionAmount;
-                            loEnList.Add(loItem);
+                            
 
                             if (option == "Compared")
                             {
@@ -4658,6 +4686,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                                 loItem.PaidAmount = GetValue<double>(loReader, "paidamount");
                                 
                             }
+                            loEnList.Add(loItem);
                         }
                         loReader.Close();
                     }

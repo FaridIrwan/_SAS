@@ -1326,6 +1326,9 @@ Partial Class SponsorInvoice
     Protected Sub txtRecNo_TextChanged1(ByVal sender As Object, ByVal e As System.EventArgs)
 
     End Sub
+    'Protected Sub ddlIntake_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddlIntake.SelectedIndexChanged
+    '    ibtnLoad_Click(sender, e)
+    'End Sub
 
 
 #Region "Methods"
@@ -1351,6 +1354,26 @@ Partial Class SponsorInvoice
         End Try
         ddlIntake.DataSource = listIntake
         ddlIntake.DataBind()
+        'Session("faculty") = listfac
+    End Sub
+    Private Sub addCurrentyearsem()
+        Dim eIntake As New SemesterSetupEn
+        Dim bIntake As New SemesterSetupBAL
+        Dim listIntake As New List(Of SemesterSetupEn)
+        ddlsemyear.Items.Clear()
+        ddlsemyear.Items.Add(New System.Web.UI.WebControls.ListItem("All", "-1"))
+        'ddlIntake.Items.Add(New ListItem("All", "1"))
+        ddlsemyear.DataTextField = "SemisterSetupCode"
+        ddlsemyear.DataValueField = "SemisterSetupCode"
+        eIntake.SemisterSetupCode = "%"
+
+        Try
+            listIntake = bIntake.GetListSemesterCode(eIntake)
+        Catch ex As Exception
+            LogError.Log("SponsorInvoice", "addCurrentyearsem", ex.Message)
+        End Try
+        ddlsemyear.DataSource = listIntake
+        ddlsemyear.DataBind()
         'Session("faculty") = listfac
     End Sub
 
@@ -2422,6 +2445,10 @@ Partial Class SponsorInvoice
                     '    LogError.Log("SponsorInvoice", "FillData", ex.Message)
                     'End Try
 
+                    For Each item In lststud3
+                        ddlsemyear.SelectedValue = item.CurretSemesterYear
+                    Next
+
                     ibtnStatus.ImageUrl = "images/Ready.gif"
                     lblStatus.Value = "Ready"
 
@@ -2562,7 +2589,9 @@ Partial Class SponsorInvoice
                     'Catch ex As Exception
                     '    LogError.Log("SponsorInvoice", "FillData", ex.Message)
                     'End Try
-
+                    For Each item In lststud3
+                        ddlsemyear.SelectedValue = item.CurretSemesterYear
+                    Next
                     ibtnStatus.ImageUrl = "images/Posted.gif"
                     lblStatus.Value = "Posted"
                     ibtnAddStudent.Enabled = False
@@ -2990,7 +3019,7 @@ Partial Class SponsorInvoice
             eobj.BatchIntake = Trim(ddlIntake.SelectedValue)
             eobj.AccountDetailsList = Session("AddFee")
             eobj.UpdatedBy = Session("User")
-
+            eobj.currsemyear = Trim(ddlsemyear.SelectedValue)
             If Not Session("lstStu") Is Nothing Then
                 listStu = Session("lstStu")
             Else
@@ -3249,6 +3278,7 @@ Partial Class SponsorInvoice
             'eobj.ProgramID = Trim(txtProgrammeName.Text)
             eobj.PostStatus = "Ready"
             eobj.UpdatedBy = Session("User")
+            eobj.currsemyear = Trim(ddlsemyear.SelectedValue)
             If Not Session("lstStu") Is Nothing Then
                 listStu = Session("lstStu")
             Else
@@ -3403,6 +3433,7 @@ Partial Class SponsorInvoice
     Protected Overloads Sub LoadFields()
         trPrint.Visible = False
         addIntake()
+        addCurrentyearsem()
     End Sub
 
     Protected Sub chkSelectSponsor_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles chkSelectSponsor.CheckedChanged
@@ -3411,6 +3442,9 @@ Partial Class SponsorInvoice
 
     Protected Sub btnHidden_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnHidden.Click
 
+    End Sub
+    Protected Sub ddlsemyear_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ddlsemyear.SelectedIndexChanged
+        'LoadInvoiceGrid()
     End Sub
 
     Protected Sub ibtnLoad_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles ibtnLoad.Click
@@ -3459,38 +3493,41 @@ Partial Class SponsorInvoice
 
         pnlView.Visible = True
 
-        ''Adding in the exisiting list
-        'Dim mylst As List(Of StudentEn)
-        'If Not Session("LstStueObj") Is Nothing Then
-        '    Dim Flag As Boolean
-        '    mylst = Session("LstStueObj")
-        '    mylst = lstobjects
-        '    While i < lstobjects.Count
 
-        '        Dim j As Integer = 0
-        '        While j < mylst.Count
-        '            Flag = False
-        '            If mylst(j).MatricNo = lstobjects(i).MatricNo Then
-        '                Flag = True
-        '                Exit While
-        '            End If
-        '            j = j + 1
-        '        End While
-        '        If Flag = False Then
-        '            mylst.Add(lstobjects(i))
-        '        End If
-        '        i = i + 1
-        '    End While
-        'Else
-        '    mylst = lstobjects
-        'End If
+
+
+        Dim sponsorfee As New List(Of StudentEn)
+        sponsorfee = objup.GetSponsorFeeList(ddlSponsor.SelectedValue)
+
+        'Dim chk As CheckBox
+        'Dim dgitem As DataGridItem
+        If sponsorfee.Count = 0 Then
+
+        Else
+            lstSponsorShip = lstSponsorShip.Where(Function(x) sponsorfee.Any(Function(y) y.ReferenceCode = x.ReferenceCode)).ToList()
+        End If
+
+        
+
+        If ddlsemyear.SelectedValue = "-1" Then
+
+        Else
+            lstSponsorShip = lstSponsorShip.Where(Function(x) lstSponsorShip.Any(Function(y) y.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
+        End If
+
         'If lstSponsorShip.Count > 0 Then
+        '    For Each item In lstSponsorShip
+        '        If item.CurSem = 0 Then
+        '            ddlSem.SelectedValue = "-1"
+        '        Else
+        '            ddlSem.SelectedValue = item.CurSem
+        '        End If
 
-        '    lstSponsorShip1.AddRange(lstSponsorShip.Where(Function(y) Not lstSponsorShip.Any(Function(z) z.MatricNo = y.MatricNo)).Select(Function(x) x).ToList())
+        '    Next
+        'Else
+        '    ddlSem.SelectedValue = "-1"
         'End If
-        'dgStudent.DataSource = lstobjects
-        'dgStudent.DataBind()
-        ' Session("LstStueObj") = lstobjects ''remarked - Session("LstStueObj") is to store the program not studentlist
+       
         Session("SponsorShip") = lstSponsorShip
         Dim saveAllStu As New List(Of StudentEn)
         Dim allstud As New List(Of StudentEn)
@@ -3511,17 +3548,7 @@ Partial Class SponsorInvoice
         Session("LstStueObjFromDB") = saveAllStu
         Session("LstStueObj") = saveAllStu
 
-        Dim sponsorfee As New List(Of StudentEn)
-        sponsorfee = objup.GetSponsorFeeList(ddlSponsor.SelectedValue)
-
-        'Dim chk As CheckBox
-        'Dim dgitem As DataGridItem
-        If sponsorfee.Count = 0 Then
-
-        Else
-            lstSponsorShip = lstSponsorShip.Where(Function(x) sponsorfee.Any(Function(y) y.ReferenceCode = x.ReferenceCode)).ToList()
-        End If
-
+        
         dgstudent1.DataSource = saveAllStu
         dgstudent1.DataBind()
         MultiView1.SetActiveView(View3)
@@ -3605,6 +3632,7 @@ Partial Class SponsorInvoice
             chkStudentall.Checked = False
         End If
         'Enable checkbox - end
+        loadsem()
     End Sub
 
 
@@ -3827,6 +3855,7 @@ Partial Class SponsorInvoice
         Dim objup As New StudentBAL
         Dim eob As New StudentEn
         'checkProgWithStu()
+
         If Not Session("LstStueObj") Is Nothing Then
 
             mylst1 = Session("LstStueObj")
@@ -3912,6 +3941,11 @@ Partial Class SponsorInvoice
 
         Else
             stuList = stuList.Where(Function(x) sponsorfee.Any(Function(y) y.ReferenceCode = x.ReferenceCode)).ToList()
+        End If
+         If ddlsemyear.SelectedValue = "-1" Then
+
+        Else
+            stuList = stuList.Where(Function(x) sponsorship.Any(Function(y) y.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
         End If
         'Dim stuList2 As List(Of StudentEn)
         'stuList2 = mylst.Where(Function(x) stuList.Any(Function(y) y.MatricNo = x.MatricNo)).ToList()
@@ -4056,6 +4090,7 @@ Partial Class SponsorInvoice
                 chk.Checked = True
             Next
         Else
+            Session("AddFee") = Nothing
             chkSelectAll.Checked = False
         End If
         'chkSelectAll.Checked = False
@@ -4211,29 +4246,11 @@ Partial Class SponsorInvoice
 
     End Sub
 
+    Private Sub loadsem()
+        'lblsem.Visible = True
+        'ddlSem.Visible = True
 
-    'Private Sub LoadSponCoverLetter()
-    '    Dim bobj As New SponsorCoverLetterBAL
-    '    Dim eobj As New SponsorCoverLetterEn
-    '    Dim ListObjects As New List(Of SponsorCoverLetterEn)
-    '    eobj.Code = String.Empty
-    '    eobj.Title = String.Empty
-    '    ddlSponCoverLetter.Items.Clear()
-    '    ddlSponCoverLetter.DataTextField = "Code"
-    '    ddlSponCoverLetter.DataValueField = "Code"
-
-    '    Try
-    '        ListObjects = bobj.GetList(eobj)
-    '        Session("ListObj_LetterDetails") = ListObjects
-    '    Catch ex As Exception
-    '        LogError.Log("SponsorInvoice", "LoadSponCoverLetter", ex.Message)
-    '    End Try
-
-    '    ddlSponCoverLetter.DataSource = ListObjects
-    '    ddlSponCoverLetter.DataBind()
-    '    ddlSponCoverLetter.SelectedIndex = 0
-    '    Session("SCLCode") = ListObjects.Find(Function(x) x.Code = ddlSponCoverLetter.SelectedValue)
-    'End Sub
+    End Sub
 
     Private Sub SendSponCoverLetter(ByVal value As SponsorCoverLetterEn)
         'Variable Declarations - Start
