@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <_x0030_>
+    <category>Student Advance</category>
+    <transdate>2016-12-26T00:00:00+08:00</transdate>
+    <sasi_matricno>178965</sasi_matricno>
+    <sasi_name>PUTERI NATASHA ARINA BINTI TALIB</sasi_name>
+    <sasi_icno>950518105800</sasi_icno>
+    <datefrom>03/02/2016</datefrom>
+    <dateto>01/02/2017</dateto>
+    <bankcode />
+    <voucherno>SAP000000000000001</voucherno>
+    <chequeno />
+    <transamount>100</transamount>
+  </_x0030_>
+  <_x0030_>
+    <category>Student Advance</category>
+    <transdate>2017-02-01T00:00:00+08:00</transdate>
+    <sasi_matricno>170676</sasi_matricno>
+    <sasi_name>ZUNAH SYAKIRAH BINTI MOHAMAD JIWA</sasi_name>
+    <sasi_icno>941208125692</sasi_icno>
+    <datefrom>03/02/2016</datefrom>
+    <dateto>01/02/2017</dateto>
+    <bankcode />
+    <voucherno />
+    <chequeno />
+    <transamount>100.5</transamount>
+  </_x0030_>
+</NewDataSet>
