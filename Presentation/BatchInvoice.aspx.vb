@@ -503,8 +503,8 @@ Partial Class BatchInvoice
                 Session("AddFee") = ListTRD
                 dgView.DataSource = ListTRD
                 dgView.DataBind()
-                'AddTotal()
             End If
+
             If dgView.Items.Count <> 0 Then
 
                 Dim dgitem1 As DataGridItem
@@ -543,7 +543,6 @@ Partial Class BatchInvoice
                     chk.Checked = True
                 Next
                 'Else
-
             End If
         Catch ex As Exception
             If ex.Message = "TaxCode Missing" Then
@@ -4854,9 +4853,12 @@ Partial Class BatchInvoice
             If Addfee.Count > 0 Then
                 dgView.DataSource = newStuList.OrderBy(Function(x) x.TransStatus)
                 dgView.DataBind()
+
+                'modified by Hafiz @ 08/02/2017
                 Dim chk As CheckBox
                 Dim dgitem As DataGridItem
-                chkSelectedView.Checked = True
+                'chkSelectedView.Checked = True
+                chkSelectedView.Checked = False
                 If chkSelectedView.Checked = True Then
                     For Each dgitem In dgView.Items
                         chk = dgitem.Cells(0).Controls(1)
@@ -4865,6 +4867,11 @@ Partial Class BatchInvoice
                         If CInt(Request.QueryString("IsView")).Equals(1) Then
                             chk.Enabled = False
                         End If
+                    Next
+                Else
+                    For Each dgitem In dgView.Items
+                        chk = dgitem.Cells(0).Controls(1)
+                        chk.Checked = False
                     Next
                 End If
                 pnlDgView.Visible = True

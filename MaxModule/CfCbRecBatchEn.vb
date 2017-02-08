@@ -108,8 +108,8 @@ Public Class CfCbRecBatchEn
     '    End Set
     'End Property
 
-    Private _cbrb_postdate As DateTime = Nothing
-    Public ReadOnly Property cbrb_postdate() As DateTime
+    Private _cbrb_postdate As String = Helper.NullValue
+    Public ReadOnly Property cbrb_postdate() As String
         Get
             Return _cbrb_postdate
         End Get

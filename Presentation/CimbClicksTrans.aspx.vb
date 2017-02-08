@@ -296,7 +296,7 @@ Partial Class CimbClicksTrans
 
         'Variable Declarations - Start
         Dim BankCode As String = Nothing, TotalRecords As Integer = 0, HeaderNo As String = Nothing
-        Dim UploadedClicksFile As String = Nothing, TotalAmount As Decimal = 0
+        Dim UploadedClicksFile As String = Nothing, TransDate As String = Nothing, TotalAmount As Decimal = 0
         'Variable Declarations - Stop
 
         Try
@@ -322,7 +322,7 @@ Partial Class CimbClicksTrans
 
             'if file uploaded Successfully - Start
             If _FileHelper.UploadCimbClicksFile(UploadedClicksFile,
-                dgClicksTransactions, TotalAmount, TotalRecords, BankCode) Then
+                dgClicksTransactions, TotalAmount, TransDate, TotalRecords, BankCode) Then
 
                 'Show Panel
                 pnlDisplay.Visible = True
@@ -353,6 +353,8 @@ Partial Class CimbClicksTrans
 
                 'Display File Details
                 Call TextFileToLabel(UploadedClicksFile, TotalAmount, TotalRecords, HeaderNo)
+
+                hdnTransDate.Value = TransDate
 
                 'Reset Controls
                 btnUpload.Visible = False
@@ -416,7 +418,7 @@ Partial Class CimbClicksTrans
         'Variable Declarations
         Dim TotalRecords As Integer = 0
         Dim UploadedClicksFile As String = Nothing, TotalAmount As Decimal = 0, HeaderNo As String = Nothing
-        Dim BatchCode As String = Nothing
+        Dim BatchCode As String = Nothing, TransDate As String = Nothing
 
         Try
 
@@ -429,11 +431,12 @@ Partial Class CimbClicksTrans
             'Added by Hafiz Roslan @ 12/01/2016
             'Assign value to headerno
             HeaderNo = hidHeaderNo.Value
+            TransDate = hdnTransDate.Value
 
             'Save Data - Start
             If _FileHelper.InsertClicksTransToAccounts(dgClicksTransactions,
                 Session(Helper.UserSession), lblTotalAmount.Text, lblFileName.Text,
-                ddlBankCode.SelectedValue, HeaderNo, BatchCode) Then
+                ddlBankCode.SelectedValue, HeaderNo, BatchCode, TransDate) Then
 
                 Call DisplayMessage("Records Saved Successfully")
 
@@ -692,7 +695,7 @@ Partial Class CimbClicksTrans
                 dr1("MATRIC_NO") = row("CreditRef")
                 dr1("IC_NO") = row("SASI_IcNo")
                 dr1("RECEIPT_NO") = row("SubRef1")
-                dr1("RECEIPT_DATE") = Format(row("Date_Time"), "dd/MM/yyyy")
+                dr1("RECEIPT_DATE") = Format(row("ReceiptDate"), "dd/MM/yyyy")
                 dr1("PAID_AMOUNT") = row("TransAmount")
 
                 dt1.Rows.Add(dr1)

@@ -1272,15 +1272,14 @@ Public Class FileHelper
     'Purpose			: To Upload Cimb Clicks File
     'Author			    : Sujith Sharatchandran - T-Melmax Sdn Bhd
     'Created Date		: 16/06/2015
-    Public Function UploadCimbClicksFile(ByVal CimbClicksFile As String,
-        ByRef dgClicksTransactions As DataGrid, ByRef TotalAmount As Decimal,
-        ByRef TotalRecords As Integer, ByVal BankCode As String) As Boolean
+    Public Function UploadCimbClicksFile(ByVal CimbClicksFile As String, ByRef dgClicksTransactions As DataGrid,
+        ByRef TotalAmount As Decimal, ByRef TransDate As String, ByRef TotalRecords As Integer, ByVal BankCode As String) As Boolean
 
         Try
 
             'if cimb clicks file uploaded successfully - Start
             If ReadCimbClicksFile(CimbClicksFile,
-                dgClicksTransactions, TotalAmount, TotalRecords) Then
+                dgClicksTransactions, TotalAmount, TransDate, TotalRecords) Then
                 Return True
             End If
             'if cimb clicks file uploaded successfully - Stop
@@ -1305,7 +1304,7 @@ Public Class FileHelper
     'Author			    : Sujith Sharatchandran - T-Melmax Sdn Bhd
     'Created Date		: 16/06/2015
     Private Function ReadCimbClicksFile(ByVal CimbClicksFile As String,
-        ByRef dgClicksTransactions As DataGrid, ByRef TotalAmount As Decimal,
+        ByRef dgClicksTransactions As DataGrid, ByRef TotalAmount As Decimal, ByRef TransDate As String,
         ByRef TotalRecords As Integer) As Boolean
 
         'Create Instances - Start
@@ -1340,7 +1339,11 @@ Public Class FileHelper
                 'Check Line Type - Start
                 If Left(LineContent, GetCimbClicksFileHeaderIdentifierLen) =
                     GetCimbClicksFileHeaderIdentifier() Then 'Header Line
-                    'Do Nothing
+                    'Modified by Hafiz @ 08/02/2017
+                    'Get TransDate - start
+                    TransDate = GetPositionValue(LineContent, GetCimbClicksFileReceiptDateStartPosition, GetCimbClicksFileReceiptDateEndPosition)
+                    TransDate = Left(TransDate, 2) & "/" & TransDate.Substring(2, 2) & "/" & Right(TransDate, 4)
+                    'Get TransDate - end
                 ElseIf Left(LineContent, GetCimbClicksFileFooterIdentifierLen) =
                     GetCimbClicksFileFooterIdentifier() Then ' Footer Line
                     'Do nothing
@@ -1669,11 +1672,12 @@ Public Class FileHelper
     'Created Date		: 19/06/2015
     'modified by Hafiz @ 29/6/2016 - CIMB Clicks BatchCode`s related
     'modified by Hafiz @ 25/7/2016 - GetHeaderDate()
+    'modified by Hafiz @ 08/02/2016
 
     Public Function InsertClicksTransToAccounts(ByRef dgClicksTransactions As DataGrid,
         ByVal DoneBy As String, ByVal TotalAmount As Decimal,
         ByVal ClicksFileName As String, ByVal BankCode As String, ByVal HeaderNo As String,
-        ByRef BatchCode As String) As Boolean
+        ByRef BatchCode As String, ByVal TransDate As String) As Boolean
 
         'Create Instances - Start
         Dim _AccountsEn As AccountsEn
@@ -1727,7 +1731,8 @@ Public Class FileHelper
                     _AccountsEn.TransType = ReceiptsClass.Credit
                     _AccountsEn.BankCode = BankCode
                     _AccountsEn.BatchDate = DateTime.Now
-                    _AccountsEn.TransDate = ReceiptDate
+                    _AccountsEn.TransDate = TransDate
+                    _AccountsEn.ReceiptDate = ReceiptDate
                     _AccountsEn.TransStatus = ReceiptsClass.StatusOpen
                     _AccountsEn.Description = "CIMB CLICKS - " + GetHeaderDate(HeaderNo)
                     _AccountsEn.PostStatus = ReceiptsClass.StatusReady
@@ -1751,7 +1756,8 @@ Public Class FileHelper
                     _StudentEn.ICNo = IdentityNo
                     _StudentEn.TransactionAmount = PaidAmount
                     _StudentEn.PaidAmount = 0.0
-                    _StudentEn.TransDate = DateTime.Now
+                    _StudentEn.TransDate = TransDate
+                    _StudentEn.ReceiptDate = ReceiptDate
                     _StudentEn.BatchDate = DateTime.Now
                     _StudentEn.PostedDateTime = DateTime.Now
                     _StudentEn.CreatedDateTime = DateTime.Now

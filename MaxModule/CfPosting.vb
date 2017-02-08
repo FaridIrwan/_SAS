@@ -578,9 +578,10 @@ Public Class CfPosting
 
             'Buils Sql Statement - Start
             SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY SAS_Accounts.TransID) AS Row_No,"
-            SqlStatement &= "SAS_Accounts.BankRecNo AS Bank_Slip_No,"
+            SqlStatement &= "CASE WHEN SAS_Accounts.Description LIKE 'CIMB CLICKS%' THEN SAS_Accounts.SubRef1 "
+            SqlStatement &= "ELSE SAS_Accounts.BankRecNo END AS Bank_Slip_No,"
             SqlStatement &= "SAS_Accounts.BatchCode As Batch_Code,"
-            SqlStatement &= "CASE WHEN SAS_Accounts.Description LIKE 'CIMB CLICKS' THEN 'CIMB Clicks Upload' "
+            SqlStatement &= "CASE WHEN SAS_Accounts.Description LIKE 'CIMB CLICKS%' THEN 'CIMB Clicks Upload' "
             SqlStatement &= "ELSE 'Bank Receipt Manual' END AS Description,"
             SqlStatement &= Payee_Name
             SqlStatement &= "SAS_Accounts.TransAmount AS Trans_Amount,"
