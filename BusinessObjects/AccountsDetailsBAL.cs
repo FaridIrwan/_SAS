@@ -347,6 +347,42 @@ namespace HTS.SAS.BusinessObjects
             }
         }
 
+        /// <summary>
+        /// Method to Get Student Allocations
+        /// </summary>
+        /// <param name="argEn">AccountDetails Entity is an Input.TransactionID is an Input Property</param>
+        /// <returns>Returns List of AccountsDetails Entities</returns>
+        public List<AccountsDetailsEn> GetActiveStuDentAllocation(AccountsDetailsEn argEn)
+        {
+            try
+            {
+                AccountsDetailsDAL loDs = new AccountsDetailsDAL();
+                return loDs.GetActiveStuDentAllocation(argEn);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Method to Get Student Allocations
+        /// </summary>
+        /// <param name="argEn">AccountDetails Entity is an Input.TransactionID is an Input Property</param>
+        /// <returns>Returns List of AccountsDetails Entities</returns>
+        public List<AccountsDetailsEn> GetInActiveStuDentAllocation(AccountsDetailsEn argEn)
+        {
+            try
+            {
+                AccountsDetailsDAL loDs = new AccountsDetailsDAL();
+                return loDs.GetInActiveStuDentAllocation(argEn);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 
 }

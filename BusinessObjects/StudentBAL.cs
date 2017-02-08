@@ -587,12 +587,12 @@ namespace HTS.SAS.BusinessObjects
             }
         }
 
-        public List<AccountsDetailsEn> GetListStudentForAllocation(string sponsor)
+        public List<AccountsDetailsEn> GetListStudentForAllocation(string sponsor,string matric)
         {
             try
             {
                 StudentDAL loDs = new StudentDAL();
-                return loDs.GetListStudentForAllocation(sponsor);
+                return loDs.GetListStudentForAllocation(sponsor, matric);
             }
             catch (Exception ex)
             {
