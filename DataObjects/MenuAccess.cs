@@ -16,6 +16,7 @@ namespace DataObjects
         private string dteFrom = string.Empty;
         private string dteTo = string.Empty;
         private string day, month, year;
+        private string rptType = string.Empty;
         private ReportDocument rptDocument;
 
         public string MenuName
@@ -89,6 +90,19 @@ namespace DataObjects
                 year = DateTo.Substring(6, 4);
 
                 return year + "/" + month + "/" + day;
+            }
+        }
+
+        protected string ReportType
+        {
+            get
+            {
+                if (Request.QueryString["ReportType"] != null)
+                {
+                    rptType = Request.QueryString["ReportType"].ToString();
+                }
+
+                return rptType;
             }
         }
 

@@ -87,7 +87,9 @@
         <siteMapNode url="~/GroupReport/RptTotalGL.aspx" title="Total General Ledger"  description="" />
         <siteMapNode url="~/GroupReport/RptTransactionDetail.aspx" title="Transaction Detail Report"  description="" />
         <siteMapNode url="~/GroupReport/RptStatementAccount.aspx" title="Statement of Account Report" description="" />
-		    <siteMapNode url="RptSpAllocation.aspx" title="Sponsor Allocation Report" description="" />
+        <siteMapNode url="~/GroupReport/RptGLDistribution.aspx" title="CF Transaction Detail" description="" />
+        <siteMapNode url="~/GroupReport/RptReceiptCollections.aspx" title="Receipt Collections" description="" />
+        <siteMapNode url="RptSpAllocation.aspx" title="Sponsor Allocation Report" description="" />
 		    <siteMapNode url="RptStuAgeing.aspx" title="Student Ageing Report"  description="" />
 		    <siteMapNode url="RptDepositLedger.aspx" title="Deposit Ledger Report"  description="" />
 		    <siteMapNode url="RptStatementAcc.aspx" title="Statement of Accounts Report"  description="" />

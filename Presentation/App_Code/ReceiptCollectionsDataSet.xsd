@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ReceiptCollectionsDataSet" targetNamespace="http://tempuri.org/ReceiptCollectionsDataSet.xsd" xmlns:mstns="http://tempuri.org/ReceiptCollectionsDataSet.xsd" xmlns="http://tempuri.org/ReceiptCollectionsDataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="ReceiptCollectionsDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_DataSetName="ReceiptCollectionsDataSet" msprop:Generator_UserDSName="ReceiptCollectionsDataSet">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="SAS_Accounts" msprop:Generator_TableClassName="SAS_AccountsDataTable" msprop:Generator_TableVarName="tableSAS_Accounts" msprop:Generator_TablePropName="SAS_Accounts" msprop:Generator_RowDeletingName="SAS_AccountsRowDeleting" msprop:Generator_RowChangingName="SAS_AccountsRowChanging" msprop:Generator_RowEvHandlerName="SAS_AccountsRowChangeEventHandler" msprop:Generator_RowDeletedName="SAS_AccountsRowDeleted" msprop:Generator_UserTableName="SAS_Accounts" msprop:Generator_RowChangedName="SAS_AccountsRowChanged" msprop:Generator_RowEvArgName="SAS_AccountsRowChangeEvent" msprop:Generator_RowClassName="SAS_AccountsRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="transid" msprop:Generator_ColumnVarNameInTable="columntransid" msprop:Generator_ColumnPropNameInRow="transid" msprop:Generator_ColumnPropNameInTable="transidColumn" msprop:Generator_UserColumnName="transid" type="xs:int" />
+              <xs:element name="transcode" msprop:Generator_ColumnVarNameInTable="columntranscode" msprop:Generator_ColumnPropNameInRow="transcode" msprop:Generator_ColumnPropNameInTable="transcodeColumn" msprop:Generator_UserColumnName="transcode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="20" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="transdate" msprop:Generator_ColumnVarNameInTable="columntransdate" msprop:Generator_ColumnPropNameInRow="transdate" msprop:Generator_ColumnPropNameInTable="transdateColumn" msprop:Generator_UserColumnName="transdate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="bankcode" msprop:Generator_ColumnVarNameInTable="columnbankcode" msprop:Generator_ColumnPropNameInRow="bankcode" msprop:Generator_ColumnPropNameInTable="bankcodeColumn" msprop:Generator_UserColumnName="bankcode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="20" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="sabd_desc" msprop:Generator_ColumnVarNameInTable="columnsabd_desc" msprop:Generator_ColumnPropNameInRow="sabd_desc" msprop:Generator_ColumnPropNameInTable="sabd_descColumn" msprop:Generator_UserColumnName="sabd_desc" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="sabd_accode" msprop:Generator_ColumnVarNameInTable="columnsabd_accode" msprop:Generator_ColumnPropNameInRow="sabd_accode" msprop:Generator_ColumnPropNameInTable="sabd_accodeColumn" msprop:Generator_UserColumnName="sabd_accode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="20" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="creditref" msprop:Generator_ColumnVarNameInTable="columncreditref" msprop:Generator_ColumnPropNameInRow="creditref" msprop:Generator_ColumnPropNameInTable="creditrefColumn" msprop:Generator_UserColumnName="creditref" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="name" msprop:Generator_ColumnVarNameInTable="columnname" msprop:Generator_ColumnPropNameInRow="name" msprop:Generator_ColumnPropNameInTable="nameColumn" msprop:Generator_UserColumnName="name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="transamount" msprop:Generator_ColumnVarNameInTable="columntransamount" msprop:Generator_ColumnPropNameInRow="transamount" msprop:Generator_ColumnPropNameInTable="transamountColumn" msprop:Generator_UserColumnName="transamount" type="xs:double" minOccurs="0" />
+              <xs:element name="dtFilter" msprop:Generator_ColumnVarNameInTable="columndtFilter" msprop:Generator_ColumnPropNameInRow="dtFilter" msprop:Generator_ColumnPropNameInTable="dtFilterColumn" msprop:Generator_UserColumnName="dtFilter" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="subtype" msprop:Generator_ColumnVarNameInTable="columnsubtype" msprop:Generator_ColumnPropNameInRow="subtype" msprop:Generator_ColumnPropNameInTable="subtypeColumn" msprop:Generator_UserColumnName="subtype" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="bankrecno" msprop:Generator_ColumnVarNameInTable="columnbankrecno" msprop:Generator_ColumnPropNameInRow="bankrecno" msprop:Generator_ColumnPropNameInTable="bankrecnoColumn" msprop:Generator_UserColumnName="bankrecno" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="29" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:SAS_Accounts" />
+      <xs:field xpath="mstns:transid" />
+    </xs:unique>
+  </xs:element>
+</xs:schema>

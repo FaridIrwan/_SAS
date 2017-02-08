@@ -392,21 +392,13 @@ Partial Class Student
         ddlstudentStatus.Items.Add(New ListItem("---Select---", "-1"))
         ddlstudentStatus.DataTextField = "Description"
         ddlstudentStatus.DataValueField = "StudentStatusCode"
-        If Session("PageMode") = "Add" Then
-            Try
-                ddlstudentStatus.DataSource = bStuStatus.GetStudentStatusList(eStuStatus)
-            Catch ex As Exception
-                LogError.Log("Student", "FillDropDownList", ex.Message)
-            End Try
 
-        Else
+        Try
+            ddlstudentStatus.DataSource = bStuStatus.GetStudentStatusListAll(eStuStatus)
+        Catch ex As Exception
+            LogError.Log("Student", "FillDropDownList", ex.Message)
+        End Try
 
-            Try
-                ddlstudentStatus.DataSource = bStuStatus.GetStudentStatusListAll(eStuStatus)
-            Catch ex As Exception
-                LogError.Log("Student", "FillDropDownList", ex.Message)
-            End Try
-        End If
         ddlstudentStatus.DataBind()
 
         'eBank.BankDetailsCode = ""
