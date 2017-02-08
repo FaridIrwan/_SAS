@@ -166,7 +166,7 @@ Partial Class SponsorInvoice
 
         If Session("PageMode") = "Edit" Then
             ddlSponsor.Enabled = False
-            ibtnLoad.Enabled = False
+            'ibtnLoad.Enabled = False
         Else
             ddlSponsor.Enabled = True
             ibtnLoad.Enabled = True
@@ -1275,29 +1275,36 @@ Partial Class SponsorInvoice
 
                 Session("AddFee") = ListTRD
                 Session(ReceiptsClass.SessionStuToSave) = currListSt
-
                 Dim eob As New StudentEn
                 Dim sumamountstudent As Double = 0
                 Dim lstmatric As List(Of String)
-                lstmatric = currListSt.Select(Function(x) x.MatricNo).Distinct().ToList()
-                For Each dgItem1 In dgstudent1.Items
-                    For Each obj In lstmatric
-                        'If dgItem1.Cells(1).Text = obj Then
-                        For Each stu In currListSt.Where(Function(x) x.MatricNo = obj And x.MatricNo = dgItem1.Cells(1).Text).ToList()
+                If currListSt.Count > 0 Then
+                    
+                    lstmatric = currListSt.Select(Function(x) x.MatricNo).Distinct().ToList()
+                    For Each dgItem1 In dgstudent1.Items
+                        For Each obj In lstmatric
+                            'If dgItem1.Cells(1).Text = obj Then
+                            For Each stu In currListSt.Where(Function(x) x.MatricNo = obj And x.MatricNo = dgItem1.Cells(1).Text).ToList()
 
-                            sumamountstudent = sumamountstudent + stu.TransactionAmount
-                            eob.TempAmount = sumamountstudent
-                            eob.TempAmount = String.Format("{0:F}", eob.TempAmount)
-                            dgItem1.Cells(3).Text = String.Format("{0:F}", eob.TempAmount)
-                            If stu.SponsorLimit = 0 And stu.AllocatedAmount = 0 Then
-                                dgItem1.Cells(8).Text = "-"
-                            End If
+                                sumamountstudent = sumamountstudent + stu.TransactionAmount
+                                eob.TempAmount = sumamountstudent
+                                eob.TempAmount = String.Format("{0:F}", eob.TempAmount)
+                                dgItem1.Cells(3).Text = String.Format("{0:F}", eob.TempAmount)
+                                If stu.SponsorLimit = 0 And stu.AllocatedAmount = 0 Then
+                                    dgItem1.Cells(8).Text = "-"
+                                End If
+                            Next
+
+                            'End If
                         Next
-
-                        'End If
+                        sumamountstudent = 0
                     Next
-                    sumamountstudent = 0
-                Next
+                Else
+                    For Each dgItem1 In dgstudent1.Items
+                        dgItem1.Cells(3).Text = 0.0
+                    Next
+                End If
+               
             Catch ex As Exception
                 LogError.Log("BatchInvoice", "ibtnRemoveFee_Click", ex.Message)
             End Try
@@ -2738,6 +2745,11 @@ Partial Class SponsorInvoice
                     chkStudent.Visible = False
                 End If
 
+                If dgstudent1.Items.Count > 0 And lblStatus.Value = "Ready" Then
+                    btnLoadFeeType.Visible = True
+                    ibtnLoad.Enabled = True
+                End If
+
                 CheckWorkflowStatus(obj)
 
             End If
@@ -3494,11 +3506,13 @@ Partial Class SponsorInvoice
         pnlView.Visible = True
 
 
+        Dim listsponsor As New List(Of StudentEn)
 
-
+        listsponsor.AddRange(lstSponsorShip)
         Dim sponsorfee As New List(Of StudentEn)
         sponsorfee = objup.GetSponsorFeeList(ddlSponsor.SelectedValue)
 
+        Session("listsponsor") = listsponsor
         'Dim chk As CheckBox
         'Dim dgitem As DataGridItem
         If sponsorfee.Count = 0 Then
@@ -3512,7 +3526,7 @@ Partial Class SponsorInvoice
         If ddlsemyear.SelectedValue = "-1" Then
 
         Else
-            lstSponsorShip = lstSponsorShip.Where(Function(x) lstSponsorShip.Any(Function(y) y.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
+            lstSponsorShip = lstSponsorShip.Where(Function(x) lstSponsorShip.Any(Function(y) x.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
         End If
 
         'If lstSponsorShip.Count > 0 Then
@@ -3539,7 +3553,7 @@ Partial Class SponsorInvoice
                                                                                      .Internal_Use = x.ProgramID, .ICNo = x.ICNo, .TaxId = x.TaxId,
                                                                                       .ProgramName = x.ProgramName, .CurretSemesterYear = x.CurretSemesterYear,
                                                                                       .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .GSTAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description,
-                                                                                    .TransactionID = x.TransactionID}))
+                                                                                    .TransactionID = x.TransactionID, .currsemyear = x.currsemyear}))
         End If
         'If saveAllStu.Count <= 0 Then
         saveAllStu.AddRange(lstobjects.Where(Function(y) Not saveAllStu.Any(Function(z) z.MatricNo = y.MatricNo)))
@@ -3855,7 +3869,12 @@ Partial Class SponsorInvoice
         Dim objup As New StudentBAL
         Dim eob As New StudentEn
         'checkProgWithStu()
-
+        Dim listsponsor As New List(Of StudentEn)
+        If Not Session("listsponsor") Is Nothing Then
+            listsponsor = Session("listsponsor")
+        Else
+            listsponsor = New List(Of StudentEn)
+        End If
         If Not Session("LstStueObj") Is Nothing Then
 
             mylst1 = Session("LstStueObj")
@@ -3871,7 +3890,7 @@ Partial Class SponsorInvoice
                                                                                      .Internal_Use = x.ProgramID, .ICNo = x.ICNo, .TaxId = x.TaxId,
                                                                                       .ProgramName = x.ProgramName, .CurretSemesterYear = x.CurretSemesterYear,
                                                                                       .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description,
-                                                                                    .TransactionID = x.TransactionID}))
+                                                                                    .TransactionID = x.TransactionID, .currsemyear = x.currsemyear}))
         End If
 
         If hfStudentCount.Value = 0 Or mylst.Count = 0 Then
@@ -3896,33 +3915,6 @@ Partial Class SponsorInvoice
             sponsorship = New List(Of StudentEn)
         End If
 
-        'If mylst.Count > 0 Then
-        '    sponsorship.AddRange(mylst.Where(Function(y) Not mylst.Any(Function(z) z.MatricNo = y.MatricNo)).Select(Function(x) New StudentEn With {.ProgramID = x.ProgramID, .SponsorCode = x.SponsorCode, .MatricNo = x.MatricNo,
-        '                                                                             .StudentName = x.StudentName, .CurrentSemester = x.CurrentSemester,
-        '                                                                             .AllocatedAmount = x.PaidAmount, .OutstandingAmount = x.OutstandingAmount,
-        '                                                                             .Internal_Use = x.ProgramID, .ICNo = x.ICNo, .TaxId = x.TaxId,
-        '                                                                              .ProgramName = x.ProgramName, .CurretSemesterYear = x.CurretSemesterYear,
-        '                                                                              .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description
-        '                                                                            }))
-        'End If
-
-        'Session("SponsorShip") = sponsorship
-        'If sponsorship.Count > 0 Then
-        '    stuList.AddRange(sponsorship.Where(Function(y) Not stuList.Any(Function(z) z.MatricNo = y.MatricNo And z.ReferenceCode = y.ReferenceCode)).Select(Function(x) New StudentEn With {.ProgramID = x.ProgramID, .SponsorCode = x.SponsorCode, .MatricNo = x.MatricNo,
-        '                                                                             .StudentName = x.StudentName, .CurrentSemester = x.CurrentSemester,
-        '                                                                             .AllocatedAmount = x.PaidAmount, .OutstandingAmount = x.OutstandingAmount,
-        '                                                                             .Internal_Use = x.ProgramID, .ICNo = x.ICNo, .TaxId = x.TaxId,
-        '                                                                              .ProgramName = x.ProgramName, .CurretSemesterYear = x.CurretSemesterYear,
-        '                                                                              .CategoryCode = x.CategoryCode, .SponsorLimit = x.SponsorLimit, .TransactionAmount = x.TransactionAmount, .TaxAmount = x.GSTAmount, .ReferenceCode = x.ReferenceCode, .Description = x.Description
-        '                                                                            }))
-        'End If
-        'Dim chk As CheckBox
-        'Dim dgitem As DataGridItem
-        'For Each dgitem In dgStudent.Items
-        '    chk = dgitem.Cells(0).Controls(1)
-        '    If chk.Checked = True Then
-        '        stuList.AddRange(sponsorship.Where(Function(x) x.ProgramID = dgitem.Cells(1).Text))
-        '    End If
         'Next
         Dim chk As CheckBox
         Dim dgitem As DataGridItem
@@ -3942,10 +3934,10 @@ Partial Class SponsorInvoice
         Else
             stuList = stuList.Where(Function(x) sponsorfee.Any(Function(y) y.ReferenceCode = x.ReferenceCode)).ToList()
         End If
-         If ddlsemyear.SelectedValue = "-1" Then
+        If ddlsemyear.SelectedValue = "-1" Then
 
         Else
-            stuList = stuList.Where(Function(x) sponsorship.Any(Function(y) y.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
+            stuList = stuList.Where(Function(x) sponsorship.Any(Function(y) x.CurretSemesterYear = ddlsemyear.SelectedValue.Replace("/", "").Replace("-", ""))).ToList()
         End If
         'Dim stuList2 As List(Of StudentEn)
         'stuList2 = mylst.Where(Function(x) stuList.Any(Function(y) y.MatricNo = x.MatricNo)).ToList()

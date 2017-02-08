@@ -507,25 +507,25 @@ namespace HTS.SAS.BusinessObjects
                 }
             }
             //Update Student OutStanding On Invoice and Receipt
-            foreach (StudentEn item in argList)
-            {
-                using (TransactionScope ts = new TransactionScope(TransactionScopeOption.Required, new System.TimeSpan(0, 20, 0)))
-                {
+            //foreach (StudentEn item in argList)
+            //{
+            //    using (TransactionScope ts = new TransactionScope(TransactionScopeOption.Required, new System.TimeSpan(0, 20, 0)))
+            //    {
 
-                    try
-                    {
-                        if (argEn.SubType == "Student") //&& (argEn.Category == "Invoice" || argEn.Category == "Receipt")
-                        {
-                            loDs.UpdateStudentOutstanding(item.MatricNo);
-                            ts.Complete();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw ex;
-                    }
-                }
-            }
+            //        try
+            //        {
+            //            if (argEn.SubType == "Student") //&& (argEn.Category == "Invoice" || argEn.Category == "Receipt")
+            //            {
+            //                loDs.UpdateStudentOutstanding(item.MatricNo);
+            //                ts.Complete();
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            throw ex;
+            //        }
+            //    }
+            //}
 
 
             return flag;
@@ -1570,6 +1570,105 @@ namespace HTS.SAS.BusinessObjects
             {
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Method to Insert SponsorBatch
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <param name="argList">List of Sponsor Entity is the Input</param>
+        /// <returns>Returns BatchCode</returns>
+        public string Sponsorinsertinactive(AccountsEn argEn, List<SponsorEn> argList)
+        {
+            string flag;
+            using (TransactionScope ts = new TransactionScope())
+            {
+                try
+                {
+                    AccountsDAL loDs = new AccountsDAL();
+                    flag = loDs.Sponsorinsertinactive(argEn, argList);
+                    ts.Complete();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+            return flag;
+        }
+        /// <summary>
+        /// Method to Insert SponsorBatch
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <param name="argList">List of Sponsor Entity is the Input</param>
+        /// <returns>Returns BatchCode</returns>
+        public string SponsorInsertActive(AccountsEn argEn, List<SponsorEn> argList)
+        {
+            string flag;
+            using (TransactionScope ts = new TransactionScope())
+            {
+                try
+                {
+                    AccountsDAL loDs = new AccountsDAL();
+                    flag = loDs.SponsorInsertActive(argEn, argList);
+                    ts.Complete();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+            return flag;
+        }
+        /// <summary>
+        /// Method to Insert SponsorBatch
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <param name="argList">List of Sponsor Entity is the Input</param>
+        /// <returns>Returns BatchCode</returns>
+        public string SponsorUpdateActive(AccountsEn argEn, List<SponsorEn> argList)
+        {
+            string flag;
+            using (TransactionScope ts = new TransactionScope())
+            {
+                try
+                {
+                    AccountsDAL loDs = new AccountsDAL();
+                    flag = loDs.SponsorUpdateActive(argEn, argList);
+                    ts.Complete();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+            return flag;
+        }
+
+        /// <summary>
+        /// Method to Insert Accounts
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <returns>Returns Boolean</returns>
+        public bool InsertInactive(AccountsEn argEn)
+        {
+            bool flag;
+            using (TransactionScope ts = new TransactionScope())
+            {
+                try
+                {
+                    AccountsDAL loDs = new AccountsDAL();
+                    flag = loDs.InsertInactive(argEn);
+                    ts.Complete();
+
+                }
+                catch (Exception ex)
+                {
+
+                    throw ex;
+                }
+            }
+            return flag;
         }
 
 

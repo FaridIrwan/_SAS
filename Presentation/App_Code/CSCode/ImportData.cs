@@ -49,12 +49,12 @@ public class ImportData
                 if (dtStudent.Rows[index]["MatricNo"].ToString() != "")
                 {
                 _studentEN.MatricNo = dtStudent.Rows[index]["MatricNo"].ToString();
-                _studentEN.StudentName = dtStudent.Rows[index]["StudentName"].ToString();
-                _studentEN.ProgramID = dtStudent.Rows[index]["Program"].ToString();
-                _studentEN.CurrentSemester =Convert.ToInt32(dtStudent.Rows[index]["Semester"].ToString());
+                //_studentEN.StudentName = dtStudent.Rows[index]["StudentName"].ToString();
+                //_studentEN.ProgramID = dtStudent.Rows[index]["Program"].ToString();
+                //_studentEN.CurrentSemester =Convert.ToInt32(dtStudent.Rows[index]["Semester"].ToString());
                 _studentEN.ICNo = dtStudent.Rows[index]["ICNo"].ToString();
-                _studentEN.TransactionAmount = Convert.ToDouble(dtStudent.Rows[index]["AllocatedAmount"]);
-                _studentEN.TempAmount = Convert.ToDouble(dtStudent.Rows[index]["PocketAmount"]);
+                //_studentEN.TransactionAmount = Convert.ToDouble(dtStudent.Rows[index]["AllocatedAmount"]);
+                _studentEN.TempPaidAmount = Convert.ToDouble(dtStudent.Rows[index]["SponsorAmount"]);
                 lstStudents.Add(_studentEN);
                 }
             }
@@ -84,12 +84,12 @@ public class ImportData
                 if (row.Equals(0))
                 {
                     dtPatterns.Columns.Add("MatricNo", typeof(string));        
-                    dtPatterns.Columns.Add("StudentName", typeof(string));
-                    dtPatterns.Columns.Add("Program", typeof(string));
-                    dtPatterns.Columns.Add("Semester", typeof(string));
+                    //dtPatterns.Columns.Add("StudentName", typeof(string));
+                    //dtPatterns.Columns.Add("Program", typeof(string));
+                    //dtPatterns.Columns.Add("Semester", typeof(string));
                     dtPatterns.Columns.Add("ICNo", typeof(string));
-                    dtPatterns.Columns.Add("AllocatedAmount", typeof(double));
-                    dtPatterns.Columns.Add("PocketAmount", typeof(double));
+                    dtPatterns.Columns.Add("SponsorAmount", typeof(double));
+                    //dtPatterns.Columns.Add("PocketAmount", typeof(double));
                 }
                 else
                 {
@@ -97,6 +97,7 @@ public class ImportData
                     //Add the value to the row
                     for (column = 0; column < dataRow.Cells.Count; column++)
                     {
+
                         dr[column] = dataRow.Cells[column].ToString();
                     }
                     dtPatterns.Rows.Add(dr);

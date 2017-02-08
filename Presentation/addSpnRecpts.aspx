@@ -72,6 +72,8 @@
                                     <asp:BoundColumn DataField="Category" HeaderText="Category" Visible="False"></asp:BoundColumn>
                                     <asp:BoundColumn DataField="AllocatedAmount" HeaderText="Allocated Amount" DataFormatString="{0:F}" ItemStyle-HorizontalAlign="Center" Visible="True"></asp:BoundColumn>
                                     <asp:BoundColumn DataField="TempAmount" HeaderText="Amount Balance" DataFormatString="{0:F}" ItemStyle-HorizontalAlign="Center" Visible="True"></asp:BoundColumn>
+                                    <asp:BoundColumn DataField="bankcode" HeaderText="Bank Code" Visible ="false"></asp:BoundColumn>
+                                    <asp:BoundColumn DataField="PaymentMode" HeaderText="Payment Mode" Visible ="false"></asp:BoundColumn>
                                 </Columns>
                             </asp:DataGrid>
                            

@@ -585,7 +585,7 @@ Partial Class Payments
         'Dim alloc2 As New AccountsEn
         eobjSpnall = Session("SpnAlleobj")
         txtAllCode.ReadOnly = False
-        txtAllCode.Text = eobjSpnall.TransactionCode
+        txtAllCode.Text = eobjSpnall.BatchCode
         txtAllCode.ReadOnly = True
         txtRef1.Text = eobjSpnall.CreditRefOne
         txtSpnCode.Text = eobjSpnall.CreditRef
@@ -605,7 +605,7 @@ Partial Class Payments
         eobstu.BatchCode = eobjSpnall.BatchCode
         eobstu.Category = "SPA"
         eobstu.Description = "Sponsor Pocket Amount"
-        eobstu.TransStatus = "Ready"
+        'eobstu.TransStatus = "Ready"
 
         Try
             listSt = objstu.GetStudentAllocationTrans(eobstu)
@@ -644,17 +644,17 @@ Partial Class Payments
         Catch ex As Exception
             LogError.Log("Payments", "addallcode", ex.Message)
         End Try
-        dgView.DataSource = liststuAll
+        dgView.DataSource = listSt
         dgView.DataBind()
-        While j < liststuAll.Count
+        While j < listSt.Count
             For Each dgItem1 In dgView.Items
-                If dgItem1.Cells(1).Text = liststuAll(j).Sudentacc.MatricNo Then
+                If dgItem1.Cells(1).Text = listSt(j).MatricNo Then
                     chk = dgItem1.Cells(0).Controls(1)
                     chk.Checked = True
                     'Vno = dgItem1.Cells(8).Controls(1)
                     'Vno.Text = "Auto Number"
                     pAmount = dgItem1.Cells(9).Controls(1)
-                    paamt = liststuAll(j).TempAmount
+                    paamt = listSt(j).TransactionAmount
                     pAmount.Text = String.Format("{0:F}", paamt)
                     pAmount.ReadOnly = True
                     Exit For
@@ -929,6 +929,7 @@ Partial Class Payments
 
         ElseIf Session("PageMode") = "Edit" Then
             Try
+                eobj.BatchCode = Trim(txtBatchid.Text)
                 txtBatchid.Text = bsobj.StudentBatchUpdate(eobj, listst)
                 txtBatchid.ReadOnly = False
                 ErrorDescription = "Record Updated Successfully "
@@ -1499,7 +1500,7 @@ Partial Class Payments
             End If
 
             Try
-                ListObjects = bobj.GetTransactions(eob)
+                ListObjects = bobj.GetSPAllocationTransactions(eob)
             Catch ex As Exception
                 lblMsg.Text = ex.Message
                 LogError.Log("Payments", "LoadListObjects", ex.Message)
@@ -1702,7 +1703,7 @@ Partial Class Payments
                 ddlBankCode.SelectedValue = eobj.BankCode
                 If eobj.Category = "Payment" Then
                     'add by farid 23022016'
-                    txtAllCode.Text = eobj.TransactionCode
+                    txtAllCode.Text = eobj.CreditRef
                     LoadUserRights()
                     ddlpaymentfor.SelectedValue = "1"
                 Else
@@ -1731,8 +1732,9 @@ Partial Class Payments
                 End If
                 If ddlpaymentfor.SelectedValue = "1" Then
                     'add by farid 25022016'
+                    txtAllCode.Text = eobj.SubReferenceTwo
                     If eobj.PostStatus = "Ready" Then
-                        txtAllCode.Text = eobj.TempTransCode
+
                         lblStatus.Value = "Ready"
                         ibtnStatus.ImageUrl = "images/Ready.gif"
                         DisablePrint()
@@ -1772,6 +1774,7 @@ Partial Class Payments
                                 'Vno = dgItem1.Cells(8).Controls(1)
                                 'Vno.Text = liststuAll(j).ReferenceOne
                                 pAmount = dgItem1.Cells(9).Controls(1)
+                                pAmount.Enabled = False
                                 'edit by farid 25022016'
                                 pAmount.Text = liststuAll(j).TempAmount
                                 Exit For
@@ -1991,8 +1994,8 @@ Partial Class Payments
         Session("loaddata") = "View"
         If lblCount.Text <> "" Then
             If CInt(lblCount.Text) > 0 Then
-                onAdd()
-                LoadListObjects()
+                'onAdd()
+                'LoadListObjects()
             Else
 
                 Session("PageMode") = "Edit"

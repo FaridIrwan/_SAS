@@ -439,7 +439,8 @@ Partial Class SponsorPayments
         Dim allocatedamount As Double
         txtAllocationCode.Text = eobj.TransactionCode
         txtSpnName.Text = eobj.Name
-
+        ddlPayment.SelectedValue = eobj.PaymentMode
+        ddlBankCode.SelectedValue = eobj.BankCode
         txtCreditref.Text = eobj.CreditRef
         'amount = eobj.PaidAmount - (eobj1(0).TransactionAmount + eobj1(0).TempAmount)
         allocatedamount = eobj.AllocatedAmount

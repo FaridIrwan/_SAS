@@ -1,12 +1,28 @@
+Imports MaxGeneric
 Partial Class FileSponsor
     Inherits System.Web.UI.Page
 
+    Private ReadOnly Property GetUploadFilePath As String
+        Get
+            Return clsGeneric.NullToString(
+                ConfigurationManager.AppSettings("EXCEL_SPONSOR_ALLOCATION"))
+        End Get
+    End Property
     Protected Sub btnselect_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles btnselect.Click
         If Not File1.PostedFile Is Nothing And File1.PostedFile.ContentLength > 0 Then
             Dim fn As String = System.IO.Path.GetFileName(File1.PostedFile.FileName)
-            Dim SaveLocation As String = Server.MapPath("data") & "\" & fn
+            Dim SaveLocation As String = GetUploadFilePath & "\" & fn
+            'Dim SaveLocation As String = Server.MapPath("data") & "\" & fn
             Dim fileOK As Boolean = False
             Dim fileType As String = Nothing
+
+            If Not System.IO.Directory.Exists(GetUploadFilePath) Then
+                System.IO.Directory.CreateDirectory(GetUploadFilePath)
+            End If
+
+            'If System.IO.Path.GetDirectoryName(GetUploadFilePath) = True Then
+            '    System.IO.StreamWriter.
+            'End If
             If File1.HasFile Then
                 Dim fileExtension As String
                 fileExtension = System.IO.Path. _

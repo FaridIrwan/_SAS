@@ -409,18 +409,36 @@ namespace HTS.SAS.DataAccessObjects
                             StudentEn loItem = LoadObject(loReader);
                             string d1, m1, y1, d2, m2, y2;
                             string code = GetValue<string>(loReader, "SASI_Intake");
-                            d1 = code.Substring(0, 4);
-                            m1 = code.Substring(4, 4);
-                            y1 = code.Substring(8, 1);
-                            string semestercode = d1 + "/" + m1 + "-" + y1;
+                            if (code != "")
+                            {
+                                d1 = code.Substring(0, 4);
+                                m1 = code.Substring(4, 4);
+                                y1 = code.Substring(8, 1);
+                                string semestercode = d1 + "/" + m1 + "-" + y1;
+                                loItem.Intake = semestercode;
+                            }
+                            else if (code == "")
+                            {
+                                loItem.Intake = "-1";
+                            }
                             string code2 = GetValue<string>(loReader, "SASI_CurSemYr");
-                            d2 = code2.Substring(0, 4);
-                            m2 = code2.Substring(4, 4);
-                            y2 = code2.Substring(8, 1);
-                            string semestercode2 = d2 + "/" + m2 + "-" + y2;
-                            loItem.Intake = semestercode;
+                            if (code2 != "")
+                            {
+                                d2 = code2.Substring(0, 4);
+                                m2 = code2.Substring(4, 4);
+                                y2 = code2.Substring(8, 1);
+                                string semestercode2 = d2 + "/" + m2 + "-" + y2;
+                                loItem.CurretSemesterYear = semestercode2;
+                            }
+                            else if (code2 == "")
+                            {
+                                loItem.CurretSemesterYear = "-1";
+                            }
+                            
+                           
+                            
                             //loItem.CurrentSemester = GetValue<int>(argReader, "SASI_CurSem");
-                            loItem.CurretSemesterYear = semestercode2;
+                            
                             loStuSpnEn.MatricNo = loItem.MatricNo;
                             //Getting the list of studentsponsors
                             loItem.ListStuSponser = loStuSpnDal.GetStuSponserList(loStuSpnEn);
@@ -1068,7 +1086,9 @@ namespace HTS.SAS.DataAccessObjects
             string sqlCmd = "";
 
             sqlCmd = @"select distinct COALESCE(sa.cursem,0) cursem,sad.transid,stu.sasi_name,stu.sasi_matricno,stu.sasi_crdithrs,stu.sasi_pgid,prog.sapg_programbm,stu.sasi_icno,stu.sasc_code,sa.cursemyr as sasi_cursemyr,
-sad.transamount - sad.paidamount as transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
+stu.sasi_cursemyr as semyear,
+Case when sad.transstatus = 'Open' then 
+sad.transamount - sad.paidamount else sad.transamount end as transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
  ( SELECT CASE WHEN SUM(acc.transamount) IS NULL THEN 0
                     ELSE SUM(acc.transamount) END 
                     FROM   SAS_SponsorInvoice D  
@@ -1108,7 +1128,7 @@ left join sas_program prog on prog.sapg_code = stu.sasi_pgid
 where sspon.sass_sponsor = " + clsGeneric.AddQuotes(Sponsor) +
                              " and sa.poststatus = 'Posted' and sa.category in ('AFC','Invoice','Debit Note') and sa.subtype = 'Student'" +
             " and stu.sasi_reg_status =  " + Helper.StuRegistered + " and stu.sass_code = " + clsGeneric.AddQuotes(Helper.StuActive) +
-" and sad.transstatus = 'Open'" +
+//" and sad.transstatus = 'Open'" +
 " and TO_DATE( sspon.SASS_sDATE,'DD/MM/YYYY') <= current_date and sad.transamount > 0 " +
                 
 
@@ -1155,7 +1175,21 @@ where sspon.sass_sponsor = " + clsGeneric.AddQuotes(Sponsor) +
                             loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
                             loItem.GSTAmount = GetValue<double>(loReader, "taxamount");
                             loItem.TaxAmount = GetValue<double>(loReader, "taxamount");
-                            //}
+                            //loItem.currsemyear = GetValue<string>(loReader, "semyear");
+                            string d2, m2, y2;
+                            string code2 = GetValue<string>(loReader, "semyear");
+                            if (code2 != "")
+                            {
+                                d2 = code2.Substring(0, 4);
+                                m2 = code2.Substring(4, 4);
+                                y2 = code2.Substring(8, 1);
+                                string semestercode2 = d2 + "/" + m2 + "-" + y2;
+                                loItem.currsemyear = semestercode2;
+                            }
+                            else if (code2 == "")
+                            {
+                                loItem.currsemyear = "";
+                            }
                             if (loItem.ReferenceCode != null)
                             {
                                 loEnList.Add(loItem);
@@ -1227,7 +1261,9 @@ where sspon.sass_sponsor = " + clsGeneric.AddQuotes(Sponsor) +
             string sqlCmd = "";
           
             sqlCmd = @"select distinct sad.transid,stu.sasi_name,stu.sasi_matricno,stu.sasi_crdithrs,stu.sasi_pgid,prog.sapg_programbm,stu.sasi_icno,stu.sasc_code,stu.sasi_cursemyr,
-sad.transamount - sad.paidamount as transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
+stu.sasi_cursemyr as semyear,
+Case when sad.transstatus = 'Open' then 
+sad.transamount - sad.paidamount else sad.transamount end as transamount,sad.taxamount,sad.refcode,ft.saft_desc,sspon.sass_sponsor,sspon.sass_type,sspon.sass_limit,
  ( SELECT CASE WHEN SUM(acc.transamount) IS NULL THEN 0
                     ELSE SUM(acc.transamount) END 
                     FROM   SAS_SponsorInvoice D  
@@ -1267,7 +1303,7 @@ left join sas_program prog on prog.sapg_code = stu.sasi_pgid
 where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
                              " and sa.poststatus = 'Posted' and sa.category in ('AFC','Invoice','Debit Note') and sa.subtype = 'Student'" +
                 //" and stu.sasi_reg_status =  " + Helper.StuRegistered + " and stu.sass_code = " + clsGeneric.AddQuotes(Helper.StuActive) +
-" and sad.transstatus = 'Open'" +
+//" and sad.transstatus = 'Open'" +
                 //" union " +
                
 
@@ -1310,102 +1346,25 @@ where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
                             //commented on 06122016 by farid
                             //loItem.TaxId = GetValue<int>(loReader, "safs_taxmode");
                             loItem.TaxId = GetValue<int>(loReader, "saft_taxmode");
-                            //if (loItem.SART_Code == "T")
-                            //{
-                            //    GSTSetupDAL gst = new GSTSetupDAL();
-                            //    decimal transamount;
-                            //    decimal gstamount;
-                            //    decimal total;
-                            //    double calculate;
-                            //    if (loItem.FeeBaseOn == "1")
-                            //    {
-                            //        loItem.TransactionAmount = GetValue<double>(loReader, "safa_amount");
-                            //        loItem.GSTAmount = GetValue<double>(loReader, "safa_gstamount");
-                            //        //loItem.TransactionAmount = GetValue<double>(loReader, "tuition_amount");
-                            //        //transamount = System.Convert.ToDecimal(loItem.TransactionAmount);
-                            //        //gstamount = gst.GetGstAmount(loItem.TaxId, transamount);
-                            //        if (loItem.TaxId == 1)
-                            //        {
-                            //            calculate = (loItem.TransactionAmount - loItem.GSTAmount);
-                            //            total = System.Convert.ToDecimal(calculate * loItem.CrditHrDiff);
-                            //            gstamount = gst.GetGstAmount(loItem.TaxId, total);
-                            //            loItem.TransactionAmount = System.Convert.ToDouble(gstamount) + System.Convert.ToDouble(total);
-                            //            loItem.GSTAmount = System.Convert.ToDouble(gstamount);
-                            //            loItem.TaxAmount = System.Convert.ToDouble(gstamount);
-                            //        }
-                            //        else
-                            //        {
-                            //            transamount = System.Convert.ToDecimal(loItem.TransactionAmount);
-                            //            gstamount = gst.GetGstAmount(loItem.TaxId, transamount);
-                            //            loItem.TransactionAmount = System.Convert.ToDouble(transamount);
-                            //            loItem.GSTAmount = System.Convert.ToDouble(gstamount);
-                            //            loItem.TaxAmount = System.Convert.ToDouble(gstamount);
-                            //        }
-                            //    }
-                            //    else if (loItem.FeeBaseOn == "0")
-                            //    {
-                            //        //loItem.TransactionAmount = GetValue<double>(loReader, "safa_amount");
-                            //        //transamount = System.Convert.ToDecimal(loItem.TransactionAmount);
-                            //        //gstamount = gst.GetGstAmount(loItem.TaxId, transamount);
-                            //        //loItem.GSTAmount = GetValue<double>(loReader, "safa_gstamount");
-                            //        //loItem.TaxAmount = GetValue<double>(loReader, "safa_gstamount");
-                            //        loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
-                            //        transamount = System.Convert.ToDecimal(loItem.TransactionAmount);
-                            //        gstamount = gst.GetGstAmount(loItem.TaxId, transamount);
-                            //        loItem.GSTAmount = GetValue<double>(loReader, "taxamount");
-                            //        loItem.TaxAmount = GetValue<double>(loReader, "taxamount");
-                            //        //if (loItem.TaxId == 1)
-                            //        //{
-                            //        //    loItem.TransactionAmount = System.Convert.ToDouble(gstamount) + System.Convert.ToDouble(transamount);
-                            //        //    loItem.GSTAmount = System.Convert.ToDouble(gstamount);
-                            //        //    loItem.TaxAmount = System.Convert.ToDouble(gstamount);
-                            //        //}
-                            //        //else
-                            //        //{
-                            //        //    loItem.GSTAmount = System.Convert.ToDouble(gstamount);
-                            //        //    loItem.TaxAmount = System.Convert.ToDouble(gstamount);
-                            //        //}
-                            //    }
-                            //}
-                            //else if (loItem.SART_Code == "K")
-                            //{
-                            //    loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
-                            //    loItem.GSTAmount = GetValue<double>(loReader, "taxamount");
-                            //    loItem.TaxAmount = GetValue<double>(loReader, "taxamount");
-                            //    //if (loItem.SASI_StatusRec == true)
-                            //    //{
-                            //    //    loItem.TransactionAmount = GetValue<double>(loReader, "tuition_amount");
-                            //    //    loItem.GSTAmount = GetValue<double>(loReader, "safs_tutamt");
-                            //    //    loItem.TaxAmount = GetValue<double>(loReader, "safs_tutamt");
-                            //    //    //loItem.TransactionAmount = loItem.TransactionAmount - loItem.GSTAmount;
-                            //    //}
-                            //    //else if (loItem.SASI_StatusRec == false)
-                            //    //{
-                            //    //    loItem.TransactionAmount = GetValue<double>(loReader, "safa_gstamount");
-                            //    //    loItem.GSTAmount = GetValue<double>(loReader, "safa_amount");
-                            //    //    loItem.TaxAmount = GetValue<double>(loReader, "safa_amount");
-                            //    //    //loItem.TransactionAmount = loItem.TransactionAmount - loItem.GSTAmount;
-                            //    //}
-                            //}
-                            //else if (loItem.SART_Code == "H")
-                            //{
 
-                            //    //loItem.TransactionAmount = GetValue<double>(loReader, "tuition_amount");
-                            //    //loItem.GSTAmount = GetValue<double>(loReader, "safa_gstamount");
-                            //    //loItem.TaxAmount = GetValue<double>(loReader, "safa_gstamount");
-                            //    loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
-                            //    loItem.GSTAmount = GetValue<double>(loReader, "taxamount");
-                            //    loItem.TaxAmount = GetValue<double>(loReader, "taxamount");
-                            //}
-                            //else
-                            //{
-                            //commented on 06122016 by farid
-                            //loItem.TransactionAmount = GetValue<double>(loReader, "safa_amount");
-                            //loItem.GSTAmount = GetValue<double>(loReader, "safa_gstamount");
-                            //loItem.TaxAmount = GetValue<double>(loReader, "safa_gstamount");
                             loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
                             loItem.GSTAmount = GetValue<double>(loReader, "taxamount");
                             loItem.TaxAmount = GetValue<double>(loReader, "taxamount");
+
+                            string d2, m2, y2;
+                            string code2 = GetValue<string>(loReader, "semyear");
+                            if (code2 != "")
+                            {
+                                d2 = code2.Substring(0, 4);
+                                m2 = code2.Substring(4, 4);
+                                y2 = code2.Substring(8, 1);
+                                string semestercode2 = d2 + "/" + m2 + "-" + y2;
+                                loItem.currsemyear = semestercode2;
+                            }
+                            else if (code2 == "")
+                            {
+                                loItem.currsemyear = "";
+                            }
                             //}
                             if (loItem.ReferenceCode != null)
                             {
@@ -1454,7 +1413,10 @@ where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
             {
                 sqlCmd = " SELECT SAS_Student.SASI_MatricNo, SAS_Student.SASI_Name, SAS_Student.SASI_PgId, SAS_Student.SASI_Faculty," +
                           " SAS_Student.SASI_ICNo, SAS_Student.SASI_CurSem, SAS_StudentSpon.SASS_Sponsor, SAS_StudentSpon.SASS_EDate, " +
-                          " SAS_StudentSpon.SASS_SDate FROM SAS_Student LEFT OUTER JOIN SAS_StudentSpon ON SAS_Student.SASI_MatricNo = SAS_StudentSpon.SASI_MatricNo" +
+                          " SAS_StudentSpon.SASS_SDate," +
+                          " " + argEn.TransactionAmount + "::double precision as SponsorAmount,SAS_Student.sass_code,sas_studentstatus.sass_blstatus " + 
+                          " FROM SAS_Student LEFT OUTER JOIN SAS_StudentSpon ON SAS_Student.SASI_MatricNo = SAS_StudentSpon.SASI_MatricNo" +
+                          " inner join sas_studentstatus on sas_studentstatus.sass_code = SAS_Student.sass_code "+
                           " where  SAS_Student.SASI_MatricNo = '" + argEn.MatricNo + "'";
             }
 
@@ -1480,6 +1442,7 @@ where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
 
                             loItem.STsponsercode = new StudentSponEn();
                             loItem.MatricNo = GetValue<string>(loReader, "SASI_MatricNo");
+                            loItem.TransactionAmount = GetValue<double>(loReader, "SponsorAmount");
                             loItem.StudentName = GetValue<string>(loReader, "SASI_Name");
                             loItem.ICNo = GetValue<string>(loReader, "SASI_ICNo");
                             loItem.ProgramID = GetValue<string>(loReader, "SASI_PgId");
@@ -1488,6 +1451,8 @@ where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
                             loItem.STsponsercode.Sponsor = GetValue<string>(loReader, "SASS_Sponsor");
                             loItem.STsponsercode.SDate = GetValue<string>(loReader, "SASS_SDate");
                             loItem.STsponsercode.EDate = GetValue<string>(loReader, "SASS_EDate");
+                            loItem.SASI_StatusRec = GetValue<bool>(loReader, "sass_blstatus");
+                            loItem.SASI_OtherID = GetValue<string>(loReader, "sass_code");
                             loEnList.Add(loItem);
                         }
                         loReader.Close();
@@ -4297,7 +4262,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                       
                         
                       
-                        select Distinct SAS_SponsorInvoice.cursemyr, SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, SASI_Name,  stu.SASI_PgId, prog.sapg_program,  stu.sasi_intake,  stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type,
+                        select Distinct SAS_SponsorInvoice.cursemyr, SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, SASI_Name,  stu.SASI_PgId, prog.sapg_program,  stu.sasi_intake,  stu.SASI_CurSem,stu.sasi_cursemyr, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type,
                         ( SELECT CASE WHEN SUM(SAS_SponsorInvoice.transamount) IS NULL THEN 0
                         ELSE Sum(sas_sponsorinvoicedetails.transamount) end from sas_sponsorinvoicedetails where transid in (select transid from sas_sponsorinvoice where batchcode = " + clsGeneric.AddQuotes(batchcode) + 
                         @" and creditref = stu.SASI_MatricNo) )AS  TransactionAMT,                          
@@ -4348,7 +4313,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                         left join sas_feetypes ft on ft.saft_code = fsa.saft_code and fsd.saft_code = fsa.saft_code    
                         
                        where sspon.SASS_Sponsor = " + clsGeneric.AddQuotes(Sponsor) + " and SAS_SponsorInvoice.BatchCode = " + clsGeneric.AddQuotes(batchcode) +
-                       " Group By SAS_SponsorInvoice.cursemyr,SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, stu.SASI_Name, stu.SASI_PgId,prog.sapg_program, stu.sasi_intake, stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type order by stu.SASI_MatricNo ";
+                       " Group By SAS_SponsorInvoice.cursemyr,SAS_SponsorInvoice.transamount,SAS_SponsorInvoice.batchcode,stu.SASI_MatricNo, stu.SASI_Name, stu.SASI_PgId,prog.sapg_program, stu.sasi_intake, stu.SASI_CurSem,stu.sasi_cursemyr, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type order by stu.SASI_MatricNo ";
 
             try
             {
@@ -4377,6 +4342,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             //loItem.CurSem = GetValue<int>(loReader, "cursem");
                             
                             string code = GetValue<string>(loReader, "cursemyr");
+                            string code2 = GetValue<string>(loReader, "sasi_cursemyr");
                             string d1, m1, y1, d2, m2, y2;
                             if (code != null)
                             {
@@ -4391,7 +4357,20 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             {
                                 loItem.CurretSemesterYear = "-1";
                             }
-                            
+
+                            if (code2 != null)
+                            {
+
+                                d2 = code2.Substring(0, 4);
+                                m2 = code2.Substring(4, 4);
+                                y2 = code2.Substring(8, 1);
+                                string semestercode = d2 + "/" + m2 + "-" + y2;
+                                loItem.currsemyear = semestercode;
+                            }
+                            else
+                            {
+                                loItem.currsemyear = "";
+                            }
                            
                             loEnList.Add(loItem);
                         }
@@ -4415,11 +4394,12 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
         /// </summary>
         /// <param name="argEn">Students Entity as an Input.MatricNo,StudentName,ICNo,ProgramId,ID and StatusRec as Input Properties.</param>
         /// <returns>Returns List of Students</returns>
-        public List<AccountsDetailsEn> GetListStudentForAllocation(string sponsor)
+        public List<AccountsDetailsEn> GetListStudentForAllocation(string sponsor,string matricno)
         {
             List<AccountsDetailsEn> loEnList = new List<AccountsDetailsEn>();
 
             string sqlCmd = @"select sa.sasi_matricno,ss.sasi_name,ss.sasi_icno,ss.sasi_pgid,ss.sasi_cursem from SAS_StudentSpon sa inner join sas_student ss on ss.sasi_matricno = sa.sasi_matricno where sa.sass_sponsor = " + clsGeneric.AddQuotes(sponsor);
+            if (matricno.Length != 0) sqlCmd = sqlCmd + " and sa.sasi_matricno like " + clsGeneric.AddQuotes(matricno);
             try
             {
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -4639,6 +4619,8 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                 " and sad.refcode = '" + refcode + "'" +
                 " and sa.creditref = '" + Matricno + "'";
             }
+
+            sqlCmd = sqlCmd + " order by creditref,transid,saft_priority,refcode asc";
             try
             {
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -4651,6 +4633,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             StudentEn loItem = new StudentEn();
                             double calculate;
                             loItem.TransactionAmount = GetValue<double>(loReader, "transamount");
+                            loItem.TempPaidAmount = loItem.TransactionAmount;
                             if (option == "Get")
                             {
                                 loItem.PaidAmount = GetValue<double>(loReader, "paidamount");
@@ -4677,7 +4660,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             loItem.Priority = GetValue<int>(loReader, "saft_priority");
                             calculate = (loItem.TransactionAmount - loItem.GSTAmount);
                             loItem.TempAmount = calculate;
-                            loItem.TempPaidAmount = loItem.TransactionAmount;
+                            
                             
 
                             if (option == "Compared")
