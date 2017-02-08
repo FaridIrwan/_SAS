@@ -1499,7 +1499,9 @@
                                     <asp:BoundColumn HeaderText="Fee Amount" DataField="TempAmount" Visible ="False"></asp:BoundColumn>
                                     <asp:BoundColumn DataField="ProgramID" HeaderText="ProgramID" Visible ="False">
                                         <HeaderStyle Width="12%" />
-                                    </asp:BoundColumn>                                
+
+                                    </asp:BoundColumn>
+                                    <asp:BoundColumn DataField="currsemyear" HeaderText="Current Sem Year">  </asp:BoundColumn>                              
                                 </Columns>
                             </asp:DataGrid>
                                     </table>

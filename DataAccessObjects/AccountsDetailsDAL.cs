@@ -562,7 +562,7 @@ namespace HTS.SAS.DataAccessObjects
                             "SAS_FeeTypes.SAFT_Code, SAS_FeeTypes.SAFT_FeeType, SAS_FeeTypes.SAFT_Hostel," +
                             " SAS_FeeTypes.SAFT_Priority, SAS_FeeTypes.SAFT_Remarks, SAS_FeeTypes.SAFT_GLCode, SAS_FeeTypes.SAFT_Status,SAS_AccountsDetails.TransAmount," +
                             " SAS_AccountsDetails.RefCode, SAS_AccountsDetails.TransID, SAS_AccountsDetails.TransTempCode,SAS_AccountsDetails.TransCode," +
-                            " SAS_FeeTypes.saft_taxmode, SAS_AccountsDetails.TaxAmount, SAS_AccountsDetails.Tax, SAS_AccountsDetails.internal_use " +
+                            " SAS_FeeTypes.saft_taxmode, SAS_AccountsDetails.TaxAmount, SAS_AccountsDetails.Tax, SAS_AccountsDetails.internal_use,SAS_AccountsDetails.temppaidamount " +
                             " FROM sas_accounts inner join SAS_AccountsDetails  on " +
                             " sas_accounts.transid = SAS_AccountsDetails.transid " +
                             " INNER JOIN SAS_FeeTypes ON SAS_AccountsDetails.RefCode = SAS_FeeTypes.SAFT_Code " +
@@ -621,6 +621,11 @@ namespace HTS.SAS.DataAccessObjects
                             loItem.TaxId = GetValue<int>(loReader, "saft_taxmode");
                             loItem.Sudentacc = getStudent;
                             loItem.Internal_Use = GetValue<string>(loReader, "internal_use");
+
+                            if(sub == "UpdatePaidAmount")
+                            {
+                                loItem.TempPaidAmount = GetValue<double>(loReader, "temppaidamount");
+                            }
                             loEnList.Add(loItem);
                         }
                         loReader.Close();
@@ -1520,6 +1525,138 @@ namespace HTS.SAS.DataAccessObjects
 
             }
             return null;
+        }
+
+        #endregion
+
+        #region GetActiveStuDentAllocation
+
+        /// <summary>
+        /// Method to Get Student Allocations
+        /// </summary>
+        /// <param name="argEn">AccountDetails Entity is an Input.TransactionID is an Input Property</param>
+        /// <returns>Returns List of AccountsDetails Entities</returns>
+        public List<AccountsDetailsEn> GetActiveStuDentAllocation(AccountsDetailsEn argEn)
+        {
+            List<AccountsDetailsEn> loEnList = new List<AccountsDetailsEn>();
+          
+            string sqlCmd = " select distinct ss.SASI_MatricNo,ss.SASI_Name,ss.SASI_PgId,ss.SASI_ICNo,ss.SASI_CurSem,sa.NoKelompok,sa.NoWarran," +
+                            " sa.AmaunWarran,allocated.allocateamount as allocateamount, allocated.paidamount as creditamount, allocated.temppaidamount as sponamt, pocket.transamount as pocket" +
+                            " ,pocket.tempamount as outstandingamt from  sas_accounts sa inner join sas_student ss on ss.SASI_MatricNo = sa.creditref left join" +
+                            " (select creditref,batchcode,allocateamount, paidamount, temppaidamount from sas_accounts where description = 'Sponsor Allocation Amount'  ) " +
+                            " as allocated on allocated.batchcode = sa.batchcode and allocated.creditref = ss.sasi_matricno left join" +
+                            " (select creditref,batchcode,transamount,temppaidamount ,tempamount from sas_accounts where  " +
+                            " description = 'Sponsor Pocket Amount')  as pocket on pocket.batchcode = sa.batchcode and pocket.creditref = ss.sasi_matricno" +
+                            " WHERE sa.category = 'SPA' and sa.batchcode ='" + argEn.ReferenceCode + "'";
+
+            try
+            {
+                if (!FormHelp.IsBlank(sqlCmd))
+                {
+                    using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                       DataBaseConnectionString, sqlCmd).CreateDataReader())
+                    {
+                        while (loReader.Read())
+                        {
+                            AccountsDetailsEn loItem = new AccountsDetailsEn();
+                            loItem.Sudentacc = new StudentEn();
+                            //loItem.TransactionID = GetValue<int>(loReader, "TransID");
+                            //loItem.TransTempCode = GetValue<string>(loReader, "TransTempCode");
+                            //loItem.TransactionCode = GetValue<string>(loReader, "TransCode");
+                            //loItem.ReferenceCode = GetValue<string>(loReader, "RefCode");
+                            loItem.TransactionAmount = GetValue<double>(loReader, "outstandingamt");
+                            loItem.PaidAmount = GetValue<double>(loReader, "creditamount");
+                            loItem.TempAmount = GetValue<double>(loReader, "pocket");
+                            loItem.TempPaidAmount = GetValue<double>(loReader, "sponamt");
+                            loItem.Sudentacc.MatricNo = GetValue<string>(loReader, "SASI_MatricNo");
+                            loItem.Sudentacc.StudentName = GetValue<string>(loReader, "SASI_Name");
+                            loItem.Sudentacc.ProgramID = GetValue<string>(loReader, "SASI_PgId");
+                            loItem.Sudentacc.ICNo = GetValue<string>(loReader, "SASI_ICNo");
+                            //loItem.ReferenceOne = GetValue<string>(loReader, "Ref1");
+                            //loItem.ReferenceThree = GetValue<string>(loReader, "Ref3");
+                            loItem.Sudentacc.CurrentSemester = GetValue<int>(loReader, "SASI_CurSem");
+                            loItem.NoKelompok = GetValue<string>(loReader, "NoKelompok");
+                            loItem.NoWarran = GetValue<string>(loReader, "NoWarran");
+                            loItem.AmaunWarran = GetValue<double>(loReader, "AmaunWarran");
+                            //loItem.noAkaun = GetValue<string>(loReader, "noAkaunPelajar");
+                            loItem.DiscountAmount = GetValue<double>(loReader, "allocateamount");
+                            loEnList.Add(loItem);
+                        }
+                        loReader.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return loEnList;
+        }
+
+        #endregion
+
+        #region GetInActiveStuDentAllocation
+
+        /// <summary>
+        /// Method to Get Student Allocations
+        /// </summary>
+        /// <param name="argEn">AccountDetails Entity is an Input.TransactionID is an Input Property</param>
+        /// <returns>Returns List of AccountsDetails Entities</returns>
+        public List<AccountsDetailsEn> GetInActiveStuDentAllocation(AccountsDetailsEn argEn)
+        {
+            List<AccountsDetailsEn> loEnList = new List<AccountsDetailsEn>();
+
+            string sqlCmd = " select distinct ss.SASI_MatricNo,ss.SASI_Name,ss.SASI_PgId,ss.SASI_ICNo,ss.SASI_CurSem,sa.NoKelompok,sa.NoWarran," +
+                            " sa.AmaunWarran,allocated.allocateamount as allocateamount, allocated.paidamount as creditamount, allocated.temppaidamount as sponamt, pocket.transamount as pocket" +
+                            " ,pocket.tempamount as outstandingamt from  sas_accounts_inactive sa inner join sas_student ss on ss.SASI_MatricNo = sa.creditref left join" +
+                            " (select creditref,batchcode,allocateamount, paidamount, temppaidamount from sas_accounts_inactive where description = 'Sponsor Allocation Amount'  ) " +
+                            " as allocated on allocated.batchcode = sa.batchcode and allocated.creditref = ss.sasi_matricno left join" +
+                            " (select creditref,batchcode,transamount,temppaidamount ,tempamount from sas_accounts_inactive where  " +
+                            " description = 'Sponsor Pocket Amount')  as pocket on pocket.batchcode = sa.batchcode and pocket.creditref = ss.sasi_matricno" +
+                            " WHERE sa.category = 'SPA' and sa.batchcode ='" + argEn.ReferenceCode + "'";
+
+            try
+            {
+                if (!FormHelp.IsBlank(sqlCmd))
+                {
+                    using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                       DataBaseConnectionString, sqlCmd).CreateDataReader())
+                    {
+                        while (loReader.Read())
+                        {
+                            AccountsDetailsEn loItem = new AccountsDetailsEn();
+                            loItem.Sudentacc = new StudentEn();
+                            //loItem.TransactionID = GetValue<int>(loReader, "TransID");
+                            //loItem.TransTempCode = GetValue<string>(loReader, "TransTempCode");
+                            //loItem.TransactionCode = GetValue<string>(loReader, "TransCode");
+                            //loItem.ReferenceCode = GetValue<string>(loReader, "RefCode");
+                            loItem.TransactionAmount = GetValue<double>(loReader, "outstandingamt");
+                            loItem.PaidAmount = GetValue<double>(loReader, "creditamount");
+                            loItem.TempAmount = GetValue<double>(loReader, "pocket");
+                            loItem.TempPaidAmount = GetValue<double>(loReader, "sponamt");
+                            loItem.Sudentacc.MatricNo = GetValue<string>(loReader, "SASI_MatricNo");
+                            loItem.Sudentacc.StudentName = GetValue<string>(loReader, "SASI_Name");
+                            loItem.Sudentacc.ProgramID = GetValue<string>(loReader, "SASI_PgId");
+                            loItem.Sudentacc.ICNo = GetValue<string>(loReader, "SASI_ICNo");
+                            //loItem.ReferenceOne = GetValue<string>(loReader, "Ref1");
+                            //loItem.ReferenceThree = GetValue<string>(loReader, "Ref3");
+                            loItem.Sudentacc.CurrentSemester = GetValue<int>(loReader, "SASI_CurSem");
+                            loItem.NoKelompok = GetValue<string>(loReader, "NoKelompok");
+                            loItem.NoWarran = GetValue<string>(loReader, "NoWarran");
+                            loItem.AmaunWarran = GetValue<double>(loReader, "AmaunWarran");
+                            //loItem.noAkaun = GetValue<string>(loReader, "noAkaunPelajar");
+                            loItem.DiscountAmount = GetValue<double>(loReader, "allocateamount");
+                            loEnList.Add(loItem);
+                        }
+                        loReader.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return loEnList;
         }
 
         #endregion

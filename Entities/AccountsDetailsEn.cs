@@ -59,6 +59,7 @@ namespace HTS.SAS.Entities
         private string csMatricNumber;
         private string csTaxCode;
         private string csInvNo;
+        private double cdoutamount;
 
         [System.Xml.Serialization.XmlElement]
         ////[DataMember]
@@ -454,6 +455,14 @@ namespace HTS.SAS.Entities
         {
             get { return csInvNo; }
             set { csInvNo = value; }
+        }
+
+        [System.Xml.Serialization.XmlElement]
+        ////[DataMember]
+        public double outamount
+        {
+            get { return cdoutamount; }
+            set { cdoutamount = value; }
         }
     }
 }

@@ -469,6 +469,7 @@ Partial Class WorkFlowDetails
                                             Call _AccountsDAL.UpdatePostingStatus(accObj.BatchCode, Session("User"))
                                         ElseIf accObj.TransType = "Allocation" Then
                                             Call _AccountsDAL.UpdatePostingStatusClosed(accObj.BatchCode, Session("User"))
+                                            Call _AccountsDAL.UpdateInactiveStatusClosed(accObj.BatchCode, Session("User"))
                                             Call _AccountsDAL.SponsorBatchPost(accObj.BatchCode, Session("User"))
                                         ElseIf accObj.TransType = "Payment" And accObj.SubType = "Sponsor" Then
                                             Call _AccountsDAL.UpdatePostingStatusClosed(accObj.BatchCode, Session("User"))

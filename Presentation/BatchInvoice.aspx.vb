@@ -2722,7 +2722,7 @@ Partial Class BatchInvoice
                     txtTotal.Text = obj.TransactionAmount
                     eobjTransDatails = New AccountsDetailsEn
                     eobjTransDatails.TransactionID = obj.TranssactionID
-
+                    txtMode.Text = obj.SubCategory
                     'Get selection criteria - start
                     Dim objSelectionCriteria As New SelectionCriteriaBAL
                     Dim enSelectionCriteria As New SelectionCriteriaEn
@@ -3485,7 +3485,30 @@ Partial Class BatchInvoice
                 Dim code As TextBox
                 Dim choice As String = "Compared"
                 Dim NewFeeStud As List(Of StudentEn)
-                'For Each dgitem In dgView.Items
+                Dim sumamountstudent As Double = 0
+                Dim lstmatric As List(Of String)
+                'If currListSt.Count > 0 Then
+
+                'lstmatric = listStu.Select(Function(x) x.MatricNo).Distinct().ToList()
+                'For Each dgItem1 In dgView.Items
+                '    For Each obj In lstmatric
+                '        'If dgItem1.Cells(1).Text = obj Then
+                '        For Each stu In listStu.Where(Function(x) x.MatricNo = obj And x.MatricNo = dgItem1.Cells(1).Text).ToList()
+
+                '            sumamountstudent = sumamountstudent + stu.TransactionAmount
+                '            eobj.TransactionAmount = sumamountstudent
+                '            'eob.TempAmount = String.Format("{0:F}", eob.TempAmount)
+                '            'dgItem1.Cells(3).Text = String.Format("{0:F}", eob.TempAmount)
+                '            'If stu.SponsorLimit = 0 And stu.AllocatedAmount = 0 Then
+                '            '    dgItem1.Cells(8).Text = "-"
+                '            'End If
+                '        Next
+
+                '        'End If
+                '    Next
+                '    sumamountstudent = 0
+                'Next
+                ''For Each dgitem In dgView.Items
                 '    chkBox = dgitem.Cells(0).Controls(1)
                 '    If chkBox.Checked = True Then
                 '        txt = dgitem.Cells(dgViewCell.Fee_Amount).Controls(1)
@@ -3609,6 +3632,12 @@ Partial Class BatchInvoice
                         trackid = 3
                     End If
                     'no record for AccountDetailsList 
+                    If txtMode.Text = "" Then
+
+                    Else
+                        eobj.SubCategory = txtMode.Text
+                    End If
+
                     txtBatchNo.Text = bsobj.StudentBatchUpdateEditMode(eobj, listStu, newsc, True)
 
                     'Else

@@ -239,12 +239,16 @@ Partial Class RptStudentLedger
             lblkolej.Text = ""
         End If
 
-        Dim MaxVal As Integer = New AccountsDAL().GetListByCreditRef(eobjf.MatricNo).Max(Function(x) x.CurSem)
-        Dim i As Integer = 0
-        While i < MaxVal
-            i = i + 1
-            ddlSponser.Items.Add(New ListItem(i, i))
-        End While
+        If lblCurSem.Text = "" Then
+        Else
+            Dim MaxVal As Integer = New AccountsDAL().GetListByCreditRef(eobjf.MatricNo).Max(Function(x) x.CurSem)
+            Dim i As Integer = 0
+            While i < MaxVal
+                i = i + 1
+                ddlSponser.Items.Add(New ListItem(i, i))
+            End While
+        End If
+
         Session("eobjstu") = Nothing
         LoadInvoiceGrid()
     End Sub

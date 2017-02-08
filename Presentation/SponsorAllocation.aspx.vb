@@ -163,33 +163,39 @@ Partial Class SponsorAllocation
             DirectCast(Master.FindControl("td"), System.Web.UI.HtmlControls.HtmlTableCell).Visible = False
             Panel1.Visible = False
             OnSearchOthers()
-            For Each dgItem1 As DataGridItem In dgView.Items
-                If dgItem1.Cells(1).Text = matric Then
-                    dgItem1.Cells(0).Visible = True
-                    dgItem1.Cells(1).Visible = True
-                    dgItem1.Cells(2).Visible = True
-                    dgItem1.Cells(3).Visible = True
-                    dgItem1.Cells(4).Visible = True
-                    dgItem1.Cells(5).Visible = True
-                    dgItem1.Cells(6).Visible = True
-                    dgItem1.Cells(7).Visible = True
-                    dgItem1.Cells(8).Visible = True
-                    dgItem1.Cells(10).Visible = True
-                    dgItem1.Cells(11).Visible = True
-                Else
-                    dgItem1.Cells(0).Visible = False
-                    dgItem1.Cells(1).Visible = False
-                    dgItem1.Cells(2).Visible = False
-                    dgItem1.Cells(3).Visible = False
-                    dgItem1.Cells(4).Visible = False
-                    dgItem1.Cells(5).Visible = False
-                    dgItem1.Cells(6).Visible = False
-                    dgItem1.Cells(7).Visible = False
-                    dgItem1.Cells(8).Visible = False
-                    dgItem1.Cells(10).Visible = False
-                    dgItem1.Cells(11).Visible = False
-                End If
-            Next
+
+            If matric Is Nothing Or matric = "" Then
+
+            Else
+                For Each dgItem1 As DataGridItem In dgView.Items
+                    If dgItem1.Cells(1).Text = matric Then
+                        dgItem1.Cells(0).Visible = True
+                        dgItem1.Cells(1).Visible = True
+                        dgItem1.Cells(2).Visible = True
+                        dgItem1.Cells(3).Visible = True
+                        dgItem1.Cells(4).Visible = True
+                        dgItem1.Cells(5).Visible = True
+                        dgItem1.Cells(6).Visible = True
+                        dgItem1.Cells(7).Visible = True
+                        dgItem1.Cells(8).Visible = True
+                        dgItem1.Cells(10).Visible = True
+                        dgItem1.Cells(11).Visible = True
+                    Else
+                        dgItem1.Cells(0).Visible = False
+                        dgItem1.Cells(1).Visible = False
+                        dgItem1.Cells(2).Visible = False
+                        dgItem1.Cells(3).Visible = False
+                        dgItem1.Cells(4).Visible = False
+                        dgItem1.Cells(5).Visible = False
+                        dgItem1.Cells(6).Visible = False
+                        dgItem1.Cells(7).Visible = False
+                        dgItem1.Cells(8).Visible = False
+                        dgItem1.Cells(10).Visible = False
+                        dgItem1.Cells(11).Visible = False
+                    End If
+                Next
+            End If
+           
         End If
     End Sub
 
@@ -432,14 +438,41 @@ Partial Class SponsorAllocation
     Protected Sub txtAllAmount1_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
 
         Dim txtamt As TextBox
+        Dim txtcredit As TextBox
+        Dim txtsponamt As TextBox
         Dim amount As Double = 0
+        Dim credamount As Double = 0
+        Dim spon As Double = 0
         Dim dgitem As DataGridItem
         Dim i As Integer = 0
         For Each dgitem In dgView.Items
             txtamt = dgitem.FindControl("txtAllAmount1")
-
+            txtsponamt = dgitem.FindControl("txtsponamt")
+            txtcredit = dgitem.FindControl("txtcreditamt")
+            credamount = MaxGeneric.clsGeneric.NullToDecimal(txtcredit.Text)
+            spon = MaxGeneric.clsGeneric.NullToDecimal(txtsponamt.Text)
             amount = txtamt.Text
 
+            If amount > 0 And credamount > 0 And amount < credamount Then
+                Dim previousamt As Double = 0
+                previousamt = spon - amount
+                txtcredit.Text = String.Format("{0:F}", previousamt)
+            End If
+            txtamt.Text = String.Format("{0:F}", amount)
+        Next
+        For Each dgitem In dgUnView.Items
+            txtamt = dgitem.FindControl("txtAllAmount1")
+            txtsponamt = dgitem.FindControl("txtsponamt")
+            txtcredit = dgitem.FindControl("txtcreditamt")
+            credamount = MaxGeneric.clsGeneric.NullToDecimal(txtcredit.Text)
+            spon = MaxGeneric.clsGeneric.NullToDecimal(txtsponamt.Text)
+            amount = txtamt.Text
+
+            If amount > 0 And credamount > 0 And amount < credamount Then
+                Dim previousamt As Double = 0
+                previousamt = spon - amount
+                txtcredit.Text = String.Format("{0:F}", previousamt)
+            End If
             txtamt.Text = String.Format("{0:F}", amount)
         Next
         If lblStatus.Value = "Posted" Then
@@ -461,6 +494,42 @@ Partial Class SponsorAllocation
         Dim dgitem As DataGridItem
         Dim i As Integer = 0
         For Each dgitem In dgView.Items
+            txtamt = dgitem.FindControl("txtpamont")
+            txtcredit = dgitem.FindControl("txtcreditamt")
+            amount = MaxGeneric.clsGeneric.NullToDecimal(txtamt.Text)
+            credamount = MaxGeneric.clsGeneric.NullToDecimal(txtcredit.Text)
+            txtamt.Text = String.Format("{0:F}", amount)
+            If amount > 0 And amount > dgitem.Cells(13).Text Then
+                dgitem.Cells(13).Text = txtamt.Text
+                'txtcredit.Text = String.Format("{0:F}", tamt)
+            ElseIf amount > 0 And amount < dgitem.Cells(13).Text And credamount = 0 Then
+                tamt = dgitem.Cells(13).Text - amount
+                total = tamt + credamount
+                txtcredit.Text = String.Format("{0:F}", total)
+            ElseIf amount > 0 And amount < dgitem.Cells(13).Text And credamount > 0 Then
+                'tamt = dgitem.Cells(13).Text - amount
+                'total = tamt + credamount
+                'txtcredit.Text = String.Format("{0:F}", total)
+
+                balance = amount + credamount
+                tamt = dgitem.Cells(14).Text - balance
+                total = tamt + credamount
+                txtcredit.Text = String.Format("{0:F}", total)
+                dgitem.Cells(13).Text = txtcredit.Text
+                '    credit = amount
+            ElseIf amount = 0 And credamount = 0 Then
+                txtcredit.Text = Trim(dgitem.Cells(13).Text)
+            ElseIf amount = 0 And amount < dgitem.Cells(13).Text Then
+                'tamt = dgitem.Cells(13).Text - amount
+                'total = tamt + credamount
+                'txtcredit.Text = String.Format("{0:F}", total)
+                txtcredit.Text = String.Format("{0:F}", dgitem.Cells(14).Text)
+                dgitem.Cells(13).Text = txtcredit.Text
+            End If
+
+        Next
+
+        For Each dgitem In dgUnView.Items
             txtamt = dgitem.FindControl("txtpamont")
             txtcredit = dgitem.FindControl("txtcreditamt")
             amount = MaxGeneric.clsGeneric.NullToDecimal(txtamt.Text)
@@ -530,6 +599,23 @@ Partial Class SponsorAllocation
             End If
 
         Next
+
+        For Each dgitem In dgUnView.Items
+            txtamt = dgitem.FindControl("txtsponamt")
+            txtallocated = dgitem.FindControl("txtAllAmount1")
+            amount = MaxGeneric.clsGeneric.NullToDecimal(txtamt.Text)
+            allocated = MaxGeneric.clsGeneric.NullToDecimal(txtallocated.Text)
+            txtamt.Text = String.Format("{0:F}", amount)
+            outstanding = dgitem.Cells(7).Text
+            If amount > allocated Then
+                credit = amount - allocated
+                txtcredit = dgitem.FindControl("txtcreditamt")
+                txtcredit.Text = String.Format("{0:F}", credit)
+                dgitem.Cells(10).Enabled = True
+                dgitem.Cells(11).Enabled = True
+            End If
+
+        Next
         If lblStatus.Value = "Posted" Then
             LoadTotals()
         Else
@@ -554,6 +640,76 @@ Partial Class SponsorAllocation
         Dim allocate As Double = 0
         Dim i As Integer = 0
         For Each dgitem In dgView.Items
+            txtamt = dgitem.FindControl("txtcreditamt")
+            txtpaamount = dgitem.FindControl("txtpamont")
+            txtcredit = dgitem.FindControl("txtcreditt")
+            txtsponamt = dgitem.FindControl("txtsponamt")
+            txtallocated = dgitem.FindControl("txtAllAmount1")
+            spon = MaxGeneric.clsGeneric.NullToDecimal(txtsponamt.Text)
+            allocate = MaxGeneric.clsGeneric.NullToDecimal(txtallocated.Text)
+            amount = MaxGeneric.clsGeneric.NullToDecimal(txtamt.Text)
+            pocket = MaxGeneric.clsGeneric.NullToDecimal(txtpaamount.Text)
+            txtamt.Text = String.Format("{0:F}", amount)
+            credit = MaxGeneric.clsGeneric.NullToDecimal(txtcredit.Text)
+            'If amount > 0 Then
+            '    dgitem.Cells(14).Text = txtamt.Text
+            '    'txtpaamount.Text = String.Format("{0:F}", tamt)
+
+            'Else
+            '    txtpaamount.Text = Trim(dgitem.Cells(14).Text)
+            'End If
+            If amount > 0 And amount > dgitem.Cells(14).Text Then
+                dgitem.Cells(14).Text = txtamt.Text
+                'txtcredit.Text = String.Format("{0:F}", tamt)
+            ElseIf amount > 0 And amount < dgitem.Cells(14).Text And pocket = 0 Then
+                'If amount > credit Then
+                tamt = dgitem.Cells(14).Text - amount
+                total = tamt + pocket
+                txtpaamount.Text = String.Format("{0:F}", total)
+                dgitem.Cells(13).Text = txtpaamount.Text
+                '    credit = amount
+                '    txtcredit.Text = String.Format("{0:F}", credit)
+                'ElseIf credit > amount Then
+                'tamt = credit - amount
+                'total = tamt + pocket
+                'txtpaamount.Text = String.Format("{0:F}", total)
+                'dgitem.Cells(13).Text = txtpaamount.Text
+
+                'End If
+            ElseIf amount > 0 And amount < dgitem.Cells(14).Text And pocket > 0 Then
+                'If amount > credit Then
+                balance = amount + pocket
+                tamt = dgitem.Cells(14).Text - balance
+                total = tamt + pocket
+                txtpaamount.Text = String.Format("{0:F}", total)
+                dgitem.Cells(13).Text = txtpaamount.Text
+                '    credit = amount
+                '    txtcredit.Text = String.Format("{0:F}", credit)
+                'ElseIf credit > amount Then
+                'tamt = credit - amount
+                'total = tamt + pocket
+                'txtpaamount.Text = String.Format("{0:F}", total)
+                'dgitem.Cells(13).Text = txtpaamount.Text
+
+                'End If
+            ElseIf amount = 0 And pocket = 0 Then
+                Dim previousamt As Double = 0
+                previousamt = spon - allocate
+                txtpaamount.Text = previousamt
+                dgitem.Cells(13).Text = String.Format("{0:F}", txtpaamount.Text)
+            ElseIf amount = 0 And amount < dgitem.Cells(14).Text Then
+                'tamt = dgitem.Cells(14).Text - amount
+                'total = tamt + pocket
+                'txtpaamount.Text = String.Format("{0:F}", total)
+                'dgitem.Cells(13).Text = txtpaamount.Text
+
+                txtpaamount.Text = String.Format("{0:F}", dgitem.Cells(14).Text)
+                dgitem.Cells(13).Text = txtpaamount.Text
+            End If
+            'Session("LastName") = txtamt.Text
+        Next
+
+        For Each dgitem In dgUnView.Items
             txtamt = dgitem.FindControl("txtcreditamt")
             txtpaamount = dgitem.FindControl("txtpamont")
             txtcredit = dgitem.FindControl("txtcreditt")
@@ -1232,25 +1388,33 @@ Partial Class SponsorAllocation
                 txtKumpulanPelajar.Value = obj.KumpulanPelajar
                 txtKodBank.Value = obj.KodBank
                 Session("loaddata") = Nothing
-                'Dim eob As New AccountsEn
-                'Dim liststuAll As New List(Of AccountsDetailsEn)
-                'Dim liststudentbasedonsponsorinvoice As New List(Of AccountsDetailsEn)
-                'Dim objstu As New AccountsDetailsBAL
-                'Dim eobstu As New AccountsDetailsEn
-                'Dim stlist As New List(Of StudentEn)
-                'Dim stuen As New StudentEn
-                'Dim bsstu As New AccountsBAL
+
                 eobstu.TransactionID = obj.TranssactionID
+
+                Dim getdata As New AccountsDetailsEn
+                getdata.ReferenceCode = obj.BatchCode
+                'getdata.Category = "SPA"
                 Try
-                    liststuAll = objstu.GetStuDentAllocation(eobstu)
+                    liststuAll = objstu.GetActiveStuDentAllocation(getdata)
                 Catch ex As Exception
                     LogError.Log("SponsorAllocation", "FillData", ex.Message)
                 End Try
 
+                Dim liststuinactive As New List(Of AccountsDetailsEn)
+                'getdata.ReferenceCode = obj.BatchCode
+                'getdata.Category = "SPA"
+                Try
+                    liststuinactive = objstu.GetInActiveStuDentAllocation(getdata)
+                Catch ex As Exception
+                    LogError.Log("SponsorAllocation", "FillData", ex.Message)
+                End Try
                 Session("spt") = obj.CreditRef
                 Session("AddFee") = liststuAll
+                Session("inactive") = liststuinactive
                 dgView.DataSource = liststuAll
                 dgView.DataBind()
+                dgUnView.DataSource = liststuinactive
+                dgUnView.DataBind()
                 MultiView1.SetActiveView(View1)
                 If obj.PostStatus = "Ready" Then
                     lblStatus.Value = "Ready"
@@ -1329,16 +1493,91 @@ Partial Class SponsorAllocation
                                 dgItem1.Cells(16).Text = liststuAll(x).NoWarran
                                 dgItem1.Cells(17).Text = liststuAll(x).AmaunWarran
                                 dgItem1.Cells(18).Text = liststuAll(x).noAkaun
-                                If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
-                                    dgItem1.Cells(10).Enabled = False
-                                    dgItem1.Cells(11).Enabled = False
-                                End If
+                                'If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
+                                '    dgItem1.Cells(10).Enabled = False
+                                '    dgItem1.Cells(11).Enabled = False
+                                'End If
                                 Exit For
                             End If
                         Next
                         x = x + 1
                     End While
                     LoadTotal()
+                    Dim i As Integer = 0
+                    While i < liststuinactive.Count
+
+                        For Each dgItem1 In dgUnView.Items
+                            'If dgItem1.Cells(1).Text = liststuAll(x).Sudentacc.MatricNo Then
+                            chk = dgItem1.Cells(0).Controls(1)
+                            If chk.Checked = False Then
+                                chk.Checked = True
+
+                                'If chkSelectAll.Checked = True Then
+                                '    chkSelectAll.Checked = False
+                                'End If
+
+                                txtAmount = dgItem1.Cells(8).Controls(1)
+                                amt = liststuinactive(i).DiscountAmount
+                                txtpamont = dgItem1.Cells(11).Controls(1)
+                                tamt = liststuinactive(i).TempAmount
+                                txtCreditamt = dgItem1.Cells(10).Controls(1)
+                                credamout = liststuinactive(i).PaidAmount
+                                txtSponamt = dgItem1.Cells(6).Controls(1)
+                                sponamt = liststuinactive(i).TempPaidAmount
+
+                                txtCreditamt.Text = String.Format("{0:F}", credamout)
+                                txtSponamt.Text = String.Format("{0:F}", sponamt)
+                                txtpamont.Text = String.Format("{0:F}", tamt)
+                                txtAmount.Text = String.Format("{0:F}", amt)
+                                stuen.MatricNo = dgItem1.Cells(1).Text
+                                dgItem1.Cells(12).Text = amt + credamout + tamt
+
+
+                                If txtpamont.Text And txtCreditamt.Text = 0 Then
+                                    dgItem1.Cells(10).Enabled = False
+                                    dgItem1.Cells(11).Enabled = False
+                                End If
+                                'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+                                Dim ListInvObjects1 As New List(Of AccountsEn)
+                                Dim obj3 As New AccountsBAL
+                                Dim eob3 As New AccountsEn
+
+                                eob3.CreditRef = stuen.MatricNo
+                                eob3.PostStatus = "Posted"
+                                eob3.SubType = "Student"
+                                eob3.TransType = ""
+                                eob3.TransStatus = "Closed"
+
+                                Try
+
+                                    ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+
+                                Catch ex As Exception
+                                    LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
+                                End Try
+
+                                dgInvoices1.DataSource = ListInvObjects1
+                                dgInvoices1.DataBind()
+                                ledgerformat()
+                                'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+                                outamt = Trim(txtoutamount.Text)
+                                ' Added by JK
+                                dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
+                                'amt = (CDbl(dgItem1.Cells(6).Text) - amt)
+                                'dgItem1.Cells(8).Text = String.Format("{0:F}", amt)
+                                dgItem1.Cells(15).Text = liststuinactive(i).NoKelompok
+                                dgItem1.Cells(16).Text = liststuinactive(i).NoWarran
+                                dgItem1.Cells(17).Text = liststuinactive(i).AmaunWarran
+                                dgItem1.Cells(18).Text = liststuinactive(i).noAkaun
+                                'If txtpamont.Text = 0 And txtCreditamt.Text = 0 Then
+                                '    dgItem1.Cells(10).Enabled = False
+                                '    dgItem1.Cells(11).Enabled = False
+                                'End If
+                                Exit For
+                            End If
+                        Next
+                        i = i + 1
+                    End While
                 End If
                 If obj.PostStatus = "Posted" Then
                     Dim espn0 As Double = 0
@@ -1446,7 +1685,8 @@ Partial Class SponsorAllocation
                                 dgInvoices1.DataBind()
                                 ledgerformat()
                                 'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
-                                outamt = Trim(txtoutamount.Text)
+                                'outamt = Trim(txtoutamount.Text)
+                                outamt = liststuAll(x).TransactionAmount
                                 ' Added by JK
                                 dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
                                 'amt = (CDbl(dgItem1.Cells(6).Text) - amt)
@@ -1466,6 +1706,82 @@ Partial Class SponsorAllocation
                         x = x + 1
                     End While
                     'LoadTotal()
+                    Dim i As Integer = 0
+                    While i < liststuinactive.Count
+
+                        For Each dgItem1 In dgUnView.Items
+                            'If dgItem1.Cells(1).Text = liststuAll(x).Sudentacc.MatricNo Then
+                            chk = dgItem1.Cells(0).Controls(1)
+                            If chk.Checked = False Then
+                                chk.Checked = True
+                                chk.Enabled = False
+                                'If chkSelectAll.Checked = True Then
+                                '    chkSelectAll.Checked = False
+                                'End If
+
+                                txtAmount = dgItem1.Cells(8).Controls(1)
+                                amt = liststuinactive(i).DiscountAmount
+                                txtpamont = dgItem1.Cells(11).Controls(1)
+                                tamt = liststuinactive(i).TempAmount
+                                txtCreditamt = dgItem1.Cells(10).Controls(1)
+                                credamout = liststuinactive(i).PaidAmount
+                                txtSponamt = dgItem1.Cells(6).Controls(1)
+                                sponamt = liststuinactive(i).TempPaidAmount
+
+                                txtCreditamt.Text = String.Format("{0:F}", credamout)
+                                txtSponamt.Text = String.Format("{0:F}", sponamt)
+                                txtpamont.Text = String.Format("{0:F}", tamt)
+                                txtAmount.Text = String.Format("{0:F}", amt)
+                                stuen.MatricNo = dgItem1.Cells(1).Text
+                                dgItem1.Cells(12).Text = amt + credamout + tamt
+
+
+                                If txtpamont.Text And txtCreditamt.Text = 0 Then
+                                    dgItem1.Cells(10).Enabled = False
+                                    dgItem1.Cells(11).Enabled = False
+                                End If
+                                'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+                                Dim ListInvObjects1 As New List(Of AccountsEn)
+                                Dim obj3 As New AccountsBAL
+                                Dim eob3 As New AccountsEn
+
+                                eob3.CreditRef = stuen.MatricNo
+                                eob3.PostStatus = "Posted"
+                                eob3.SubType = "Student"
+                                eob3.TransType = ""
+                                eob3.TransStatus = "Closed"
+
+                                Try
+
+                                    ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+
+                                Catch ex As Exception
+                                    LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
+                                End Try
+
+                                dgInvoices1.DataSource = ListInvObjects1
+                                dgInvoices1.DataBind()
+                                ledgerformat()
+                                'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+                                'outamt = Trim(txtoutamount.Text)
+                                outamt = liststuinactive(i).TransactionAmount
+                                ' Added by JK
+                                dgItem1.Cells(7).Text = String.Format("{0:F}", outamt)
+                                'amt = (CDbl(dgItem1.Cells(6).Text) - amt)
+                                'dgItem1.Cells(8).Text = String.Format("{0:F}", amt)
+                                dgItem1.Cells(15).Text = liststuinactive(i).NoKelompok
+                                dgItem1.Cells(16).Text = liststuinactive(i).NoWarran
+                                dgItem1.Cells(17).Text = liststuinactive(i).AmaunWarran
+                                dgItem1.Cells(18).Text = liststuinactive(i).noAkaun
+                                dgItem1.Cells(6).Enabled = False
+                                dgItem1.Cells(8).Enabled = False
+                                dgItem1.Cells(10).Enabled = False
+                                dgItem1.Cells(11).Enabled = False
+                                Exit For
+                            End If
+                        Next
+                        i = i + 1
+                    End While
                 End If
 
                 CheckWorkflowStatus(obj)
@@ -1920,8 +2236,11 @@ Partial Class SponsorAllocation
 
         'instance declared
         Dim eobj As New AccountsEn
+        Dim eobj1 As New AccountsEn
+        Dim eobj2 As New AccountsEn
         Dim eobjDetails As New AccountsDetailsEn
         Dim list As New List(Of AccountsDetailsEn)
+        Dim list2 As New List(Of AccountsDetailsEn)
         Dim splist As New List(Of SponsorEn)
         Dim eospn As New SponsorEn
         Dim bsobj As New AccountsBAL
@@ -1967,49 +2286,6 @@ Partial Class SponsorAllocation
         RspStuAllAmount = MaxGeneric.clsGeneric.NullToDecimal(txtAllAmount.Text)
         StAllAmount = MaxGeneric.clsGeneric.NullToDecimal(txtAllocateAmount.Text)
 
-        'Try
-        '    If ActSpAmount > SpStuAllAmount Then
-        '        ' stuAllAmount = MaxGeneric.clsGeneric.NullToDecimal(txtspnAllAmount.Text) + MaxGeneric.clsGeneric.NullToDecimal( txtAllocateAmount.Text)
-        '        If RspStuAllAmount <> 0 Then
-        '            AvalAllAmount = Session("SpStuAllAmount")
-        '            If AvalAllAmount <> 0 Then
-        '                eobj.AllocatedAmount = Session("SpStuAllAmount")
-        '            End If
-        '        Else
-
-        '            If SpStuAllAmount >= StAllAmount Then
-
-        '                eobj.AllocatedAmount = SpStuAllAmount - StAllAmount
-        '            Else
-        '                Throw New Exception("Allocated Amount Exceeds the Amount Received")
-        '                ibtnSave.Enabled = False
-        '            End If
-
-
-        '        End If
-
-        '    Else
-        '        If SpStuAllAmount <= ActSpAmount Then
-
-        '            eobj.AllocatedAmount = ActSpAmount - StAllAmount
-        '        Else
-        '            Throw New Exception("Allocated Amount Exceeds the Amount Received")
-        '            ibtnSave.Enabled = False
-        '        End If
-        '    End If
-
-
-
-
-        'Catch ex As Exception
-        '    lblMsg.Text = ex.Message.ToString()
-        '    LogError.Log("SponsorAllocation", "Onsave", ex.Message)
-        '    ibtnSave.Enabled = False
-        '    ibtnSave.ImageUrl = "images/gsave.png"
-        '    ibtnSave.ToolTip = "Access Denied"
-        'End Try
-        ''check ended
-
 
         Dim dgItem1 As DataGridItem
         Dim amount As TextBox
@@ -2049,6 +2325,7 @@ Partial Class SponsorAllocation
                 eobjDetails.DiscountAmount = CDbl(allocated)
                 eobjDetails.TempAmount = CDbl(tempAmount.Text.Trim)
                 eobjDetails.TempPaidAmount = CDbl(txtSponamt.Text.Trim)
+                eobjDetails.outamount = CDbl(dgItem1.Cells(7).Text.Trim)
                 eobjDetails.TransStatus = "Open"
                 If dgItem1.Cells(15).Text.Trim = "&nbsp;" Then
                     NoKelompok = ""
@@ -2102,15 +2379,78 @@ Partial Class SponsorAllocation
 
         splist.Add(eospn)
         lblMsg.Visible = True
+
+        Dim dgItem2 As DataGridItem
+        Dim amount2 As TextBox
+        Dim tempAmount2 As TextBox
+        Dim chkselect2 As CheckBox
+        Dim txtAmount2 As TextBox
+        Dim txtCreditamt2 As TextBox
+        Dim txtSponamt2 As TextBox
+        Dim txtpamont2 As TextBox
+        Dim total2 As Double = 0
+        Dim allocated2 As Double = 0
+        Dim credit2 As Double = 0
+
+        For Each dgItem2 In dgUnView.Items
+            chkselect2 = dgItem2.Cells(0).Controls(1)
+            If chkselect2.Checked = True Then
+                Dim NoKelompok As String = ""
+                Dim NoWarran As String = ""
+                Dim AmaunWarran As Double = 0.0
+                Dim noAkaun As String = ""
+                amount2 = dgItem2.Cells(8).Controls(1)
+                txtCreditamt2 = dgItem2.Cells(10).Controls(1)
+                txtSponamt2 = dgItem2.Cells(6).Controls(1)
+                tempAmount2 = dgItem2.Cells(11).Controls(1)
+                allocated2 = amount2.Text
+                credit2 = txtCreditamt2.Text
+                eobjDetails = New AccountsDetailsEn
+                eobjDetails.ReferenceCode = dgItem2.Cells(1).Text.Trim
+                eobjDetails.PaidAmount = CDbl(txtCreditamt2.Text.Trim)
+                total2 = credit2 + allocated2
+                eobjDetails.TransactionAmount = CDbl(total2)
+                eobjDetails.DiscountAmount = CDbl(allocated2)
+                eobjDetails.TempAmount = CDbl(tempAmount2.Text.Trim)
+                eobjDetails.TempPaidAmount = CDbl(txtSponamt2.Text.Trim)
+                eobjDetails.outamount = CDbl(dgItem2.Cells(7).Text.Trim)
+                eobjDetails.TransStatus = "Open"
+                If dgItem2.Cells(15).Text.Trim = "&nbsp;" Then
+                    NoKelompok = ""
+                End If
+                If dgItem2.Cells(16).Text.Trim = "&nbsp;" Then
+                    NoWarran = ""
+                End If
+                If dgItem2.Cells(17).Text.Trim = "&nbsp;" Then
+                    AmaunWarran = ""
+                End If
+                If dgItem2.Cells(18).Text.Trim = "&nbsp;" Then
+                    noAkaun = ""
+                End If
+                eobjDetails.NoKelompok = NoKelompok
+                eobjDetails.NoWarran = NoWarran
+                eobjDetails.AmaunWarran = AmaunWarran
+                eobjDetails.noAkaun = noAkaun
+                'eobjDetails.StatusBayaran = statusBayaran.Value
+                list2.Add(eobjDetails)
+                eobjDetails = Nothing
+            End If
+
+        Next
+        eobj2.AccountDetailsList = list2
         If Session("PageMode") = "Add" Then
             Try
-                txtReceipNo.Text = bsobj.SponsorBatchInsert(eobj, splist)
+                txtReceipNo.Text = bsobj.SponsorInsertActive(eobj, splist)
                 ErrorDescription = "Record Saved Successfully "
                 lblMsg.Text = ErrorDescription
                 ibtnStatus.ImageUrl = "images/ready.gif"
                 lblStatus.Value = "Ready"
                 txtReceipNo.ReadOnly = False
                 txtReceipNo.Text = eobj.BatchCode
+                eobj2.BatchCode = eobj.BatchCode
+                eobj2.CreditRefOne = eobj.CreditRef
+                Dim insertinactive As String
+                insertinactive = bsobj.Sponsorinsertinactive(eobj2, splist)
                 txtReceipNo.ReadOnly = True
                 LabelAvailable.Visible = True
                 ibtnSave.Enabled = False
@@ -2124,7 +2464,12 @@ Partial Class SponsorAllocation
         ElseIf Session("PageMode") = "Edit" Then
             Try
                 eobj.BatchCode = Trim(txtReceipNo.Text)
-                txtReceipNo.Text = bsobj.SponsorBatchUpdate(eobj, splist)
+                txtReceipNo.Text = bsobj.SponsorUpdateActive(eobj, splist)
+                eobj2.BatchCode = eobj.BatchCode
+                Dim updateinactive As String
+                eobj2.SubCategory = "Update"
+                eobj2.CreditRefOne = eobj.CreditRef
+                updateinactive = bsobj.Sponsorinsertinactive(eobj2, splist)
                 ListObjects = Session("ListObj")
                 ListObjects(CInt(txtRecNo.Text) - 1) = eobj
                 Session("ListObj") = ListObjects
@@ -2508,6 +2853,7 @@ Partial Class SponsorAllocation
             'txtCheque.Text = eobj1.ChequeNo
             txtchequeDate.Text = eobj.ChequeDate
             'eob = Session("spnObj")
+            ddlBankCode.SelectedValue = eobj1.Filler
             eobstu.TransTempCode = eobj1.TransTempCode
             eobstu.PostStatus = "Posted"
             'eobstu.TransStatus = "Open"commented by farid on 240216
@@ -3472,7 +3818,7 @@ Partial Class SponsorAllocation
         'Modified Mona 19/2/2016
         'eobj.TransStatus = "Open"
         'eobj.PostStatus = "Posted"
-        eobj.TransStatus = "Closed"
+        eobj.TransStatus = "Open"
         eobj.PostStatus = "Ready"
         'Added by farid 27022016
         eobj.SubCategory = "Student Payment"
@@ -3501,21 +3847,10 @@ Partial Class SponsorAllocation
         For Each dgItem1 In dgView.Items
             chkselect = dgItem1.Cells(0).Controls(1)
             If chkselect.Checked = True Then
-                Dim NoKelompok As String = ""
+               Dim NoKelompok As String = ""
                 Dim NoWarran As String = ""
                 Dim AmaunWarran As Double = 0.0
                 Dim noAkaun As String = ""
-                'amount = dgItem1.Cells(8).Controls(1)
-                'txtCreditamt = dgItem1.Cells(10).Controls(1)
-                'txtSponamt = dgItem1.Cells(6).Controls(1)
-                'tempAmount = dgItem1.Cells(11).Controls(1)
-                'eobjDetails = New AccountsDetailsEn
-                'eobjDetails.ReferenceCode = dgItem1.Cells(1).Text
-                'eobjDetails.PaidAmount = CDbl(txtCreditamt.Text.Trim)
-                'eobjDetails.TransactionAmount = txtCreditamt.Text + amount.Text
-                'eobjDetails.DiscountAmount = CDbl(amount.Text.Trim)
-                'eobjDetails.TempAmount = CDbl(tempAmount.Text)
-                'eobjDetails.TempPaidAmount = CDbl(txtSponamt.Text.Trim)
                 amount = dgItem1.Cells(8).Controls(1)
                 txtCreditamt = dgItem1.Cells(10).Controls(1)
                 txtSponamt = dgItem1.Cells(6).Controls(1)
@@ -3530,8 +3865,8 @@ Partial Class SponsorAllocation
                 eobjDetails.DiscountAmount = CDbl(allocated)
                 eobjDetails.TempAmount = CDbl(tempAmount.Text.Trim)
                 eobjDetails.TempPaidAmount = CDbl(txtSponamt.Text.Trim)
+                eobjDetails.outamount = CDbl(dgItem1.Cells(7).Text.Trim)
                 eobjDetails.TransStatus = "Open"
-                eobjDetails.ReferenceOne = Trim(txtAllocationCode.Text)
                 If dgItem1.Cells(15).Text.Trim = "&nbsp;" Then
                     NoKelompok = ""
                 End If
@@ -3548,11 +3883,72 @@ Partial Class SponsorAllocation
                 eobjDetails.NoWarran = NoWarran
                 eobjDetails.AmaunWarran = AmaunWarran
                 eobjDetails.noAkaun = noAkaun
+                'eobjDetails.StatusBayaran = statusBayaran.Value
                 list.Add(eobjDetails)
                 eobjDetails = Nothing
             End If
         Next
         eobj.AccountDetailsList = list
+
+        Dim dgItem2 As DataGridItem
+        Dim amount2 As TextBox
+        Dim tempAmount2 As TextBox
+        Dim chkselect2 As CheckBox
+        Dim txtAmount2 As TextBox
+        Dim txtCreditamt2 As TextBox
+        Dim txtSponamt2 As TextBox
+        Dim txtpamont2 As TextBox
+        Dim total2 As Double = 0
+        Dim allocated2 As Double = 0
+        Dim credit2 As Double = 0
+        Dim eobj2 As New AccountsEn
+        Dim list2 As New List(Of AccountsDetailsEn)
+        For Each dgItem2 In dgUnView.Items
+            chkselect2 = dgItem2.Cells(0).Controls(1)
+            If chkselect2.Checked = True Then
+                Dim NoKelompok As String = ""
+                Dim NoWarran As String = ""
+                Dim AmaunWarran As Double = 0.0
+                Dim noAkaun As String = ""
+                amount2 = dgItem2.Cells(8).Controls(1)
+                txtCreditamt2 = dgItem2.Cells(10).Controls(1)
+                txtSponamt2 = dgItem2.Cells(6).Controls(1)
+                tempAmount2 = dgItem2.Cells(11).Controls(1)
+                allocated2 = amount2.Text
+                credit2 = txtCreditamt2.Text
+                eobjDetails = New AccountsDetailsEn
+                eobjDetails.ReferenceCode = dgItem2.Cells(1).Text.Trim
+                eobjDetails.PaidAmount = CDbl(txtCreditamt2.Text.Trim)
+                total2 = credit2 + allocated2
+                eobjDetails.TransactionAmount = CDbl(total2)
+                eobjDetails.DiscountAmount = CDbl(allocated2)
+                eobjDetails.TempAmount = CDbl(tempAmount2.Text.Trim)
+                eobjDetails.TempPaidAmount = CDbl(txtSponamt2.Text.Trim)
+                eobjDetails.outamount = CDbl(dgItem2.Cells(7).Text.Trim)
+                eobjDetails.TransStatus = "Open"
+                If dgItem2.Cells(15).Text.Trim = "&nbsp;" Then
+                    NoKelompok = ""
+                End If
+                If dgItem2.Cells(16).Text.Trim = "&nbsp;" Then
+                    NoWarran = ""
+                End If
+                If dgItem2.Cells(17).Text.Trim = "&nbsp;" Then
+                    AmaunWarran = ""
+                End If
+                If dgItem2.Cells(18).Text.Trim = "&nbsp;" Then
+                    noAkaun = ""
+                End If
+                eobjDetails.NoKelompok = NoKelompok
+                eobjDetails.NoWarran = NoWarran
+                eobjDetails.AmaunWarran = AmaunWarran
+                eobjDetails.noAkaun = noAkaun
+                'eobjDetails.StatusBayaran = statusBayaran.Value
+                list2.Add(eobjDetails)
+                eobjDetails = Nothing
+            End If
+
+        Next
+        eobj2.AccountDetailsList = list2
         If list.Count = 0 Then
             ErrorDescription = "Select At least One Student"
             lblMsg.Text = ErrorDescription
@@ -3599,7 +3995,7 @@ Partial Class SponsorAllocation
         lblMsg.Visible = True
         If Session("PageMode") = "Add" Then
             Try
-                txtReceipNo.Text = bsobj.SponsorBatchUpdate(eobj, splist)
+                txtReceipNo.Text = bsobj.SponsorUpdateActive(eobj, splist)
                 'ErrorDescription = "Record Posted Successfully "
                 ibtnStatus.ImageUrl = "images/posted.gif"
                 'lblStatus.Value = "Posted"
@@ -3611,12 +4007,11 @@ Partial Class SponsorAllocation
                 txtReceipNo.ReadOnly = True
                 trFileGen.Visible = True
                 result = True
-                'LoadListObjects()
-                'Display error message saying that Duplicate Record
-                'Catch ex As Exception
-                '    'lblMsg.Text = ex.Message.ToString()
-                '    LogError.Log("SponsorAllocation", "OnPost", ex.Message)
-                'End Tr
+                eobj2.BatchCode = eobj.BatchCode
+                Dim updateinactive As String
+                eobj2.CreditRefOne = eobj.CreditRef
+                eobj2.SubCategory = "Update"
+                updateinactive = bsobj.Sponsorinsertinactive(eobj2, splist)
                 'Remove item from List 
                 If Not Session("ListObj") Is Nothing Then
                     ListObjects = Session("ListObj")
@@ -3635,7 +4030,7 @@ Partial Class SponsorAllocation
             'End If
         ElseIf Session("PageMode") = "Edit" Then
             Try
-                txtReceipNo.Text = bsobj.SponsorBatchUpdate(eobj, splist)
+                txtReceipNo.Text = bsobj.SponsorUpdateActive(eobj, splist)
                 'ErrorDescription = "Record Posted Successfully "
                 ibtnStatus.ImageUrl = "images/posted.gif"
                 'lblStatus.Value = "Posted"
@@ -3648,12 +4043,11 @@ Partial Class SponsorAllocation
                 trFileGen.Visible = True
                 result = True
                 'LoadListObjects()
-                'Display error message saying that Duplicate Record
-                'Catch ex As Exception
-                '    'lblMsg.Text = ex.Message.ToString()
-                '    LogError.Log("SponsorAllocation", "OnPost", ex.Message)
-                'End Tr
-                'Remove item from List 
+                eobj2.BatchCode = eobj.BatchCode
+                Dim updateinactive As String
+                eobj2.SubCategory = "Update"
+                eobj2.CreditRefOne = eobj.CreditRef
+                updateinactive = bsobj.Sponsorinsertinactive(eobj2, splist)
                 If Not Session("ListObj") Is Nothing Then
                     ListObjects = Session("ListObj")
                     Session("ListObj") = ListObjects
@@ -4048,7 +4442,7 @@ Partial Class SponsorAllocation
             eobj.MatricNo = stuItem.MatricNo
             eobj.ICNo = String.Empty
             eobj.StudentName = String.Empty
-            eobj.TransactionAmount = 0.0
+            eobj.TransactionAmount = stuItem.TempPaidAmount
             eobj.ProgramID = String.Empty
             eobj.Faculty = String.Empty
             eobj.CurrentSemester = 0
@@ -4079,16 +4473,22 @@ Partial Class SponsorAllocation
         If studentList.Count = 0 Then
 
         Else
-            studentList = newlist.Where(Function(x) newlist.Any(Function(z) x.STsponsercode.Sponsor = txtspcode.Text)).ToList()
-            newstulist = newlist.Where(Function(x) newlist.Any(Function(z) Not x.STsponsercode.Sponsor = txtspcode.Text)).ToList()
+
+            studentList = newlist.Where(Function(x) newlist.Any(Function(z) x.STsponsercode.Sponsor = txtspcode.Text And x.SASI_StatusRec = True And x.SASI_OtherID = 1)).ToList()
+            newstulist = newlist.Where(Function(x) newlist.Any(Function(z) Not x.STsponsercode.Sponsor = txtspcode.Text Or Not x.SASI_StatusRec = True Or Not x.SASI_OtherID = 1)).ToList()
         End If
-        'Session("SponsorShip") = newlist
+        If newstulist.Count > 0 Then
+            lblMsg.Text = "Some of the student's does not map to any sponsor or status inactive, thus will go to inactive students"
+            lblMsg.Visible = True
+            'Exit Sub
+        End If
 
         dgView.DataSource = studentList
         dgView.DataBind()
         dgUnView.DataSource = newstulist
         dgUnView.DataBind()
         Dim y As Integer = 0
+        Dim f As Integer = 0
         Dim chk As CheckBox
         Dim sponamt As Double = 0
         Dim txtSponamt As TextBox
@@ -4101,40 +4501,83 @@ Partial Class SponsorAllocation
         Dim tamt As Double = 0
         Dim _totalSpon As Double = 0
         Dim spon As Double = 0
-        For Each dgitem As DataGridItem In dgUnView.Items
-            txtsponamt2 = dgitem.Cells(6).Controls(1)
-            txtAmount2 = dgitem.Cells(8).Controls(1)
-            txtCreditamt2 = dgitem.Cells(10).Controls(1)
-            txtpamont2 = dgitem.Cells(11).Controls(1)
-            txtsponamt2.Text = String.Format("{0:F}", spon)
-            txtAmount2.Text = String.Format("{0:F}", spon)
-            txtCreditamt2.Text = String.Format("{0:F}", spon)
-            txtpamont2.Text = String.Format("{0:F}", spon)
-            Dim ListInvObjects1 As New List(Of AccountsEn)
-            Dim obj3 As New AccountsBAL
-            Dim eob3 As New AccountsEn
-            eob3.CreditRef = dgitem.Cells(1).Text
-            eob3.PostStatus = "Posted"
-            eob3.SubType = "Student"
-            eob3.TransType = ""
-            eob3.TransStatus = "Closed"
+        While f < newstulist.Count
+            For Each dgitem As DataGridItem In dgUnView.Items
+                If dgitem.Cells(1).Text = newstulist(f).MatricNo Then
+                    txtsponamt2 = dgitem.Cells(6).Controls(1)
+                    spon = newstulist(f).TransactionAmount
+                    txtsponamt2.Text = String.Format("{0:F}", spon)
+                    txtAmount2 = dgitem.Cells(8).Controls(1)
+                    txtCreditamt2 = dgitem.Cells(10).Controls(1)
+                    txtpamont2 = dgitem.Cells(11).Controls(1)
+                    'txtsponamt2 = dgitem.Cells(6).Controls(1)
 
-            Try
+                    Dim ListInvObjects1 As New List(Of AccountsEn)
+                    Dim obj3 As New AccountsBAL
+                    Dim eob3 As New AccountsEn
+                    eob3.CreditRef = dgitem.Cells(1).Text
+                    eob3.PostStatus = "Posted"
+                    eob3.SubType = "Student"
+                    eob3.TransType = ""
+                    eob3.TransStatus = "Closed"
 
-                ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                    Try
 
-            Catch ex As Exception
-                LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
-            End Try
+                        ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
 
-            dgInvoices1.DataSource = ListInvObjects1
-            dgInvoices1.DataBind()
-            ledgerformat()
-            'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
-            'outamt = Trim(txtoutamount.Text)
-            outamt = Trim(txtoutamount.Text)
-            dgitem.Cells(7).Text = String.Format("{0:F}", outamt)
-        Next
+                    Catch ex As Exception
+                        LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
+                    End Try
+
+                    dgInvoices1.DataSource = ListInvObjects1
+                    dgInvoices1.DataBind()
+                    ledgerformat()
+                    'outamt = bsstu.GetStudentOutstandingAmtInSponsorAllocation(stuen)
+                    'outamt = Trim(txtoutamount.Text)
+                    outamt = Trim(txtoutamount.Text)
+                    If outamt >= 0 And outamt <= spon Then
+                        txtAmount2.Text = String.Format("{0:F}", outamt)
+                    ElseIf outamt <= 0 Then
+                        amt = 0
+                        txtAmount2.Text = String.Format("{0:F}", amt)
+                    ElseIf outamt >= 0 And outamt > spon Then
+                        amt = 0
+                        txtAmount2.Text = String.Format("{0:F}", sponamt)
+                    End If
+                    If spon >= outamt Then
+                        If txtAmount2.Text = "" Then
+                            txtAmount2.Text = 0.0
+                        End If
+                        txtCreditamt2.Text = String.Format("{0:F}", spon - txtAmount2.Text)
+                    Else
+                        amt = 0
+                        txtCreditamt2.Text = String.Format("{0:F}", amt)
+                    End If
+                    txtpamont2.Text = String.Format("{0:F}", tamt)
+                    If txtpamont2.Text = 0 And txtCreditamt2.Text = 0 Then
+                        dgitem.Cells(10).Enabled = False
+                        dgitem.Cells(11).Enabled = False
+                    End If
+                    dgitem.Cells(7).Text = String.Format("{0:F}", outamt)
+                    dgitem.Cells(14).Text = txtCreditamt2.Text
+                    dgitem.Cells(13).Text = txtpamont2.Text
+                    dgitem.Cells(7).Text = String.Format("{0:F}", outamt)
+                    Exit For
+                End If
+
+            Next
+            f = f + 1
+        End While
+
+        'For Each dgitem As DataGridItem In dgUnView.Items
+        '    'txtsponamt2 = dgitem.Cells(6).Controls(1)
+
+
+
+
+        'Next
+
+
         While y < studentList.Count
             For Each dgItem1 In dgView.Items
                 If dgItem1.Cells(1).Text = studentList(y).MatricNo Then
@@ -4143,8 +4586,8 @@ Partial Class SponsorAllocation
                     stuen.BatchCode = Trim(txtbatchspcode.Text)
                     stuen.MatricNo = studentList(y).MatricNo
 
-                    sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
-
+                    'sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
+                    sponamt = studentList(y).TransactionAmount
                     txtSponamt = dgItem1.Cells(6).Controls(1)
                     txtAmount = dgItem1.Cells(8).Controls(1)
                     'amt = liststuAll(j).TransactionAmount

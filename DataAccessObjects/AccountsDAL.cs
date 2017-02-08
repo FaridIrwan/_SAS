@@ -112,7 +112,7 @@ namespace HTS.SAS.DataAccessObjects
 
             sqlCmd = "( SELECT SAS_Sponsor.SASR_Code,SAS_Accounts.TransDate,SAS_Sponsor.SASR_Name,SAS_Accounts.TransAmount as StAmount,SAS_SponsorInvoice.transamount as SpAmount " +
              ",SAS_Accounts.PaidAmount,SAS_Accounts.BatchCode as TransCode,SAS_SponsorInvoice.batchcode, " +
-            "SAS_Accounts.TransTempCode ,SAS_Accounts.Category,SAS_Accounts.TransType,SAS_Accounts.PostStatus,SAS_Accounts.TransStatus,SAS_Accounts.allocateamount FROM SAS_Accounts " +
+            "SAS_Accounts.TransTempCode ,SAS_Accounts.Category,SAS_Accounts.TransType,SAS_Accounts.PostStatus,SAS_Accounts.TransStatus,SAS_Accounts.allocateamount,sas_accounts.bankcode,sas_accounts.paymentmode FROM SAS_Accounts " +
                 "INNER JOIN SAS_Sponsor On SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code " +
 " left join sas_sponsor_inv_rec on sas_sponsor_inv_rec.receipt_id=SAS_Accounts.transid " +
 " left join SAS_SponsorInvoice on SAS_SponsorInvoice.batchcode =sas_sponsor_inv_rec.invoice_id WHERE (SAS_Accounts.TransType = 'Credit') AND SAS_Accounts.allocateamount<>0 AND" +
@@ -133,14 +133,14 @@ namespace HTS.SAS.DataAccessObjects
             //if (argEn.TransStatus.Length != 0) sqlCmd = sqlCmd + "AND (SAS_Accounts.TransStatus='" + argEn.TransStatus + "')";
 
             sqlCmd = sqlCmd + " group by SAS_Sponsor.SASR_Code,SAS_Accounts.TransDate,SAS_Sponsor.SASR_Name,StAmount,SpAmount,SAS_Accounts.PaidAmount,SAS_Accounts.BatchCode," +
-            "SAS_SponsorInvoice.batchcode,SAS_Accounts.TransTempCode ,SAS_Accounts.Category,SAS_Accounts.TransType,SAS_Accounts.PostStatus,SAS_Accounts.TransStatus,SAS_Accounts.allocateamount" +
+            "SAS_SponsorInvoice.batchcode,SAS_Accounts.TransTempCode ,SAS_Accounts.Category,SAS_Accounts.TransType,SAS_Accounts.PostStatus,SAS_Accounts.TransStatus,SAS_Accounts.allocateamount,sas_accounts.bankcode,sas_accounts.paymentmode" +
             " Order by SAS_SponsorInvoice.batchcode desc )";
 
             sqlCmd = sqlCmd + " UNION ";
 
             sqlCmd = sqlCmd + "( SELECT SAS_Sponsor.SASR_Code, SAS_Accounts.TransDate, SAS_Sponsor.SASR_Name, SAS_Accounts.TransAmount as StAmount, " +
             "0 as SpAmount, SAS_Accounts.PaidAmount, SAS_Accounts.BatchCode as TransCode, '' as batchcode, SAS_Accounts.TransTempCode, SAS_Accounts.Category, " +
-            "SAS_Accounts.TransType, SAS_Accounts.PostStatus, SAS_Accounts.TransStatus, SAS_Accounts.tempamount " +
+            "SAS_Accounts.TransType, SAS_Accounts.PostStatus, SAS_Accounts.TransStatus, SAS_Accounts.tempamount,sas_accounts.bankcode,sas_accounts.paymentmode " +
             "FROM SAS_Accounts " +
             "INNER JOIN SAS_Sponsor On SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code " +
             "WHERE (SAS_Accounts.TransType = 'Credit') " +
@@ -168,6 +168,10 @@ namespace HTS.SAS.DataAccessObjects
                             loItem.TransDate = GetValue<DateTime>(loReader, "TransDate");
                             loItem.Category = GetValue<string>(loReader, "Category");
                             loItem.AllocatedAmount = GetValue<double>(loReader, "allocateamount");
+
+                            //added by farid 07022017
+                            loItem.BankCode = GetValue<string>(loReader, "bankcode");
+                            loItem.PaymentMode = GetValue<string>(loReader, "paymentmode");
                             loEnList.Add(loItem);
                         }
                         loReader.Close();
@@ -204,7 +208,7 @@ namespace HTS.SAS.DataAccessObjects
                     "SAS_Accounts.TransAmount - SAS_Accounts.allocateamount " +
                   "ELSE 0 " +
             "END AS AmountBalance " +
-            "FROM SAS_Accounts " +
+            ",sas_accounts.bankcode,sas_accounts.paymentmode FROM SAS_Accounts " +
                 "INNER JOIN SAS_Sponsor On SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code " +
 " left join sas_sponsor_inv_rec on sas_sponsor_inv_rec.receipt_id=SAS_Accounts.transid " +
 " left join SAS_SponsorInvoice on SAS_SponsorInvoice.batchcode =sas_sponsor_inv_rec.invoice_id WHERE (SAS_Accounts.TransType = 'Credit') AND SAS_Accounts.allocateamount<>0 AND (SAS_Accounts.TransAmount >= SAS_Accounts.allocateamount) AND" +
@@ -220,7 +224,7 @@ namespace HTS.SAS.DataAccessObjects
 
             sqlCmd = sqlCmd + " group by SAS_Sponsor.SASR_Code,SAS_Accounts.TransDate,SAS_Sponsor.SASR_Name,StAmount,SpAmount,SAS_Accounts.PaidAmount,SAS_Accounts.BatchCode," +
             "SAS_SponsorInvoice.batchcode,SAS_Accounts.TransTempCode ,SAS_Accounts.Category,SAS_Accounts.TransType,SAS_Accounts.PostStatus,SAS_Accounts.TransStatus,SAS_Accounts.allocateamount" +
-            " Order by SAS_SponsorInvoice.batchcode desc";
+            " ,sas_accounts.bankcode,sas_accounts.paymentmode Order by SAS_SponsorInvoice.batchcode desc";
 
 
             try
@@ -245,6 +249,9 @@ namespace HTS.SAS.DataAccessObjects
                             //used tempamount to stored AmountBalance - Start
                             loItem.AllocatedAmount = GetValue<double>(loReader, "AmountBalance");
                             //used tempamount to stored AmountBalance - End
+                            //added by farid 07022017
+                            loItem.BankCode = GetValue<string>(loReader, "bankcode");
+                            loItem.PaymentMode = GetValue<string>(loReader, "paymentmode");
                             loEnList.Add(loItem);
                         }
                         loReader.Close();
@@ -1826,7 +1833,7 @@ namespace HTS.SAS.DataAccessObjects
             string sqlCmd = " SELECT SAS_Accounts.TransID,SAS_Accounts.TransCode,SAS_Accounts.Category,SAS_Accounts.ChequeNo, SAS_Accounts.CreditRef,SAS_Accounts.Description, SAS_Accounts.BatchCode," +
                             " SAS_Student.SASI_MatricNo,SAS_Student.SASI_Name, SAS_Student.SASI_PgId, SAS_Student.SASI_CurSem, SAS_Student.SASI_Faculty, SAS_Student.SASI_ICNo,SAS_Accounts.VoucherNo, SAS_Accounts.TransAmount" +
                             " FROM SAS_Accounts INNER JOIN SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo" +
-                            " WHERE SAS_Accounts.BatchCode ='" + argEn.BatchCode + "' and SAS_Accounts.Category ='" + argEn.Category + "' and SAS_Accounts.Description ='" + argEn.Description + "'";
+                            " WHERE sas_accounts.transamount > 0 and SAS_Accounts.BatchCode ='" + argEn.BatchCode + "' and SAS_Accounts.Category ='" + argEn.Category + "' and SAS_Accounts.Description ='" + argEn.Description + "'";
 
             try
             {
@@ -1968,8 +1975,15 @@ namespace HTS.SAS.DataAccessObjects
         public AccountsEn GetItem(AccountsEn argEn)
         {
             AccountsEn loItem = new AccountsEn();
-            string sqlCmd = "Select * FROM SAS_Accounts WHERE BatchCode = @BatchCode";
-
+            string sqlCmd = "";
+            if (argEn.Category == "Payment" && argEn.SubType == "Student")
+            {
+                sqlCmd = "Select * FROM SAS_Accounts WHERE BatchCode = @BatchCode and category not in ('STA')";
+            }
+            else
+            {
+                sqlCmd = "Select * FROM SAS_Accounts WHERE BatchCode = @BatchCode";
+            }
             try
             {
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -2625,6 +2639,7 @@ namespace HTS.SAS.DataAccessObjects
                                 inv = clsGeneric.NullToString(_IDataReader["transcode"]);
                             }
                             newAccDetails.Inv_no = inv;
+                            newAccDetails.TempPaidAmount = data.TempPaidAmount;
                         }
                         else
                         {
@@ -3210,7 +3225,7 @@ namespace HTS.SAS.DataAccessObjects
             }
             //inserting Sponsor Pocket Amount & Sponsor Allocation Amount into Accounts table
             //if (argEn.Category == "Allocation" && argEn.PostStatus == "Posted")
-            if (argEn.Category == "Allocation" && argEn.PostStatus == "Ready" && argEn.TransStatus == "Closed")
+            if (argEn.Category == "Allocation" && argEn.PostStatus == "Ready")
             {
                 AccountsEn loAccounts;
 
@@ -3243,7 +3258,7 @@ namespace HTS.SAS.DataAccessObjects
                     loAccounts.TransType = "Credit";
                     loAccounts.SubType = "Student";
                     loAccounts.TransactionAmount = argEn.AccountDetailsList[j].TransactionAmount;
-                    loAccounts.DiscountAmount = argEn.AccountDetailsList[j].DiscountAmount;
+                    loAccounts.AllocatedAmount = argEn.AccountDetailsList[j].DiscountAmount;
                     //loAccounts.AccountDetailsList.
 
                     //loAccounts.TransactionCode = GetAutoNumber("DN");
@@ -3751,6 +3766,23 @@ namespace HTS.SAS.DataAccessObjects
                                 }
                             }
                         }
+                        if (argEn.Category == "Credit Note" && argEn.SubCategory == "UpdatePaidAmount")
+                        {
+                            //for (int i = 0; i < argEn.AccountDetailsList.Count; i++)
+                            //{
+                                string sqlget1 = "update sas_accounts set transamount = (select sum(transamount) as transamount from sas_accountsdetails where transtempcode = '" + argEn.TempTransCode + "') where transtempcode = '" + argEn.TempTransCode + "';";
+                                if (!FormHelp.IsBlank(sqlget1))
+                                {
+                                    int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                         DataBaseConnectionString, sqlget1);
+
+                                    if (liRowAffected > -1)
+                                    { }
+                                    else
+                                        throw new Exception("Update Failed! No Row has been updated...");
+                                }
+                            //}
+                        }
 
                         #endregion
 
@@ -3824,6 +3856,7 @@ namespace HTS.SAS.DataAccessObjects
                                 }
 
                             }
+                          
 
                             #endregion
                         }
@@ -5892,7 +5925,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     if (liRowAffected > -1)
                         lbRes = true;
                     else
-                        throw new Exception("Updation Failed! No Row has been updated...");
+                    { }
+                        //throw new Exception("Updation Failed! No Row has been updated...");
                 }
             }
             catch (Exception ex)
@@ -5958,10 +5992,10 @@ public double GetSponserStuAllocateAmount(string BatchId)
         {
             List<AccountsEn> loListAccounts = new List<AccountsEn>();
             argEn.BatchCode = argEn.BatchCode.Replace("*", "%");
-            string sqlCmd = "SELECT DISTINCT BatchCode FROM SAS_StudentLoan WHERE Category='" +
+            string sqlCmd = "SELECT DISTINCT BatchCode,transid FROM SAS_StudentLoan WHERE Category='" +
                           argEn.Category + "' AND PostStatus='" + argEn.PostStatus + "' and SubType ='" + argEn.SubType + "'";
             if (argEn.BatchCode.Length != 0) sqlCmd = sqlCmd + " AND BatchCode LIKE '" + argEn.BatchCode + "'";
-
+            sqlCmd = sqlCmd + " order by transid desc";
             try
             {
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -7208,7 +7242,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     }
                     if (category == "SPA" && desc == "Sponsor Allocation Amount")
                     {
-                        bool allocated = UpdatePaidAmountSPAReceipt(pamt, creditref, category, TransId);
+                        bool allocated = UpdatePaidAmountSPAReceipt(allocateamount, creditref, category, TransId);
                     }
                     if (category == "SPA" && desc == "Sponsor Pocket Amount")
                     {
@@ -7884,7 +7918,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             string sqlCmd = "SELECT * FROM SAS_Accounts WHERE Category='" +
                           argEn.Category + "' AND PostStatus='" + argEn.PostStatus + "' and SubType ='" + argEn.SubType + "' AND SubCategory='" + argEn.SubCategory + "'";
             if (argEn.BatchCode.Length != 0) sqlCmd = sqlCmd + " AND BatchCode LIKE '" + argEn.BatchCode + "'";
-
+            sqlCmd = sqlCmd + " order by transid desc";
             try
             {
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -7895,7 +7929,26 @@ public double GetSponserStuAllocateAmount(string BatchId)
                         while (loReader.Read())
                         {
                             AccountsEn loItem = LoadObject(loReader);
-                            loListAccounts.Add(loItem);
+                            string batchno = loItem.BatchCode;
+
+                            string sqlget = "SELECT count(transamount)as amount from sas_accounts WHERE category = 'SPA' and transamount > 0 and description = 'Sponsor Pocket Amount' and batchcode = '" + batchno + "'";
+                            //Build Sql Statement - Stop
+                            IDataReader _IDataReader = null;
+                            //Get Batch Details - Start
+                            _IDataReader = _DatabaseFactory.ExecuteReader(
+                                Helper.GetDataBaseType, DataBaseConnectionString, sqlget).CreateDataReader();
+                            //Get Batch Details - Stop
+                            int amount = 0;
+                            //loop thro the batch details - start
+                            while (_IDataReader.Read())
+                            {
+                                //Get Transaction Id
+                                amount = clsGeneric.NullToInteger(_IDataReader["amount"]);
+                            }
+                            if (amount > 0)
+                            {
+                                loListAccounts.Add(loItem);
+                            }
                         }
                         loReader.Close();
                     }
@@ -8697,9 +8750,10 @@ public double GetSponserStuAllocateAmount(string BatchId)
 				                    END
 			                END TransCode,                            
                         CASE WHEN acc.Category = 'SPA' THEN
-                                
+                                SUBSTRING (acc.Description, 9, 17) 
+                                ::text || ' | ' || 
 	                                ( SELECT Description FROM sas_accounts WHERE batchcode = acc.BatchCode and category = 'Allocation' and subtype = 'Sponsor'
-		                              )
+		                              )::text 
 	                        ELSE acc.Description
 	                        END Description, acc.Category ,
                             CASE WHEN acc.category = 'Credit Note' or acc.category = 'Debit Note' or acc.category = 'Invoice' THEN
@@ -9138,7 +9192,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             double toldamount = 0;
             double newamount = 0; int newTransId = 0;
             string refcode = ""; string matric = ""; string sub = "";
-            string use = "";
+            string use = ""; string transcode = "";
             string sqlget = "SELECT subcategory from sas_accounts WHERE batchcode = "
                     + clsGeneric.AddQuotes(BatchCode);
             //Build Sql Statement - Stop
@@ -9197,10 +9251,11 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 string status = clsGeneric.NullToString(drTrack["transstatus"]);
                                 if (status == "Closed")
                                 {
-                                    bool a = UpdatePaidAmountSPAReceipt(paidamt, matric,"Credit Note",1);
+                                    bool a = UpdatePaidAmountSPAReceipt(paidamt, matric, "Credit Note", TransId);
                                 }
                                 else
                                 {
+                                    //transcode = clsGeneric.NullToString(_IDataReader["transcode"]);
                                     oldamount = Convert.ToDouble(drTrack["transamount"]);
                                     newTransId = clsGeneric.NullToInteger(drTrack["transid"]);
                                     newamount = Convert.ToDouble(drTrack["paidamount"]);
@@ -9277,7 +9332,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
 
                         string sqlget1 = "update sas_accounts set paidamount = (select sum(paidamount) as paidamount from sas_accountsdetails where transid = '" + Int32.Parse(use) + "') where transid = '" + Int32.Parse(use) + "';";
                         string sqlupdate1 = "update sas_accounts set transstatus = 'Closed' where transamount = paidamount and transid = '" + Int32.Parse(use) + "';";
-                        if (!FormHelp.IsBlank(sqlget))
+                        if (!FormHelp.IsBlank(sqlget1))
                         {
                             int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
                                  DataBaseConnectionString, sqlget1);
@@ -9405,7 +9460,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             List<AccountsDetailsEn> listStud = new List<AccountsDetailsEn>();
             AccountsDetailsEn studEn = new AccountsDetailsEn();
             string transcode = "";
-
+            string mode = "";
             string sqlgettranscode = "Select distinct transcode from sas_accounts where transid = '" + transactionid + "'";
             _IDataReader = _DatabaseFactory.ExecuteReader(
     Helper.GetDataBaseType, DataBaseConnectionString, sqlgettranscode).CreateDataReader();
@@ -9533,6 +9588,38 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 catch (Exception ex)
                                 {
                                     throw ex;
+                                }
+                                
+                            }
+                            else if (category == "Credit Note")
+                            {
+                                
+                                if (mode != "Exit")
+                                {
+                                    try
+                                    {
+                                        string updateinv = "UPDATE sas_accountsdetails SET inv_no = '" + listStud[i].TransactionCode + "' WHERE transid = '" + transactionid + "';";
+
+                                        if (!FormHelp.IsBlank(updateinv))
+                                        {
+
+                                            int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                             DataBaseConnectionString, updateinv);
+
+                                            if (liRowAffected > -1)
+                                            {
+                                                mode = "Exit";
+                                            }
+                                            else
+                                            { }
+
+                                        }
+
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        throw ex;
+                                    }
                                 }
                             }
                         }
@@ -9766,5 +9853,847 @@ public double GetSponserStuAllocateAmount(string BatchId)
         }
 
         #endregion
+
+
+        #region SponsorInsertActive
+
+        /// <summary>
+        /// Method to Update SponsorBatch
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <param name="argList">List of Sponsor Entity is the Input</param>
+        /// <returns>Returns BatchCode</returns>
+
+        public string SponsorInsertActive(AccountsEn argEn, List<SponsorEn> argList)
+        {
+            int i = 0;
+            //BatchDelete(argEn);
+            if (argEn.Category == "Receipt")
+            {
+                argEn.BatchCode = new BatchNumberDAL().GenerateBatchNumber("Receipt");
+            }
+            else if (argEn.Category == "Allocation" && argEn.SubType == "Sponsor")
+            {
+                argEn.BatchCode = new BatchNumberDAL().GenerateBatchNumber("Sponsor Allocation");
+            }
+            else if (argEn.Category == "Payment" && argEn.SubType == "Sponsor")
+            {
+                argEn.BatchCode = new BatchNumberDAL().GenerateBatchNumber("Sponsor Payment");
+                argEn.VoucherNo = GetAutoNumber("SPP");
+            }
+            else if (argEn.Category == "Debit Note" && argEn.SubType == "Sponsor")
+            {
+                argEn.BatchCode = new BatchNumberDAL().GenerateBatchNumber("Sponsor Debit Note");
+            }
+            else if (argEn.Category == "Credit Note" && argEn.SubType == "Sponsor")
+            {
+                argEn.BatchCode = new BatchNumberDAL().GenerateBatchNumber("Sponsor Credit Note");
+            }
+
+            for (i = 0; i < argList.Count; i++)
+            {
+                argEn.CreditRef = argList[i].SponserCode;
+                //Insert(argEn);
+            }
+
+            if (argEn.Category == "Allocation")
+            {
+                argEn.AllocatedAmount = 0.00;
+                argEn.TempTransCode = GetAutoNumber("TSA");
+            }
+            string sqlCmd;
+            if (argEn.Category == "Allocation" && argEn.PostStatus == "Ready")
+            {
+
+                try
+                {
+                    //string lsError = String.Empty;
+                    sqlCmd = "INSERT INTO SAS_Accounts(TransTempCode,TransCode,CreditRef,CreditRef1,DebitRef,DebitRef1,Category," +
+                     "SubCategory,TransType,SubType,SourceType,TransDate,DueDate,BatchCode,BatchIntake,BatchDate,CrRef1,CrRef2," +
+                     "Description,Currency,BatchTotal,Tax,Discount,TaxAmount,DiscountAmount,TransAmount,PaidAmount,TransStatus," +
+                     "TempAmount,TempPaidAmount,PaymentMode,BankCode,PayeeName,ChequeDate,ChequeNo,VoucherNo,PocketAmount,SubRef1," +
+                     "SubRef2,SubRef3,PostStatus,IntStatus,CreatedBy,CreatedTimeStamp,PostedBy,PostedTimeStamp,IntCode,GLCode," +
+                     "UpdatedBy,UpdatedTime,KodUniversiti,KumpulanPelajar,TarikhProses,KodBank,ReceiptDate,bankrecno,allocateamount," +
+                     "outstandingamt,control_amt,TaxCode) VALUES (@TransTempCode,@TransCode,@CreditRef,@CreditRef1,@DebitRef,@DebitRef1," +
+                     "@Category,@SubCategory,@TransType,@SubType,@SourceType,@TransDate,@DueDate,@BatchCode,@BatchIntake,@BatchDate," +
+                     "@CrRef1,@CrRef2,@Description,@Currency,@BatchTotal,@Tax,@Discount,@TaxAmount,@DiscountAmount,@TransAmount," +
+                     "@PaidAmount,@TransStatus,@TempAmount,@TempPaidAmount,@PaymentMode,@BankCode,@PayeeName,@ChequeDate,@ChequeNo," +
+                     "@VoucherNo,@PocketAmount,@SubRef1,@SubRef2,@SubRef3,@PostStatus,@IntStatus,@CreatedBy,@CreatedDateTime," +
+                     "@PostedBy,@PostedDateTime,@IntCode,@GLCode,@UpdatedBy,@UpdatedTime,@KodUniversiti,@KumpulanPelajar,@TarikhProses," +
+                     "@KodBank,@ReceiptDate,@bankrecno,@allocateamount,@outstandingamt,@control_amt,@TaxCode);" +
+                     "select max(transid) from sas_accounts;";
+
+                    //select @@identity";
+
+                    if (!FormHelp.IsBlank(sqlCmd))
+                    {
+
+                        #region Command Params
+
+                        DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmd, DataBaseConnectionString);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransTempCode", DbType.String, argEn.TempTransCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, argEn.TransactionCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreditRef", DbType.String, argEn.CreditRef);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreditRef1", DbType.String, argEn.CreditRefOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DebitRef", DbType.String, argEn.DebitRef);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DebitRef1", DbType.String, argEn.DebitRefOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Category", DbType.String, argEn.Category);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubCategory", DbType.String, argEn.SubCategory);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransType", DbType.String, argEn.TransType);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubType", DbType.String, argEn.SubType);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SourceType", DbType.String, argEn.SourceType);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransDate", DbType.DateTime, Helper.DateConversion(argEn.TransDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DueDate", DbType.DateTime, Helper.DateConversion(argEn.DueDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchCode", DbType.String, argEn.BatchCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchDate", DbType.DateTime, Helper.DateConversion(argEn.BatchDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CrRef1", DbType.String, argEn.CrRefOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CrRef2", DbType.String, argEn.CrRefTwo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Description", DbType.String, argEn.Description);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Currency", DbType.String, argEn.CurrencyUsed);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchTotal", DbType.Double, argEn.BatchTotal);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, argEn.TaxPercentage);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, argEn.DiscountPercentage);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, argEn.TaxAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, argEn.DiscountAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, argEn.TransactionAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, argEn.PaidAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, argEn.TransStatus);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, argEn.TempAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, argEn.TempPaidAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PaymentMode", DbType.String, argEn.PaymentMode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BankCode", DbType.String, argEn.BankCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PayeeName", DbType.String, argEn.PayeeName);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@ChequeDate", DbType.DateTime, Helper.DateConversion(argEn.ChequeDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@ChequeNo", DbType.String, argEn.ChequeNo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@VoucherNo", DbType.String, argEn.VoucherNo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PocketAmount", DbType.String, argEn.PocketAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubRef1", DbType.String, argEn.SubReferenceOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubRef2", DbType.String, argEn.SubReferenceTwo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubRef3", DbType.String, argEn.SubReferenceThree);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, argEn.PostStatus);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@IntStatus", DbType.Int32, argEn.IntegrationStatus);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreatedBy", DbType.String, argEn.CreatedBy);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreatedDateTime", DbType.DateTime, Helper.DateConversion(argEn.CreatedDateTime));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PostedBy", DbType.String, argEn.PostedBy);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PostedDateTime", DbType.DateTime, Helper.DateConversion(argEn.PostedDateTime));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@IntCode", DbType.String, argEn.IntegrationCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@GLCode", DbType.String, argEn.GLCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@UpdatedBy", DbType.String, argEn.UpdatedBy);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@UpdatedTime", DbType.DateTime, Helper.DateConversion(argEn.UpdatedTime));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchIntake", DbType.String, argEn.BatchIntake);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@KodUniversiti", DbType.String, argEn.KodUniversiti);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@KumpulanPelajar", DbType.String, argEn.KumpulanPelajar);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TarikhProses", DbType.String, argEn.TarikhProses);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@KodBank", DbType.String, argEn.KodBank);
+                        //_DatabaseFactory.AddInParameter(ref cmd, "@ReceiptNo", DbType.String, argEn.ReceiptNo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@ReceiptDate", DbType.DateTime, Helper.DateConversion(argEn.ReceiptDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@bankrecno", DbType.String, argEn.BankSlipID);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@allocateamount", DbType.Double, argEn.AllocatedAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@outstandingamt", DbType.String, argEn.Outstanding_Amount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@control_amt", DbType.Decimal, clsGeneric.NullToDecimal(argEn.ControlAmt));
+                        _DbParameterCollection = cmd.Parameters;
+
+                        #endregion
+
+                        switch (argEn.Category)
+                        {
+                            case MaxModule.CfGeneric.CategoryTypeInvoice:
+                            case MaxModule.CfGeneric.CategoryTypeAfc:
+                            case MaxModule.CfGeneric.CategoryTypeCreditNote:
+                            case MaxModule.CfGeneric.CategoryTypeDebitNote:
+                            case MaxModule.CfGeneric.CategoryTypeLoan:
+                            case MaxModule.CfGeneric.CategoryTypeAllocation:
+
+                                if (argEn.SubType == "Sponsor")
+                                {
+                                    _DatabaseFactory.AddInParameter(ref cmd, "@TaxCode", DbType.String, "ES");
+                                }
+                                else
+                                {
+                                    if (argEn.Category == "Loan")
+                                    {
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TaxCode", DbType.String, "ES");
+                                    }
+                                    else
+                                    {
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TaxCode", DbType.String, String.Empty);
+                                    }
+                                }
+
+                                break;
+
+                            default:
+                                _DatabaseFactory.AddInParameter(ref cmd, "@TaxCode", DbType.String, String.IsNullOrEmpty(argEn.TaxCode) ? String.Empty : argEn.TaxCode);
+                                break;
+                        }
+                        int Result = clsGeneric.NullToInteger(_DatabaseFactory.ExecuteScalarCommand(Helper.GetDataBaseType, cmd,
+                            DataBaseConnectionString, sqlCmd, _DbParameterCollection));
+
+                    if (Result > 0)
+                    {
+                            #region Insert Log Auto Number
+
+                            try
+                            {
+                                string sqlCmdlog = "INSERT INTO SAS_LogAutoNumber(BatchNo,TransactionNo,Status,Category,CreatedBy,Createdon) " +
+                                "VALUES (@BatchNo,@TransactionNo,@Status,@Category,@CreatedBy,@Createdon)";
+
+                                if (!FormHelp.IsBlank(sqlCmdlog))
+                                {
+                                    DbCommand cmdlog = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmdlog, DataBaseConnectionString);
+                                    _DatabaseFactory.AddInParameter(ref cmdlog, "@BatchNo", DbType.String, argEn.BatchCode);
+                                    _DatabaseFactory.AddInParameter(ref cmdlog, "@Status", DbType.String, argEn.PostStatus);
+
+
+                                    if (argEn.PostStatus == "Ready")
+                                    {
+                                        _DatabaseFactory.AddInParameter(ref cmdlog, "@TransactionNo", DbType.String, argEn.TempTransCode);
+                                    }
+                                    else
+                                    {
+                                        _DatabaseFactory.AddInParameter(ref cmdlog, "@TransactionNo", DbType.String, argEn.TransactionCode);
+                                    }
+                                    _DatabaseFactory.AddInParameter(ref cmdlog, "@Category", DbType.String, argEn.Category);
+                                    if (string.IsNullOrEmpty(argEn.CreatedBy))
+                                    {
+                                        _DatabaseFactory.AddInParameter(ref cmdlog, "@CreatedBy", DbType.String, argEn.UpdatedBy);
+                                    }
+                                    else
+                                    {
+                                        _DatabaseFactory.AddInParameter(ref cmdlog, "@CreatedBy", DbType.String, argEn.CreatedBy);
+                                    }
+                                    _DatabaseFactory.AddInParameter(ref cmdlog, "@Createdon", DbType.String, DateTime.Now.ToString("yyyy/MM/dd"));
+                                    _DbParameterCollection = cmdlog.Parameters;
+
+                                    int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmdlog,
+                                        DataBaseConnectionString, sqlCmdlog, _DbParameterCollection);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                MaxModule.Helper.LogError(ex.Message);
+                                throw ex;
+                            }
+                        #endregion
+                    }
+                        else
+                        { }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MaxModule.Helper.LogError(ex.Message);
+                    throw ex;
+                }
+            }
+            //{
+                AccountsEn loAccounts;
+
+                List<AccountsDetailsEn> loAccDet = new List<AccountsDetailsEn>();
+
+                int j = 0;
+                for (j = 0; j < argEn.AccountDetailsList.Count; j++)
+                {
+                    //loAccounts = new AccountsEn();
+                    loAccounts = new AccountsEn();
+
+                    loAccounts.TransStatus = "Open";
+                    //loAccounts.PostStatus = "Posted";
+                    //loAccounts.TransStatus = "Closed";
+                    loAccounts.PostStatus = "Ready";
+                    loAccounts.PostedDateTime = DateTime.Now;
+                    loAccounts.UpdatedTime = DateTime.Now;
+                    loAccounts.DueDate = DateTime.Now;
+                    loAccounts.CreatedDateTime = DateTime.Now;
+                    loAccounts.TransDate = argEn.TransDate;
+                    loAccounts.ChequeDate = argEn.ChequeDate;
+                    loAccounts.BatchDate = argEn.BatchDate;
+                    loAccounts.BatchCode = argEn.BatchCode;
+                    loAccounts.BankCode = argEn.BankCode;
+                    loAccounts.PaymentMode = argEn.PaymentMode;
+                    loAccounts.CreditRefOne = argEn.CreditRef;
+
+                    loAccounts.CreditRef = argEn.AccountDetailsList[j].ReferenceCode;
+                    loAccounts.Category = "SPA";
+                    loAccounts.TransType = "Credit";
+                    loAccounts.SubType = "Student";
+                    loAccounts.TransactionAmount = argEn.AccountDetailsList[j].TransactionAmount;
+                    loAccounts.AllocatedAmount = argEn.AccountDetailsList[j].DiscountAmount;
+                    loAccounts.PaidAmount = argEn.AccountDetailsList[j].PaidAmount;
+                    loAccounts.TempPaidAmount = argEn.AccountDetailsList[j].TempPaidAmount;
+                    loAccounts.TempAmount = argEn.AccountDetailsList[j].outamount;
+
+                    //loAccounts.TransactionCode = GetAutoNumber("DN");
+                    loAccounts.TempTransCode = GetAutoNumber("SPA");
+
+                    //Inserting Allocated Amount
+                    loAccounts.Description = "Sponsor Allocation Amount";
+                    Insert(loAccounts);
+
+                    //Inserting Pocket Money                    
+
+                    loAccounts.TransactionAmount = argEn.AccountDetailsList[j].TempAmount;
+                    loAccounts.TempPaidAmount = argEn.AccountDetailsList[j].TempPaidAmount;
+                    loAccounts.TempAmount = argEn.AccountDetailsList[j].outamount;
+                    loAccounts.TempTransCode = GetAutoNumber("SPA");
+                    loAccounts.Description = "Sponsor Pocket Amount";
+
+                    Insert(loAccounts);
+                    // If subtype is student then update the outstanding - by jk
+                    loAccounts = null;
+                }
+            //}
+            return argEn.BatchCode;
+
+        }
+
+        #endregion
+
+        #region SponsorUpdateActive
+
+        /// <summary>
+        /// Method to Update SponsorBatch
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <param name="argList">List of Sponsor Entity is the Input</param>
+        /// <returns>Returns BatchCode</returns>
+
+        public string SponsorUpdateActive(AccountsEn argEn, List<SponsorEn> argList)
+        {
+            int i = 0;
+            BatchDelete(argEn);
+           
+
+            for (i = 0; i < argList.Count; i++)
+            {
+                argEn.CreditRef = argList[i].SponserCode;
+                //Insert(argEn);
+            }
+
+            if (argEn.Category == "Allocation")
+            {
+                argEn.AllocatedAmount = 0.00;
+                argEn.TempTransCode = GetAutoNumber("TSA");
+            }
+            string sqlCmd;
+            if (argEn.Category == "Allocation" && argEn.PostStatus == "Ready")
+            {
+
+                try
+                {
+                    //string lsError = String.Empty;
+                    sqlCmd = "INSERT INTO SAS_Accounts(TransTempCode,TransCode,CreditRef,CreditRef1,DebitRef,DebitRef1,Category," +
+                     "SubCategory,TransType,SubType,SourceType,TransDate,DueDate,BatchCode,BatchIntake,BatchDate,CrRef1,CrRef2," +
+                     "Description,Currency,BatchTotal,Tax,Discount,TaxAmount,DiscountAmount,TransAmount,PaidAmount,TransStatus," +
+                     "TempAmount,TempPaidAmount,PaymentMode,BankCode,PayeeName,ChequeDate,ChequeNo,VoucherNo,PocketAmount,SubRef1," +
+                     "SubRef2,SubRef3,PostStatus,IntStatus,CreatedBy,CreatedTimeStamp,PostedBy,PostedTimeStamp,IntCode,GLCode," +
+                     "UpdatedBy,UpdatedTime,KodUniversiti,KumpulanPelajar,TarikhProses,KodBank,ReceiptDate,bankrecno,allocateamount," +
+                     "outstandingamt,control_amt) VALUES (@TransTempCode,@TransCode,@CreditRef,@CreditRef1,@DebitRef,@DebitRef1," +
+                     "@Category,@SubCategory,@TransType,@SubType,@SourceType,@TransDate,@DueDate,@BatchCode,@BatchIntake,@BatchDate," +
+                     "@CrRef1,@CrRef2,@Description,@Currency,@BatchTotal,@Tax,@Discount,@TaxAmount,@DiscountAmount,@TransAmount," +
+                     "@PaidAmount,@TransStatus,@TempAmount,@TempPaidAmount,@PaymentMode,@BankCode,@PayeeName,@ChequeDate,@ChequeNo," +
+                     "@VoucherNo,@PocketAmount,@SubRef1,@SubRef2,@SubRef3,@PostStatus,@IntStatus,@CreatedBy,@CreatedDateTime," +
+                     "@PostedBy,@PostedDateTime,@IntCode,@GLCode,@UpdatedBy,@UpdatedTime,@KodUniversiti,@KumpulanPelajar,@TarikhProses," +
+                     "@KodBank,@ReceiptDate,@bankrecno,@allocateamount,@outstandingamt,@control_amt);" +
+                     "select max(transid) from sas_accounts;";
+
+                    //select @@identity";
+
+                    if (!FormHelp.IsBlank(sqlCmd))
+                    {
+
+                        #region Command Params
+
+                        DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmd, DataBaseConnectionString);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransTempCode", DbType.String, argEn.TempTransCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, argEn.TransactionCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreditRef", DbType.String, argEn.CreditRef);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreditRef1", DbType.String, argEn.CreditRefOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DebitRef", DbType.String, argEn.DebitRef);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DebitRef1", DbType.String, argEn.DebitRefOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Category", DbType.String, argEn.Category);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubCategory", DbType.String, argEn.SubCategory);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransType", DbType.String, argEn.TransType);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubType", DbType.String, argEn.SubType);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SourceType", DbType.String, argEn.SourceType);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransDate", DbType.DateTime, Helper.DateConversion(argEn.TransDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DueDate", DbType.DateTime, Helper.DateConversion(argEn.DueDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchCode", DbType.String, argEn.BatchCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchDate", DbType.DateTime, Helper.DateConversion(argEn.BatchDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CrRef1", DbType.String, argEn.CrRefOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CrRef2", DbType.String, argEn.CrRefTwo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Description", DbType.String, argEn.Description);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Currency", DbType.String, argEn.CurrencyUsed);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchTotal", DbType.Double, argEn.BatchTotal);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, argEn.TaxPercentage);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, argEn.DiscountPercentage);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, argEn.TaxAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, argEn.DiscountAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, argEn.TransactionAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, argEn.PaidAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, argEn.TransStatus);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, argEn.TempAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, argEn.TempPaidAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PaymentMode", DbType.String, argEn.PaymentMode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BankCode", DbType.String, argEn.BankCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PayeeName", DbType.String, argEn.PayeeName);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@ChequeDate", DbType.DateTime, Helper.DateConversion(argEn.ChequeDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@ChequeNo", DbType.String, argEn.ChequeNo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@VoucherNo", DbType.String, argEn.VoucherNo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PocketAmount", DbType.String, argEn.PocketAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubRef1", DbType.String, argEn.SubReferenceOne);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubRef2", DbType.String, argEn.SubReferenceTwo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@SubRef3", DbType.String, argEn.SubReferenceThree);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, argEn.PostStatus);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@IntStatus", DbType.Int32, argEn.IntegrationStatus);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreatedBy", DbType.String, argEn.CreatedBy);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@CreatedDateTime", DbType.DateTime, Helper.DateConversion(argEn.CreatedDateTime));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PostedBy", DbType.String, argEn.PostedBy);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@PostedDateTime", DbType.DateTime, Helper.DateConversion(argEn.PostedDateTime));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@IntCode", DbType.String, argEn.IntegrationCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@GLCode", DbType.String, argEn.GLCode);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@UpdatedBy", DbType.String, argEn.UpdatedBy);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@UpdatedTime", DbType.DateTime, Helper.DateConversion(argEn.UpdatedTime));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@BatchIntake", DbType.String, argEn.BatchIntake);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@KodUniversiti", DbType.String, argEn.KodUniversiti);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@KumpulanPelajar", DbType.String, argEn.KumpulanPelajar);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@TarikhProses", DbType.String, argEn.TarikhProses);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@KodBank", DbType.String, argEn.KodBank);
+                        //_DatabaseFactory.AddInParameter(ref cmd, "@ReceiptNo", DbType.String, argEn.ReceiptNo);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@ReceiptDate", DbType.DateTime, Helper.DateConversion(argEn.ReceiptDate));
+                        _DatabaseFactory.AddInParameter(ref cmd, "@bankrecno", DbType.String, argEn.BankSlipID);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@allocateamount", DbType.Double, argEn.AllocatedAmount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@outstandingamt", DbType.String, argEn.Outstanding_Amount);
+                        _DatabaseFactory.AddInParameter(ref cmd, "@control_amt", DbType.Decimal, clsGeneric.NullToDecimal(argEn.ControlAmt));
+                        _DbParameterCollection = cmd.Parameters;
+
+                        #endregion
+
+
+                        int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+                       DataBaseConnectionString, sqlCmd, _DbParameterCollection);
+
+                        if (liRowAffected > -1)
+                        { }
+                        else
+                        { }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MaxModule.Helper.LogError(ex.Message);
+                    throw ex;
+                }
+            }
+            //{
+            AccountsEn loAccounts;
+
+            List<AccountsDetailsEn> loAccDet = new List<AccountsDetailsEn>();
+
+            int j = 0;
+            for (j = 0; j < argEn.AccountDetailsList.Count; j++)
+            {
+                //loAccounts = new AccountsEn();
+                loAccounts = new AccountsEn();
+
+                loAccounts.TransStatus = "Open";
+                //loAccounts.PostStatus = "Posted";
+                //loAccounts.TransStatus = "Closed";
+                loAccounts.PostStatus = "Ready";
+                loAccounts.PostedDateTime = DateTime.Now;
+                loAccounts.UpdatedTime = DateTime.Now;
+                loAccounts.DueDate = DateTime.Now;
+                loAccounts.CreatedDateTime = DateTime.Now;
+                loAccounts.TransDate = argEn.TransDate;
+                loAccounts.ChequeDate = argEn.ChequeDate;
+                loAccounts.BatchDate = argEn.BatchDate;
+                loAccounts.BatchCode = argEn.BatchCode;
+                loAccounts.BankCode = argEn.BankCode;
+                loAccounts.PaymentMode = argEn.PaymentMode;
+                loAccounts.CreditRefOne = argEn.CreditRef;
+
+                loAccounts.CreditRef = argEn.AccountDetailsList[j].ReferenceCode;
+                loAccounts.Category = "SPA";
+                loAccounts.TransType = "Credit";
+                loAccounts.SubType = "Student";
+                loAccounts.TransactionAmount = argEn.AccountDetailsList[j].TransactionAmount;
+                loAccounts.AllocatedAmount = argEn.AccountDetailsList[j].DiscountAmount;
+                loAccounts.PaidAmount = argEn.AccountDetailsList[j].PaidAmount;
+                loAccounts.TempPaidAmount = argEn.AccountDetailsList[j].TempPaidAmount;
+                loAccounts.TempAmount = argEn.AccountDetailsList[j].outamount;
+                //loAccounts.AccountDetailsList.
+
+                //loAccounts.TransactionCode = GetAutoNumber("DN");
+                loAccounts.TempTransCode = GetAutoNumber("SPA");
+
+                //Inserting Allocated Amount
+                loAccounts.Description = "Sponsor Allocation Amount";
+                Insert(loAccounts);
+
+                //Inserting Pocket Money                    
+
+                loAccounts.TransactionAmount = argEn.AccountDetailsList[j].TempAmount;
+                loAccounts.TempPaidAmount = argEn.AccountDetailsList[j].TempPaidAmount;
+                loAccounts.TempAmount = argEn.AccountDetailsList[j].outamount;
+                loAccounts.TempTransCode = GetAutoNumber("SPA");
+                loAccounts.Description = "Sponsor Pocket Amount";
+
+                Insert(loAccounts);
+                // If subtype is student then update the outstanding - by jk
+                loAccounts = null;
+            }
+            //}
+            return argEn.BatchCode;
+
+        }
+
+        #endregion
+        /// <summary>
+        /// Method to Insert Sponsorinsertinactive
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <param name="argList">List of Sponsor Entity is the Input</param>
+        /// <returns>Returns BatchCode</returns>
+
+        public string Sponsorinsertinactive(AccountsEn argEn, List<SponsorEn> argList)
+        {
+            int i = 0;
+            int a = 0;
+            string sqlCmd;
+            double totalAll = 0.0;
+            IDataReader _IDataReader = null;
+            //Check paid amount For Each Student
+            double balance = 0.0;
+            double paid = 0.0;
+            double pamt = 0.0;
+            double amount = 0.0;
+            List<AccountsDetailsEn> listStud = new List<AccountsDetailsEn>();
+            AccountsDetailsEn studEn = new AccountsDetailsEn();
+            string transcode = "";
+            List<AccountsEn> StuTransList = new List<AccountsEn>();
+            string deletecmd = "DELETE FROM sas_accounts_inactive WHERE  BatchCode = @BatchCode";
+
+            if (argEn.SubCategory == "Update")
+            {
+            
+            try
+            {
+                //   argEn.BatchCode =  StudentLoanInsert(argEn);
+
+                if (!FormHelp.IsBlank(deletecmd))
+                {
+                    DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, deletecmd, DataBaseConnectionString);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@BatchCode", DbType.String, argEn.BatchCode);
+                    _DbParameterCollection = cmd.Parameters;
+
+                    int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+                                DataBaseConnectionString, deletecmd, _DbParameterCollection);
+
+                    if (liRowAffected > -1)
+                    //lbRes = true;
+                    { }
+                    else
+                    {
+                        throw new Exception("Insertion Failed! No Row has been updated...");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            }
+
+            //for (a = 0; a < argList.Count; a++)
+            //{
+            //    argEn.CreditRefOne = argList[a].SponserCode;
+               
+            //}
+
+                
+                AccountsEn loAccounts;
+
+                List<AccountsDetailsEn> loAccDet = new List<AccountsDetailsEn>();
+
+                int j = 0;
+                for (j = 0; j < argEn.AccountDetailsList.Count; j++)
+                {
+                    //loAccounts = new AccountsEn();
+                    loAccounts = new AccountsEn();
+
+                    loAccounts.TransStatus = "Open";
+                    //loAccounts.PostStatus = "Posted";
+                    //loAccounts.TransStatus = "Closed";
+                    loAccounts.PostStatus = "Ready";
+                    loAccounts.PostedDateTime = DateTime.Now;
+                    loAccounts.UpdatedTime = DateTime.Now;
+                    loAccounts.DueDate = DateTime.Now;
+                    loAccounts.CreatedDateTime = DateTime.Now;
+                    loAccounts.TransDate = argEn.TransDate;
+                    loAccounts.ChequeDate = argEn.ChequeDate;
+                    loAccounts.BatchDate = argEn.BatchDate;
+                    loAccounts.BatchCode = argEn.BatchCode;
+                    loAccounts.BankCode = argEn.BankCode;
+                    loAccounts.PaymentMode = argEn.PaymentMode;
+                    loAccounts.CreditRefOne = argEn.CreditRefOne;
+
+                    
+                    loAccounts.CreditRef = argEn.AccountDetailsList[j].ReferenceCode;
+                    loAccounts.Category = "SPA";
+                    loAccounts.TransType = "Credit";
+                    loAccounts.SubType = "Student";
+                    loAccounts.TransactionAmount = argEn.AccountDetailsList[j].TransactionAmount;
+                    loAccounts.AllocatedAmount = argEn.AccountDetailsList[j].DiscountAmount;
+                    loAccounts.PaidAmount = argEn.AccountDetailsList[j].PaidAmount;
+                    loAccounts.TempPaidAmount = argEn.AccountDetailsList[j].TempPaidAmount;
+                    loAccounts.TempAmount = argEn.AccountDetailsList[j].outamount;
+                   
+                    //Inserting Allocated Amount
+                    loAccounts.Description = "Sponsor Allocation Amount";
+                    string gettranscode = "Select transtempcode from sas_accounts where category = 'Allocation' and poststatus = 'Ready' and batchcode = "
+                       + clsGeneric.AddQuotes(argEn.BatchCode);
+
+                    //Get Batch Details - Start
+                    _IDataReader = _DatabaseFactory.ExecuteReader(
+                        Helper.GetDataBaseType, DataBaseConnectionString, gettranscode).CreateDataReader();
+                    //Get Batch Details - Stop
+                    //string transcode = "";
+                    //loop thro the batch details - start
+                    while (_IDataReader.Read())
+                    {
+                        //Get Transaction Id
+                        transcode = clsGeneric.NullToString(_IDataReader["transtempcode"]);
+                    }
+                    loAccounts.TempTransCode = transcode;
+                    
+                    bool inactive = InsertInactive(loAccounts);
+
+                    //Inserting Pocket Money                    
+
+                    loAccounts.TransactionAmount = argEn.AccountDetailsList[j].TempAmount;
+                    loAccounts.TempPaidAmount = argEn.AccountDetailsList[j].TempPaidAmount;
+                    loAccounts.TempAmount = argEn.AccountDetailsList[j].outamount;
+                    //loAccounts.TempTransCode = GetAutoNumber("SPA");
+                    loAccounts.Description = "Sponsor Pocket Amount";
+
+                   
+                    loAccounts.TempTransCode = transcode;
+                    bool inactivestu = InsertInactive(loAccounts);
+                    // If subtype is student then update the outstanding - by jk
+                    loAccounts = null;
+                }
+
+            //}
+
+                        
+            // ended
+
+            return argEn.BatchCode;
+        }
+                        //#endregion
+
+        #region InsertInactive
+
+        /// <summary>
+        /// Method to Insert Into sas_Accounts_inactive
+        /// </summary>
+        /// <param name="argEn">Accounts Entity is the Input</param>
+        /// <returns>Returns Boolean</returns>
+        /// Added by Farid @ 03/2/2017 
+
+        public bool InsertInactive(AccountsEn argEn)
+        {
+            bool lbRes = false;
+            string sqlCmd;
+            double totalAll = 0.0;
+            List<AccountsEn> StuTransList = new List<AccountsEn>();
+            try
+            {
+                //string lsError = String.Empty;
+                sqlCmd = "INSERT INTO sas_accounts_inactive(TransTempCode,TransCode,CreditRef,CreditRef1,DebitRef,DebitRef1,Category," +
+                "SubCategory,TransType,SubType,SourceType,TransDate,DueDate,BatchCode,BatchIntake,BatchDate,CrRef1,CrRef2," +
+                "Description,Currency,BatchTotal,Tax,Discount,TaxAmount,DiscountAmount,TransAmount,PaidAmount,TransStatus," +
+                "TempAmount,TempPaidAmount,PaymentMode,BankCode,PayeeName,ChequeDate,ChequeNo,VoucherNo,PocketAmount,SubRef1," +
+                "SubRef2,SubRef3,PostStatus,IntStatus,CreatedBy,CreatedTimeStamp,PostedBy,PostedTimeStamp,IntCode,GLCode," +
+                "UpdatedBy,UpdatedTime,KodUniversiti,KumpulanPelajar,TarikhProses,KodBank,ReceiptDate,bankrecno,allocateamount," +
+                "outstandingamt,control_amt) VALUES (@TransTempCode,@TransCode,@CreditRef,@CreditRef1,@DebitRef,@DebitRef1," +
+                "@Category,@SubCategory,@TransType,@SubType,@SourceType,@TransDate,@DueDate,@BatchCode,@BatchIntake,@BatchDate," +
+                "@CrRef1,@CrRef2,@Description,@Currency,@BatchTotal,@Tax,@Discount,@TaxAmount,@DiscountAmount,@TransAmount," +
+                "@PaidAmount,@TransStatus,@TempAmount,@TempPaidAmount,@PaymentMode,@BankCode,@PayeeName,@ChequeDate,@ChequeNo," +
+                "@VoucherNo,@PocketAmount,@SubRef1,@SubRef2,@SubRef3,@PostStatus,@IntStatus,@CreatedBy,@CreatedDateTime," +
+                "@PostedBy,@PostedDateTime,@IntCode,@GLCode,@UpdatedBy,@UpdatedTime,@KodUniversiti,@KumpulanPelajar,@TarikhProses," +
+                "@KodBank,@ReceiptDate,@bankrecno,@allocateamount,@outstandingamt,@control_amt);" +
+                "select max(transid) from sas_accounts_inactive;";
+
+                //select @@identity";
+
+                if (!FormHelp.IsBlank(sqlCmd))
+                {
+
+                    #region Command Params
+
+                    DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmd, DataBaseConnectionString);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransTempCode", DbType.String, argEn.TempTransCode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, argEn.TransactionCode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@CreditRef", DbType.String, argEn.CreditRef);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@CreditRef1", DbType.String, argEn.CreditRefOne);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@DebitRef", DbType.String, argEn.DebitRef);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@DebitRef1", DbType.String, argEn.DebitRefOne);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Category", DbType.String, argEn.Category);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@SubCategory", DbType.String, argEn.SubCategory);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransType", DbType.String, argEn.TransType);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@SubType", DbType.String, argEn.SubType);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@SourceType", DbType.String, argEn.SourceType);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransDate", DbType.DateTime, Helper.DateConversion(argEn.TransDate));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@DueDate", DbType.DateTime, Helper.DateConversion(argEn.DueDate));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@BatchCode", DbType.String, argEn.BatchCode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@BatchDate", DbType.DateTime, Helper.DateConversion(argEn.BatchDate));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@CrRef1", DbType.String, argEn.CrRefOne);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@CrRef2", DbType.String, argEn.CrRefTwo);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Description", DbType.String, argEn.Description);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Currency", DbType.String, argEn.CurrencyUsed);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@BatchTotal", DbType.Double, argEn.BatchTotal);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, argEn.TaxPercentage);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, argEn.DiscountPercentage);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, argEn.TaxAmount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, argEn.DiscountAmount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, argEn.TransactionAmount + totalAll);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, argEn.PaidAmount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, argEn.TransStatus);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, argEn.TempAmount + totalAll);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, argEn.TempPaidAmount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PaymentMode", DbType.String, argEn.PaymentMode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@BankCode", DbType.String, argEn.BankCode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PayeeName", DbType.String, argEn.PayeeName);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@ChequeDate", DbType.DateTime, Helper.DateConversion(argEn.ChequeDate));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@ChequeNo", DbType.String, argEn.ChequeNo);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@VoucherNo", DbType.String, argEn.VoucherNo);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PocketAmount", DbType.String, argEn.PocketAmount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@SubRef1", DbType.String, argEn.SubReferenceOne);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@SubRef2", DbType.String, argEn.SubReferenceTwo);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@SubRef3", DbType.String, argEn.SubReferenceThree);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, argEn.PostStatus);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@IntStatus", DbType.Int32, argEn.IntegrationStatus);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@CreatedBy", DbType.String, argEn.CreatedBy);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@CreatedDateTime", DbType.DateTime, Helper.DateConversion(argEn.CreatedDateTime));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PostedBy", DbType.String, argEn.PostedBy);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@PostedDateTime", DbType.DateTime, Helper.DateConversion(argEn.PostedDateTime));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@IntCode", DbType.String, argEn.IntegrationCode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@GLCode", DbType.String, argEn.GLCode);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@UpdatedBy", DbType.String, argEn.UpdatedBy);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@UpdatedTime", DbType.DateTime, Helper.DateConversion(argEn.UpdatedTime));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@BatchIntake", DbType.String, argEn.BatchIntake);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@KodUniversiti", DbType.String, argEn.KodUniversiti);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@KumpulanPelajar", DbType.String, argEn.KumpulanPelajar);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@TarikhProses", DbType.String, argEn.TarikhProses);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@KodBank", DbType.String, argEn.KodBank);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@ReceiptDate", DbType.DateTime, Helper.DateConversion(argEn.ReceiptDate));
+                    _DatabaseFactory.AddInParameter(ref cmd, "@bankrecno", DbType.String, argEn.BankSlipID);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@allocateamount", DbType.Double, argEn.AllocatedAmount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@outstandingamt", DbType.String, argEn.Outstanding_Amount);
+                    _DatabaseFactory.AddInParameter(ref cmd, "@control_amt", DbType.Decimal, clsGeneric.NullToDecimal(argEn.ControlAmt));
+                    _DbParameterCollection = cmd.Parameters;
+
+                    #endregion
+
+                   
+
+                    int Result = clsGeneric.NullToInteger(_DatabaseFactory.ExecuteScalarCommand(Helper.GetDataBaseType, cmd,
+                            DataBaseConnectionString, sqlCmd, _DbParameterCollection));
+
+                    if (Result > 0)
+                    {
+                    }
+                    else
+                    {
+                        throw new Exception("Insertion Failed! No Row has been inserted...");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MaxModule.Helper.LogError(ex.Message);
+                throw ex;
+            }
+
+            return lbRes;
+        }
+
+        #endregion
+
+        #region Update Posting Status - Closed
+
+        public bool UpdateInactiveStatusClosed(string BatchCode, string UserId)
+        {
+            //create instances
+            IDataReader _IDataReader = null;
+
+            //variable declarations
+            string SqlStatement = null; string UpdateStatement = null; int TransId = 0;
+
+            try
+            {
+                //Build Sql Statement - Start
+                SqlStatement = "SELECT transid from sas_accounts_inactive WHERE batchcode = "
+                    + clsGeneric.AddQuotes(BatchCode);
+                //Build Sql Statement - Stop
+
+                //Get Batch Details - Start
+                _IDataReader = _DatabaseFactory.ExecuteReader(
+                    Helper.GetDataBaseType, DataBaseConnectionString, SqlStatement).CreateDataReader();
+                //Get Batch Details - Stop
+
+                //loop thro the batch details - start
+                while (_IDataReader.Read())
+                {
+                    //Get Transaction Id
+                    TransId = clsGeneric.NullToInteger(_IDataReader[0]);
+
+                    string transstatus = "Closed";
+
+                    //Build Update Statement - Start
+                    //UpdateStatement += "UPDATE sas_accountsdetails SET transcode = substring(transtempcode from 2 for Length(transtempcode)),poststatus = 'Posted',transstatus=" + clsGeneric.AddQuotes(transstatus) + " ,transtempcode = '' WHERE transid = " + TransId + ";";
+                    UpdateStatement += "UPDATE sas_accounts_inactive SET transcode = substring(transtempcode from 2 for Length(transtempcode)),poststatus = 'Posted',transstatus=" + clsGeneric.AddQuotes(transstatus) + " ,transtempcode = '',";
+                    UpdateStatement += "postedby = " + clsGeneric.AddQuotes(UserId) + clsGeneric.AddComma() + "postedtimestamp = " + clsGeneric.AddQuotes(Helper.DateConversion(DateTime.Now)) + " WHERE transid = " + TransId + ";";
+                    //Build Update Statement - Stop
+                }
+                //loop thro the batch details - stop
+
+                //if update statement successful - Start
+                if (!FormHelp.IsBlank(UpdateStatement))
+                {
+                    if (_DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                        DataBaseConnectionString, UpdateStatement) > -1)
+                    {
+                        ////Added by Hafiz Roslan @ 4/2/2016 - Check for Category = Loan
+                        ////updated on 10/2/2016 - category change back to receipt
+                        //if (UpdatePostingOnStudLoan(BatchCode, UserId)) { }
+
+                        ////updated of 11/2/2015
+                        //if (UpdateStudLoanPaidAmt(BatchCode)) { }
+
+                        return true;
+                    }
+                }
+                //if update statement successful - Stop
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                MaxModule.Helper.LogError(ex.Message);
+
+                return false;
+            }
+        }
+
+        #endregion
+
+    
+
+
     }
+
 }

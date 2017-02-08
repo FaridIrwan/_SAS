@@ -1166,7 +1166,8 @@
                                                 Style="text-align: right" Width="86px" AutoPostBack="True" Visible="False"></asp:TextBox>
                                         </ItemTemplate>
                                         <HeaderStyle Width="10%" />
-                                    </asp:TemplateColumn>         
+                                    </asp:TemplateColumn> 
+                                     <%--<asp:BoundColumn DataField="Status" HeaderText="Status" />--%>        
                                 </Columns>
                             </asp:DataGrid>
                           
