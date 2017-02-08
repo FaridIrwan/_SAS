@@ -279,6 +279,7 @@ Partial Class HostelFee
                     objHostelAmt.SCCode = obj.LocalCategory
                     objHostelAmt.HAAmount = obj.LocalAmount
                     'Added by Zoya @15/04/2016
+                    'Updated by Hafiz @ 07/02/2017 - allow 0 input
                     'If objHostelAmt.HAAmount = 0 Then
                     '    lblMsg.Visible = True
                     '    lblMsg.Text = "Amount Cannot be Zero"
@@ -294,6 +295,7 @@ Partial Class HostelFee
                     objHostelAmt.SCCode = obj.NonLocalCategory
                     objHostelAmt.HAAmount = obj.NonLocalAmount
                     'Added by Zoya @15/04/2016
+                    'Updated by Hafiz @ 07/02/2017 - allow 0 input
                     'If objHostelAmt.HAAmount = 0 Then
                     '    lblMsg.Visible = True
                     '    lblMsg.Text = "Amount Cannot be Zero"

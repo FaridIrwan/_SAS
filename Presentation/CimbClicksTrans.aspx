@@ -349,6 +349,7 @@
     </asp:Panel>
     <asp:HiddenField ID="TranStatus" runat="server" />
     <asp:HiddenField ID="MenuId" runat="server" />
+    <asp:HiddenField ID="hdnTransDate" runat="server" />
     <asp:Button ID="btnHiddenApp" runat="Server" OnClick="btnHiddenApp_Click" Style="display: none" />
 </asp:Content>
 
