@@ -392,13 +392,21 @@ Partial Class Student
         ddlstudentStatus.Items.Add(New ListItem("---Select---", "-1"))
         ddlstudentStatus.DataTextField = "Description"
         ddlstudentStatus.DataValueField = "StudentStatusCode"
-
+        'If Session("PageMode") = "Add" Then
         Try
             ddlstudentStatus.DataSource = bStuStatus.GetStudentStatusListAll(eStuStatus)
         Catch ex As Exception
             LogError.Log("Student", "FillDropDownList", ex.Message)
         End Try
 
+        'Else
+
+        'Try
+        '    ddlstudentStatus.DataSource = bStuStatus.GetStudentStatusListAll(eStuStatus)
+        'Catch ex As Exception
+        '    LogError.Log("Student", "FillDropDownList", ex.Message)
+        'End Try
+        'End If
         ddlstudentStatus.DataBind()
 
         'eBank.BankDetailsCode = ""
@@ -1372,7 +1380,21 @@ Partial Class Student
                     End Try
 
                     If kokolist.Count > 0 Then
-                        ddlKokoList.SelectedValue = obj.KokoCode
+                        Dim ko As Integer = 0
+                        While ko < kokolist.Count
+                            For Each ListItem In kokolist
+                                If obj.KokoCode = kokolist(ko).SAKO_Code Then
+                                    ddlKokoList.SelectedValue = obj.KokoCode
+                                Else
+                                    'lblMsg.Text = "Program Id " + obj.ProgramID + " does not exist"
+                                    'lblMsg.Visible = True
+                                    'ddlProgram.SelectedValue = "-1"
+                                    Exit For
+                                End If
+                            Next
+                            ko = ko + 1
+                        End While
+                        'ddlKokoList.SelectedValue = obj.KokoCode
                     Else
                         ddlKokoList.SelectedValue = "-1"
                     End If

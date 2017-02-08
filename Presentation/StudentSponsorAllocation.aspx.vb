@@ -32,7 +32,7 @@ Partial Class StudentSponsorAllocation
         'Dim list As New List(Of StudentEn)
         If Not lststud Is Nothing Then
             MatricNo = Trim(txtMatricNo.Text)
-            lststud = _StudentDAL.GetListStudentForAllocation(Sponsor)
+            lststud = _StudentDAL.GetListStudentForAllocation(Sponsor, MatricNo)
             dgStudentInfo.Visible = True
             dgStudentInfo.DataSource = lststud
             dgStudentInfo.DataBind()

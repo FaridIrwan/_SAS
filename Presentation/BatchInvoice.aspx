@@ -1103,6 +1103,10 @@
                                                         <asp:TextBox ID="txtDesc" runat="server" Height="20px" MaxLength="50"
                                                             Width="300px"></asp:TextBox>
                                                     </td>
+                                                     <td style="height: 25px; vertical-align: top;" colspan="4">
+                                                        <asp:TextBox ID="txtMode" runat="server" Height="20px" MaxLength="50"
+                                                            Width="300px" Visible ="false"></asp:TextBox>
+                                                    </td>
                                                 </tr>
                                             </table>
                                             <table>
@@ -1314,6 +1318,8 @@
                                                         </asp:BoundColumn>
                                                         <asp:BoundColumn DataField="TaxId" Visible="false"></asp:BoundColumn>
                                                         <asp:BoundColumn DataField="TransactionID" Visible="false"></asp:BoundColumn>
+                                                        
+                                                        <asp:BoundColumn DataField="TempPaidAmount" HeaderText="Original Amount" ItemStyle-HorizontalAlign="Right" DataFormatString="{0:F}"></asp:BoundColumn>
                                                         <asp:BoundColumn DataField="Transstatus" HeaderText="Status"></asp:BoundColumn>
                                                     </Columns>
                                                 </asp:DataGrid>

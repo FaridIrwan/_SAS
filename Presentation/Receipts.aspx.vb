@@ -761,15 +761,15 @@ Partial Class Receipts
                     Dim ctrlamt As Decimal = Session("CtrlAmt")
                     If Not ctrlamt = 0 Then
                         If totalAmt > ctrlamt Then
-                            txtCtrlAmt.Focus()
+                            'txtCtrlAmt.Focus()
                             Session("ExceedLmt") = True
-
-                            Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+                            'Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
                         ElseIf totalAmt < ctrlamt Then
-                            txtCtrlAmt.Focus()
+                            'txtCtrlAmt.Focus()
                             Session("ExceedLmt") = True
-
-                            Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+                            'Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+                        Else
+                            Session("ExceedLmt") = False
                         End If
                     End If
 
@@ -1232,16 +1232,15 @@ Partial Class Receipts
         Try
             If Not txtAllocateAmount.Text = 0 Then
                 If CDec(txtAllocateAmount.Text) > amt Then
-                    txtCtrlAmt.Focus()
+                    'txtCtrlAmt.Focus()
                     Session("ExceedLmt") = True
-
-                    Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+                    'Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
                 ElseIf CDec(txtAllocateAmount.Text) < amt Then
-                    txtCtrlAmt.Focus()
+                    'txtCtrlAmt.Focus()
                     Session("ExceedLmt") = True
-
-                    Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
-
+                    'Throw New Exception("Total Amount of Receipt Must Equals To Control Amount")
+                Else
+                    Session("ExceedLmt") = False
                 End If
             End If
         Catch ex As Exception

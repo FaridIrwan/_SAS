@@ -154,6 +154,8 @@ Partial Class addSpnRecpts
                 eob.PaidAmount = dgView.Items(dgView.SelectedIndex).Cells(6).Text
                 eob.Category = dgView.Items(dgView.SelectedIndex).Cells(7).Text
                 eob.AllocatedAmount = dgView.Items(dgView.SelectedIndex).Cells(8).Text
+                eob.BankCode = dgView.Items(dgView.SelectedIndex).Cells(10).Text
+                eob.PaymentMode = dgView.Items(dgView.SelectedIndex).Cells(11).Text
                 dgView.SelectedIndex = -1
                 Session("spnobj") = eob
 
@@ -169,6 +171,8 @@ Partial Class addSpnRecpts
                 eobj1.PaidAmount = dgView.Items(dgView.SelectedIndex).Cells(6).Text
                 eobj1.ReferenceOne = dgView.Items(dgView.SelectedIndex).Cells(7).Text
                 eobj1.TempAmount = dgView.Items(dgView.SelectedIndex).Cells(8).Text
+                eobj1.Filler = dgView.Items(dgView.SelectedIndex).Cells(10).Text
+                'eobj1.p = dgView.Items(dgView.SelectedIndex).Cells(10).Text
                 dgView.SelectedIndex = -1
                 Session("spnobj") = eobj1
             End If
