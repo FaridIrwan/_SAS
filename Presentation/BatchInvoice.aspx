@@ -1000,7 +1000,7 @@
                                                     </td>
                                                     <td style="width: 91px; height: 23px"></td>
                                                     <td colspan="3" style="height: 23px">
-                                                        <asp:TextBox ID="txtBatchNo" runat="server" Width="142px" ReadOnly ="true"></asp:TextBox>
+                                                        <asp:TextBox ID="txtBatchNo" runat="server" Width="142px"></asp:TextBox>
                                                     </td>
                                                     <td style="width: 81px; height: 23px">
                                                         <span style="color: #ff0000"></span>
@@ -1265,7 +1265,7 @@
                                                     <Columns>
                                                         <asp:TemplateColumn HeaderText="Select" Visible="false">
                                                             <ItemTemplate>
-                                                                &nbsp;<asp:CheckBox ID="chkView" runat="server" AutoPostBack="true" OnCheckedChanged ="chk_SelectCheckedChanged" Checked ="true"/>
+                                                                &nbsp;<asp:CheckBox ID="chkView" runat="server" AutoPostBack="true" OnCheckedChanged ="chk_SelectCheckedChanged"/>
                                                             </ItemTemplate>
                                                         </asp:TemplateColumn>
                                                         <asp:BoundColumn HeaderText="Matric No" Visible="false"></asp:BoundColumn>
@@ -1320,7 +1320,8 @@
                                                         <asp:BoundColumn DataField="TransactionID" Visible="false"></asp:BoundColumn>
                                                         
                                                         <asp:BoundColumn DataField="TempPaidAmount" HeaderText="Original Amount" ItemStyle-HorizontalAlign="Right" DataFormatString="{0:F}"></asp:BoundColumn>
-                                                        <asp:BoundColumn DataField="Transstatus" HeaderText="Status"></asp:BoundColumn>
+                                                        <asp:BoundColumn DataField="Transstatus" HeaderText="Status" Visible ="false"></asp:BoundColumn>
+                                                        <asp:BoundColumn DataField="Internal_Use" HeaderText="OpenTransID" Visible="false"></asp:BoundColumn>
                                                     </Columns>
                                                 </asp:DataGrid>
                                             </td>

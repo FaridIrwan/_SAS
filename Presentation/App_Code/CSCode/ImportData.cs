@@ -46,7 +46,7 @@ public class ImportData
             for (int index = 0; index < dtStudent.Rows.Count; index++)
             {
                 _studentEN = new StudentEn();
-                if (dtStudent.Rows[index]["MatricNo"].ToString() != "")
+                if (!string.IsNullOrWhiteSpace(dtStudent.Rows[index]["MatricNo"].ToString()))
                 {
                 _studentEN.MatricNo = dtStudent.Rows[index]["MatricNo"].ToString();
                 //_studentEN.StudentName = dtStudent.Rows[index]["StudentName"].ToString();
@@ -70,7 +70,7 @@ public class ImportData
     {
         DataTable dtPatterns = new DataTable();
         int column = 0;
-        int row = 0;
+        int row = -1;
 
         HSSFWorkbook hssfworkbook;
         FileStream fileName = new FileStream(file, FileMode.Open, FileAccess.Read);
@@ -78,10 +78,10 @@ public class ImportData
         HSSFSheet sheet1 = (HSSFSheet)hssfworkbook.GetSheet("Sheet1");
         if (sheet1.LastRowNum > 0)
         {
-            for (row = 0; row <= sheet1.LastRowNum; row++)
+            for (row = -1; row <= sheet1.LastRowNum; row++)
             {
                 HSSFRow dataRow = (HSSFRow)sheet1.GetRow(row);
-                if (row.Equals(0))
+                if (row.Equals(-1))
                 {
                     dtPatterns.Columns.Add("MatricNo", typeof(string));        
                     //dtPatterns.Columns.Add("StudentName", typeof(string));
