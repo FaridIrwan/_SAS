@@ -562,8 +562,8 @@ namespace HTS.SAS.DataAccessObjects
                             "SAS_FeeTypes.SAFT_Code, SAS_FeeTypes.SAFT_FeeType, SAS_FeeTypes.SAFT_Hostel," +
                             " SAS_FeeTypes.SAFT_Priority, SAS_FeeTypes.SAFT_Remarks, SAS_FeeTypes.SAFT_GLCode, SAS_FeeTypes.SAFT_Status,SAS_AccountsDetails.TransAmount," +
                             " SAS_AccountsDetails.RefCode, SAS_AccountsDetails.TransID, SAS_AccountsDetails.TransTempCode,SAS_AccountsDetails.TransCode," +
-                            " SAS_FeeTypes.saft_taxmode, SAS_AccountsDetails.TaxAmount, SAS_AccountsDetails.Tax, SAS_AccountsDetails.internal_use,SAS_AccountsDetails.temppaidamount " +
-                            " FROM sas_accounts inner join SAS_AccountsDetails  on " +
+                            " SAS_FeeTypes.saft_taxmode, SAS_AccountsDetails.TaxAmount, SAS_AccountsDetails.Tax, SAS_AccountsDetails.internal_use::int,SAS_AccountsDetails.temppaidamount " +
+                            " ,SAS_AccountsDetails.transstatus,SAS_AccountsDetails.internal_use as use FROM sas_accounts inner join SAS_AccountsDetails  on " +
                             " sas_accounts.transid = SAS_AccountsDetails.transid " +
                             " INNER JOIN SAS_FeeTypes ON SAS_AccountsDetails.RefCode = SAS_FeeTypes.SAFT_Code " +
                             " inner join sas_student on sas_student.sasi_matricno = sas_accounts.creditref" +
@@ -587,8 +587,14 @@ namespace HTS.SAS.DataAccessObjects
             //added by Hafiz @ 22/3/2016
             if (m_no.Length != 0) sqlCmd = sqlCmd + " AND SAS_Student.SASI_MatricNo ='" + m_no + "'";
 
-            sqlCmd += " order by sas_student.sasi_matricno";
-
+            if (sub == "UpdatePaidAmount")
+            {
+                sqlCmd += " order by sasi_matricno,transstatus,internal_use,saft_priority,saft_code asc";
+            }
+            else
+            {
+                sqlCmd += " order by sas_student.sasi_matricno";
+            }
             try
             {
                 if (!FormHelp.IsBlank(sqlCmd))
@@ -620,11 +626,19 @@ namespace HTS.SAS.DataAccessObjects
                             loItem.TaxAmount = GetValue<double>(loReader, "TaxAmount");
                             loItem.TaxId = GetValue<int>(loReader, "saft_taxmode");
                             loItem.Sudentacc = getStudent;
-                            loItem.Internal_Use = GetValue<string>(loReader, "internal_use");
+                            
 
-                            if(sub == "UpdatePaidAmount")
+                            if (sub == "UpdatePaidAmount")
                             {
+                                loItem.TransactionID = GetValue<int>(loReader, "internal_use");
                                 loItem.TempPaidAmount = GetValue<double>(loReader, "temppaidamount");
+                                loItem.TransStatus = GetValue<string>(loReader, "transstatus");
+                                loItem.Internal_Use = GetValue<string>(loReader, "use");
+                            }
+                            else
+                            {
+                                loItem.Internal_Use = GetValue<string>(loReader, "internal_use");
+                                loItem.TransactionID = GetValue<int>(loReader, "TransID");
                             }
                             loEnList.Add(loItem);
                         }

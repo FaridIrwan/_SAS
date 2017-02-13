@@ -1010,7 +1010,7 @@ namespace HTS.SAS.DataAccessObjects
                 //           " and B.SASI_Reg_Status =" + Helper.StuRegistered
                 //            + " and B.sass_code =" + clsGeneric.AddQuotes(Helper.StuActive) +
                 //            " and TO_DATE( c.SASS_sDATE,'DD/MM/YYYY') <= current_date and TO_DATE( c.SASS_EDATE,'DD/MM/YYYY') >= current_date";
-                sqlCmd = "select distinct A.sapg_code, A.sapg_program,C.SASS_Sponsor,C.sasi_matricno,C.sass_limit,B.sasi_name," +
+                sqlCmd = "select distinct A.sapg_code, A.sapg_program,C.SASS_Sponsor,C.sasi_matricno,C.sass_limit,B.sasi_name,B.sasi_cursemyr as semyear," +
                     "( SELECT CASE WHEN SUM(acc.transamount) IS NULL THEN 0 " +
                     "ELSE SUM(acc.transamount) END " +
                     "FROM   SAS_SponsorInvoice D " +
@@ -1055,6 +1055,21 @@ namespace HTS.SAS.DataAccessObjects
                             loItem.ProgramType = GetValue<string>(loReader, "sapg_program");
                             loItem.SponsorCode = GetValue<string>(loReader, "SASS_Sponsor");
                             loItem.CreditRef = "0";
+                            string d2, m2, y2;
+                            string code2 = GetValue<string>(loReader, "semyear");
+                            if (code2 != "")
+                            {
+                                d2 = code2.Substring(0, 4);
+                                m2 = code2.Substring(4, 4);
+                                y2 = code2.Substring(8, 1);
+                                string semestercode2 = d2 + "/" + m2 + "-" + y2;
+                                loItem.currsemyear = semestercode2;
+                            }
+                            else if (code2 == "")
+                            {
+                                loItem.currsemyear = "";
+                            }
+                            //loItem.currsemyear = GetValue<string>(loReader, "semyear");
                             loEnList.Add(loItem);
 
                         }
@@ -3099,6 +3114,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             loItem.OutstandingAmount = GetValue<double>(loReader, "AvailableAmont");
                             loItem.CategoryCode = GetValue<string>(loReader, "sasc_code");
                             loItem.FullySponsor = GetValue<Boolean>(loReader, "sass_type");
+                            
                             loEnList.Add(loItem);
                         }
                         loReader.Close();
@@ -4164,7 +4180,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
 
             string sqlCmd = @"
                       
-                        select Distinct  stu.SASI_MatricNo, SASI_Name,  stu.SASI_PgId,  stu.sasi_intake,  stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type,
+                        select Distinct  stu.SASI_MatricNo, SASI_Name,  stu.SASI_PgId,  stu.sasi_intake,stu.sasi_cursemyr as semyear,  stu.SASI_CurSem, sspon.SASS_Sponsor, sspon.sass_limit, stu.sasc_code, sspon.sass_type,
                          ( SELECT CASE WHEN SUM(acc.transamount) IS NULL THEN 0
                         ELSE SUM(acc.transamount) END 
                         FROM   SAS_SponsorInvoice D  
@@ -4237,6 +4253,20 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             loItem.OutstandingAmount = GetValue<double>(loReader, "AvailableAmont");
                             loItem.CategoryCode = GetValue<string>(loReader, "sasc_code");
                             loItem.FullySponsor = GetValue<Boolean>(loReader, "sass_type");
+                            string d2, m2, y2;
+                            string code2 = GetValue<string>(loReader, "semyear");
+                            if (code2 != "")
+                            {
+                                d2 = code2.Substring(0, 4);
+                                m2 = code2.Substring(4, 4);
+                                y2 = code2.Substring(8, 1);
+                                string semestercode2 = d2 + "/" + m2 + "-" + y2;
+                                loItem.currsemyear = semestercode2;
+                            }
+                            else if (code2 == "")
+                            {
+                                loItem.currsemyear = "";
+                            }
                             loEnList.Add(loItem);
                         }
                         loReader.Close();
@@ -4620,7 +4650,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                 " and sa.creditref = '" + Matricno + "'";
             }
 
-            sqlCmd = sqlCmd + " order by creditref,transid,saft_priority,refcode asc";
+            sqlCmd = sqlCmd + " order by creditref,transstatus,transid,saft_priority,refcode asc";
             try
             {
                 if (!FormHelp.IsBlank(sqlCmd))
