@@ -154,6 +154,10 @@ Partial Class BatchInvoice
             btnChangeHostel.Visible = False
             link2.Enabled = False
             link2.Visible = False
+            lblSemyear.Visible = False
+            ddlsemyear.Visible = False
+            lblTransstatus.Visible = False
+            ddltransstatus.Visible = False
         ElseIf Request.QueryString("Formid") = "DN" Then
             btnBatchInvoice.Text = "Debit Note"
             Page.Title = String.Format("Student Debit Note")
@@ -161,6 +165,10 @@ Partial Class BatchInvoice
             btnChangeCdtHr.Visible = True
             btnChangeHostel.Visible = False
             btnChangeHostel2.Visible = True
+            lblSemyear.Visible = False
+            ddlsemyear.Visible = False
+            lblTransstatus.Visible = False
+            ddltransstatus.Visible = False
             'check the session("module") to enable/disable View Student tab - start
             If Session("Module") Is Nothing Then
                 btnViewStu.Enabled = True
@@ -181,6 +189,10 @@ Partial Class BatchInvoice
             btnChangeProg.Visible = True
             btnChangeCdtHr.Visible = True
             btnChangeHostel.Visible = True
+            lblSemyear.Visible = True
+            ddlsemyear.Visible = True
+            lblTransstatus.Visible = True
+            ddltransstatus.Visible = True
             'check the session("module") to enable/disable View Student tab - start
             If Session("Module") Is Nothing Then
                 btnViewStu.Enabled = True
@@ -363,11 +375,11 @@ Partial Class BatchInvoice
             If listStu.Count > 0 Then
                 For Each dgitem In dgView.Items
                     chk = dgitem.Cells(0).Controls(1)
-                    'If chk.Checked = True Then
-                    '    chk.Checked = True
-                    'Else
-                    chk.Checked = False
-                    'End If
+                    If chk.Checked = True Then
+                        chk.Checked = True
+                    Else
+                        chk.Checked = False
+                    End If
 
                     Dim currMatricNo As String
                     Dim currFeeCode As String
@@ -381,7 +393,14 @@ Partial Class BatchInvoice
                     'If objStu.PostStatus = "Ready" Then
                     '    objStu = listStu.Where(Function(y) y.MatricNo = currMatricNo And y.ReferenceCode = currFeeCode).FirstOrDefault()
                     'Else
+                    'If txtMode.Text = "UpdatePaidAmount" And lblStatus.Value = "Ready" Then
+                    '    objStu = listStu.Where(Function(y) y.MatricNo = currMatricNo And y.ReferenceCode = currFeeCode And y.Internal_Use = dgitem.Cells(16).Text).FirstOrDefault()
+                    'ElseIf txtMode.Text = "UpdatePaidAmount" And lblStatus.Value <> "Ready" Then
+                    '    objStu = listStu.Where(Function(y) y.MatricNo = currMatricNo And y.ReferenceCode = currFeeCode And y.TransactionID = Transid).FirstOrDefault()
+                    'Else
                     objStu = listStu.Where(Function(y) y.MatricNo = currMatricNo And y.ReferenceCode = currFeeCode And y.TransactionID = Transid).FirstOrDefault()
+                    'End If
+
                     'End If
 
 
@@ -424,8 +443,9 @@ Partial Class BatchInvoice
                     objStu.TransactionAmount = FeeAmount
                     objStu.TaxAmount = GSTAmt
                     objStu.GSTAmount = GSTAmt
-
-
+                    objStu.Internal_Use = dgitem.Cells(16).Text
+                    objStu.TempPaidAmount = dgitem.Cells(14).Text
+                    objStu.TransStatus = dgitem.Cells(15).Text
                     newListStu.Add(objStu)
                     objStu = Nothing
                     i = i + 1
@@ -436,11 +456,11 @@ Partial Class BatchInvoice
             Else
                 For Each dgitem In dgView.Items
                     chk = dgitem.Cells(0).Controls(1)
-                    'If chk.Checked = True Then
-                    '    chk.Checked = True
-                    'Else
-                    chk.Checked = False
-                    'End If
+                    If chk.Checked = True Then
+                        chk.Checked = True
+                    Else
+                        chk.Checked = False
+                    End If
                     Session("AddFee") = Nothing
                     txt = dgitem.Cells(dgViewCell.Fee_Amount).Controls(1)
                     If txt.Text = "" Then txt.Text = 0
@@ -496,6 +516,9 @@ Partial Class BatchInvoice
                     eobjTRD.GSTAmount = GSTAmt
                     eobjTRD.TaxAmount = GSTAmt
                     'eobjTRD.Tax = TaxPercentage
+                    eobjTRD.Internal_Use = dgitem.Cells(16).Text
+                    eobjTRD.TempPaidAmount = dgitem.Cells(14).Text
+                    eobjTRD.TransStatus = dgitem.Cells(15).Text
                     ListTRD.Add(eobjTRD)
                     eobjTRD = Nothing
                     i = i + 1
@@ -503,8 +526,8 @@ Partial Class BatchInvoice
                 Session("AddFee") = ListTRD
                 dgView.DataSource = ListTRD
                 dgView.DataBind()
+                'AddTotal()
             End If
-
             If dgView.Items.Count <> 0 Then
 
                 Dim dgitem1 As DataGridItem
@@ -543,6 +566,7 @@ Partial Class BatchInvoice
                     chk.Checked = True
                 Next
                 'Else
+
             End If
         Catch ex As Exception
             If ex.Message = "TaxCode Missing" Then
@@ -1545,25 +1569,35 @@ Partial Class BatchInvoice
                         Dim ReferenceCode As String = item.Cells(dgViewCell.ReferenceCode).Text
                         'Dim ReferenceCode As String = dgView.DataKeys(dgView.SelectedIndex).ToString()
                         Dim MatricNo As String = item.Cells(dgViewCell.MatricNo).Text
+                        If txtMode.Text = "UpdatePaidAmount" And lblStatus.Value = "Ready" Then
+                            Dim transid As String = item.Cells(13).Text
+                            currListSt.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode And x.MatricNo = MatricNo And x.TransactionID = transid)
+                        ElseIf txtMode.Text = "UpdatePaidAmount" And lblStatus.Value <> "Ready" Then
+                            Dim transid As String = item.Cells(13).Text
+                            currListSt.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode And x.MatricNo = MatricNo And x.TransactionID = transid)
+                        Else
+                            currListSt.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode And x.MatricNo = MatricNo)
+                        End If
+
                         'Dim MatricNo As String = dgView.Items(dgView.SelectedIndex).Cells(dgViewCell.MatricNo).Text
-                Dim getselectedReferenCode As New List(Of StudentEn)
-                currListSt.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode And x.MatricNo = MatricNo)
-                Dim updateCurrList As New AccountsDetailsEn
-                updateCurrList = ListTRD.Where(Function(x) x.ReferenceCode = ReferenceCode).FirstOrDefault()
-                getselectedReferenCode = currListSt.Where(Function(x) x.ReferenceCode = ReferenceCode).ToList()
-                If getselectedReferenCode.Count > 0 Then
-                    updateCurrList.TransactionAmount = 0
-                    updateCurrList.GSTAmount = 0
-                    updateCurrList.TempAmount = 0
-                    For Each obj In getselectedReferenCode
-                        updateCurrList.TransactionAmount = updateCurrList.TransactionAmount + obj.TransactionAmount
-                        updateCurrList.GSTAmount = updateCurrList.GSTAmount + obj.GSTAmount
-                        updateCurrList.TempAmount = updateCurrList.TransactionAmount - updateCurrList.GSTAmount
-                    Next
-                    updateCurrList.StudentQty = getselectedReferenCode.Count
-                Else
-                    ListTRD.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode)
-                End If
+                        Dim getselectedReferenCode As New List(Of StudentEn)
+
+                        Dim updateCurrList As New AccountsDetailsEn
+                        updateCurrList = ListTRD.Where(Function(x) x.ReferenceCode = ReferenceCode).FirstOrDefault()
+                        getselectedReferenCode = currListSt.Where(Function(x) x.ReferenceCode = ReferenceCode).ToList()
+                        If getselectedReferenCode.Count > 0 Then
+                            updateCurrList.TransactionAmount = 0
+                            updateCurrList.GSTAmount = 0
+                            updateCurrList.TempAmount = 0
+                            For Each obj In getselectedReferenCode
+                                updateCurrList.TransactionAmount = updateCurrList.TransactionAmount + obj.TransactionAmount
+                                updateCurrList.GSTAmount = updateCurrList.GSTAmount + obj.GSTAmount
+                                updateCurrList.TempAmount = updateCurrList.TransactionAmount - updateCurrList.GSTAmount
+                            Next
+                            updateCurrList.StudentQty = getselectedReferenCode.Count
+                        Else
+                            ListTRD.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode)
+                        End If
                     End If
                 Next
                 If ListTRD.Count > 0 Then
@@ -1960,7 +1994,7 @@ Partial Class BatchInvoice
         Dim InternationalStuCount As Integer = 0
         Dim TakeLocalFeeAmount As Boolean = False
         Dim existingFeeType As New AccountsDetailsEn
-        chkSelectedView.Checked = True
+        'chkSelectedView.Checked = True
         chkSelectedView.Visible = True
         Dim i As Integer = 0
         If Not Session(ReceiptsClass.SessionStuChange) Is Nothing Then
@@ -2257,7 +2291,7 @@ Partial Class BatchInvoice
         If dgView.Items.Count > 0 Then
             Dim chk As CheckBox
             Dim dgitem As DataGridItem
-            chkSelectedView.Checked = True
+            'chkSelectedView.Checked = True
             If chkSelectedView.Checked = True Then
                 For Each dgitem In dgView.Items
                     chk = dgitem.Cells(0).Controls(1)
@@ -2811,7 +2845,7 @@ Partial Class BatchInvoice
                                                                                                                .TaxAmount = x.TaxAmount, .GSTAmount = x.GSTAmount,
                                                                                                               .TaxId = x.TaxId, .ReferenceCode = x.ReferenceCode,
                                                                                                               .Description = x.Description, .Priority = x.Priority, .Internal_Use = x.Internal_Use,
-                                                                                                              .TransactionID = x.TransactionID}).Distinct().ToList())
+                                                                                                              .TransactionID = x.TransactionID, .TransStatus = x.TransStatus, .TempPaidAmount = x.TempPaidAmount}).Distinct().ToList())
                             'If ListStuChange.Count <> 0 Then
                             '    Dim i As Integer = 0
                             '    While i < ListStuChange.Count
@@ -2889,20 +2923,7 @@ Partial Class BatchInvoice
 
                         dgView.DataSource = ListTranctionDetails
                         dgView.DataBind()
-                        'Dim chk As CheckBox
-                        'Dim dgitem As DataGridItem
-                        'If dgView.Items.Count > 0 Then
-                        '    txtTotal.Visible = True
-                        '    lblTotal.Visible = True
-                        '    chkSelectedView.Checked = True
-                        '    If chkSelectedView.Checked = True Then
-                        '        For Each dgitem In dgView.Items
-                        '            chk = dgitem.Cells(0).Controls(1)
-                        '            chk.Checked = True
-                        '        Next
-                        '    End If
-                        'End If
-                        'Session("AddFee") = ListTranctionDetails
+                        
                         Dim mylst As New List(Of StudentEn)
                         Dim bsobj As New AccountsBAL
                         Dim loen As New StudentEn
@@ -3036,12 +3057,14 @@ Partial Class BatchInvoice
                         dgView.DataSource = ListTranctionDetails
                         dgView.DataBind()
 
-                        'If dgView.Items.Count >= 0 Then
-                        '    txtTotal.Visible = True
-                        '    lblTotal.Visible = True
-                        'End If
+                        If txtMode.Text = "UpdatePaidAmount" Then
+                            For Each items As DataGridItem In dgView.Items
+                                items.Cells(15).Visible = True
+                                items.Cells(16).Visible = True
+                            Next
+                        Else
 
-                        'Session("AddFee") = ListTranctionDetails
+                        End If
                         Dim mylst As New List(Of StudentEn)
                         Dim bsobj As New AccountsBAL
                         Dim loen As New StudentEn
@@ -3148,7 +3171,12 @@ Partial Class BatchInvoice
             pnlDgView.Visible = True
             pnlDgFeeType.Visible = False
         End If
+        If txtMode.Text = "UpdatePaidAmount" Then
+            dgView.Columns(15).Visible = True
+            'dgView.Columns(16).Visible = True
+        Else
 
+        End If
         setDateFormat()
         Session("MatricNo") = Nothing
         hfValidateAmt.Value = False
@@ -4823,6 +4851,7 @@ Partial Class BatchInvoice
         'dgFeeType.DataSource = Addfeestudent
         'dgFeeType.DataBind()
         If Addfee.Count > 0 Then
+            txtMode.Text = "UpdatePaidAmount"
             If Not Session("AddFee") Is Nothing Then
                 ListTRD = Session("AddFee")
             Else
@@ -4880,14 +4909,17 @@ Partial Class BatchInvoice
             Session(ReceiptsClass.SessionStuChgMatricNo) = StuChgMatricNo
             hfStudentCount.Value = StuChgMatricNo.Count
             If Addfee.Count > 0 Then
-                dgView.DataSource = newStuList.OrderBy(Function(x) x.TransStatus)
+                dgView.DataSource = newStuList
                 dgView.DataBind()
+                If txtMode.Text = "UpdatePaidAmount" Then
+                    dgView.Columns(15).Visible = True
+                    'dgView.Columns(16).Visible = True
+                Else
 
-                'modified by Hafiz @ 08/02/2017
+                End If
                 Dim chk As CheckBox
                 Dim dgitem As DataGridItem
                 'chkSelectedView.Checked = True
-                chkSelectedView.Checked = False
                 If chkSelectedView.Checked = True Then
                     For Each dgitem In dgView.Items
                         chk = dgitem.Cells(0).Controls(1)
@@ -4896,11 +4928,6 @@ Partial Class BatchInvoice
                         If CInt(Request.QueryString("IsView")).Equals(1) Then
                             chk.Enabled = False
                         End If
-                    Next
-                Else
-                    For Each dgitem In dgView.Items
-                        chk = dgitem.Cells(0).Controls(1)
-                        chk.Checked = False
                     Next
                 End If
                 pnlDgView.Visible = True

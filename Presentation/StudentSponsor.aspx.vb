@@ -73,6 +73,7 @@ Partial Class StudentSponsor
                 eobjstu.StudentName = dgitem.Cells(2).Text
                 eobjstu.CurrentSemester = dgitem.Cells(3).Text
                 eobjstu.CategoryCode = dgitem.Cells(7).Text
+                eobjstu.currsemyear = dgitem.Cells(9).Text
                 listStu.Add(eobjstu)
             End If
         Else
@@ -106,6 +107,7 @@ Partial Class StudentSponsor
                     eobjstu.StudentName = dgitem.Cells(2).Text
                     eobjstu.CurrentSemester = dgitem.Cells(3).Text
                     eobjstu.CategoryCode = dgitem.Cells(7).Text
+                    eobjstu.currsemyear = dgitem.Cells(9).Text
                     listStu.Add(eobjstu)
                 End If
             Next
@@ -136,6 +138,7 @@ Partial Class StudentSponsor
                 eobj.OutstandingAmount = dgi.Cells(6).Text
                 eobj.CategoryCode = dgi.Cells(7).Text
                 eobj.ProgramID = dgi.Cells(8).Text
+                eobj.currsemyear = dgi.Cells(9).Text
                 eobj.TempAmount = 0
                 listStudent.Add(eobj)
                 dgStudentInfo.SelectedIndex = -1

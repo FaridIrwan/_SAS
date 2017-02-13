@@ -77,6 +77,7 @@
                                                 <asp:BoundColumn DataField="OutstandingAmount" HeaderText="Available Amount"></asp:BoundColumn>
                                                 <asp:BoundColumn DataField="CategoryCode" HeaderText="Category Code" Visible="false"></asp:BoundColumn>
                                                 <asp:BoundColumn DataField="ProgramID" HeaderText="Program ID" Visible="false"></asp:BoundColumn>
+                                                <asp:BoundColumn DataField="currsemyear" HeaderText="Sem Year" Visible="false"></asp:BoundColumn>
                                             </Columns>
                                         </asp:DataGrid>
                                     </div>
