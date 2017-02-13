@@ -2616,7 +2616,7 @@ namespace HTS.SAS.DataAccessObjects
                         newAccDetails.ReferenceCode = data.ReferenceCode;
                         newAccDetails.TaxAmount = data.TaxAmount;
                         newAccDetails.PostStatus = argEn.PostStatus;
-                        newAccDetails.TransStatus = argEn.TransStatus;
+                        
                         newAccDetails.Priority = data.Priority;
 
                         if (argEn.SubCategory == "UpdatePaidAmount")
@@ -2640,9 +2640,11 @@ namespace HTS.SAS.DataAccessObjects
                             }
                             newAccDetails.Inv_no = inv;
                             newAccDetails.TempPaidAmount = data.TempPaidAmount;
+                            newAccDetails.TransStatus = data.TransStatus;
                         }
                         else
                         {
+                            newAccDetails.TransStatus = argEn.TransStatus;
                             newAccDetails.Internal_Use = data.Internal_Use;
                         }
                         
@@ -2905,6 +2907,33 @@ namespace HTS.SAS.DataAccessObjects
                         newAccDetails.PostStatus = argEn.PostStatus;
                         newAccDetails.TransStatus = argEn.TransStatus;
                         newAccDetails.Priority = data.Priority;
+                        if (argEn.SubCategory == "UpdatePaidAmount")
+                        {
+                            string inv = "";
+                            IDataReader _IDataReader = null;
+                            //newAccDetails.Internal_Use = data.TransactionID.ToString();
+                            string sqlget = "Select distinct transcode from sas_accountsdetails where transid = '" + data.Internal_Use + "'";
+                            //Build Sql Statement - Stop
+
+                            //Get Batch Details - Start
+                            _IDataReader = _DatabaseFactory.ExecuteReader(
+                                Helper.GetDataBaseType, DataBaseConnectionString, sqlget).CreateDataReader();
+                            //Get Batch Details - Stop
+
+                            //loop thro the batch details - start
+                            while (_IDataReader.Read())
+                            {
+                                //Get transcode
+                                inv = clsGeneric.NullToString(_IDataReader["transcode"]);
+                            }
+                            newAccDetails.Inv_no = inv;
+                            newAccDetails.TempPaidAmount = data.TempPaidAmount;
+                            newAccDetails.TransStatus = data.TransStatus;
+                        }
+                        else
+                        {
+                            
+                        }
                         newAccDetails.Internal_Use = data.Internal_Use;
                         newlistAccDetails.Add(newAccDetails);
                     }
@@ -6707,15 +6736,42 @@ public double GetSponserStuAllocateAmount(string BatchId)
             bool result = false;
             string UpdateStatement = null;
             string transstatus = "Open";
+            IDataReader _IDataReader = null;
+            string sqlget = "SELECT subcategory from sas_accounts WHERE batchcode = '" + BatchCode + "'";
+            //Build Sql Statement - Stop
+            //string sqlCmd = "";
+            string sub = "";
+            //Get Batch Details - Start
+            _IDataReader = _DatabaseFactory.ExecuteReader(
+                Helper.GetDataBaseType, DataBaseConnectionString, sqlget).CreateDataReader();
+            //Get Batch Details - Stop
 
+            //loop thro the batch details - start
+            while (_IDataReader.Read())
+            {
+                //Get Transaction Id
+                sub = clsGeneric.NullToString(_IDataReader["subcategory"]);
+            }
             try
             {
                 //Build Update Statement - Start
-                UpdateStatement += "UPDATE sas_accountsdetails AS sas_details SET transcode = substring(sas_details.transtempcode from 2 for Length(sas_details.transtempcode)),poststatus = 'Posted',transstatus=" + clsGeneric.AddQuotes(transstatus) + " ,transtempcode = '' FROM sas_accounts sas_acc WHERE sas_acc.transid = sas_details.transid AND sas_acc.batchcode = " + clsGeneric.AddQuotes(BatchCode) + ";";
+                if (sub == "UpdatePaidAmount")
+                {
+                    UpdateStatement += "UPDATE sas_accountsdetails AS sas_details SET transcode = substring(sas_details.transtempcode from 2 for Length(sas_details.transtempcode)),poststatus = 'Posted',transtempcode = '' FROM sas_accounts sas_acc WHERE sas_acc.transid = sas_details.transid AND sas_acc.batchcode = " + clsGeneric.AddQuotes(BatchCode) + ";";
 
-                UpdateStatement += "UPDATE sas_accounts SET transcode = substring(transtempcode from 2 for Length(transtempcode)),poststatus = 'Posted',transstatus=" + clsGeneric.AddQuotes(transstatus) + " ,transtempcode = '',";
+                    UpdateStatement += "UPDATE sas_accounts SET transcode = substring(transtempcode from 2 for Length(transtempcode)),poststatus = 'Posted',transstatus=" + clsGeneric.AddQuotes(transstatus) + " ,transtempcode = '',";
 
-                UpdateStatement += "postedby = " + clsGeneric.AddQuotes(UserId) + clsGeneric.AddComma() + "postedtimestamp = " + clsGeneric.AddQuotes(Helper.DateConversion(DateTime.Now)) + " WHERE batchcode = " + clsGeneric.AddQuotes(BatchCode) + ";";
+                    UpdateStatement += "postedby = " + clsGeneric.AddQuotes(UserId) + clsGeneric.AddComma() + "postedtimestamp = " + clsGeneric.AddQuotes(Helper.DateConversion(DateTime.Now)) + " WHERE batchcode = " + clsGeneric.AddQuotes(BatchCode) + ";";
+                }
+                else
+                {
+                    UpdateStatement += "UPDATE sas_accountsdetails AS sas_details SET transcode = substring(sas_details.transtempcode from 2 for Length(sas_details.transtempcode)),poststatus = 'Posted',transstatus=" + clsGeneric.AddQuotes(transstatus) + " ,transtempcode = '' FROM sas_accounts sas_acc WHERE sas_acc.transid = sas_details.transid AND sas_acc.batchcode = " + clsGeneric.AddQuotes(BatchCode) + ";";
+
+                    UpdateStatement += "UPDATE sas_accounts SET transcode = substring(transtempcode from 2 for Length(transtempcode)),poststatus = 'Posted',transstatus=" + clsGeneric.AddQuotes(transstatus) + " ,transtempcode = '',";
+
+                    UpdateStatement += "postedby = " + clsGeneric.AddQuotes(UserId) + clsGeneric.AddComma() + "postedtimestamp = " + clsGeneric.AddQuotes(Helper.DateConversion(DateTime.Now)) + " WHERE batchcode = " + clsGeneric.AddQuotes(BatchCode) + ";";
+                }
+                
                 //Build Update Statement - Stop
 
                 if (!FormHelp.IsBlank(UpdateStatement))
@@ -9189,7 +9245,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             //variable declarations
             string SqlStatement = null; string UpdateStatement = null; int TransId = 0;
             double oldamount = 0; double pamt = 0; double paidamt = 0; double balance = 0;
-            double toldamount = 0;
+            double toldamount = 0; double amountopen = 0;
             double newamount = 0; int newTransId = 0;
             string refcode = ""; string matric = ""; string sub = "";
             string use = ""; string transcode = "";
@@ -9260,6 +9316,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                     newTransId = clsGeneric.NullToInteger(drTrack["transid"]);
                                     newamount = Convert.ToDouble(drTrack["paidamount"]);
                                     toldamount = oldamount - newamount;
+                                    amountopen = paidamt - toldamount;
                                     if (toldamount > paidamt)
                                     {
                                         if (newamount == 0)
@@ -9323,10 +9380,14 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                             throw new Exception("Update Failed! No Row has been updated...");
                                     }
                                 }
+                                if (amountopen > 0)
+                                {
+                                    bool b = UpdatePaidAmountSPAReceipt(amountopen, matric, "Credit Note", TransId);
+                                }
                             }
                             drTrack.Close();
                         }
-                       
+
 
                         //if update statement successful - Stop
 
@@ -9357,6 +9418,10 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     return BatchCode;
                 }
 
+            }
+            else
+            {
+                UpdatePaidAmountCreditNote(BatchCode, UserId);
             }
             return BatchCode;
         }
@@ -9457,6 +9522,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             double paid = 0.0;
             double pamt = 0.0;
             double amount = 0.0;
+            double PAID2 = 0.0;
             List<AccountsDetailsEn> listStud = new List<AccountsDetailsEn>();
             AccountsDetailsEn studEn = new AccountsDetailsEn();
             string transcode = "";
@@ -9490,9 +9556,9 @@ public double GetSponserStuAllocateAmount(string BatchId)
                             else if (listStud[i].PaidAmount > 0)
                             {
                                 pamt = paid - transamount;
-                                //amount = pamt + listStud[i].PaidAmount;
                                 amount = listStud[i].PaidAmount + transamount;
                             }
+                            PAID2 = transamount;
                         }
                         if (paid <= transamount)
                         {
@@ -9506,7 +9572,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 pamt = transamount - paid;
                                 amount = listStud[i].TransactionAmount;
                             }
-                            //amount = paid;
+                            PAID2 = paid;
                         }
                         //paid = transamount - listStud[i].TransactionAmount;
                         if (transamount > 0)
@@ -9564,7 +9630,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                         _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
-                                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, amount);
+                                        //_DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, transamount);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, PAID2);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, "Open");
@@ -10691,7 +10758,482 @@ public double GetSponserStuAllocateAmount(string BatchId)
 
         #endregion
 
-    
+        #region UpdatePaidAmount
+
+        public string UpdatePaidAmountCreditNote(string BatchCode, string UserId)
+        {
+            //create instances
+            IDataReader _IDataReader = null;
+            bool lbRes = false;
+            //variable declarations
+            string SqlStatement = null; string UpdateStatement = null; int TransId = 0;
+            double oldamount = 0; double pamt = 0; double paidamt = 0; double balance = 0;
+            double toldamount = 0; double amountopen = 0;
+            double newamount = 0; int newTransId = 0;
+            string refcode = ""; string matric = ""; string sub = "";
+            string use = ""; string transcode = "";
+
+                try
+                {
+                    //Build Sql Statement - Start
+                    SqlStatement = "SELECT sad.transid,sad.transamount,sa.creditref,sad.refcode,sad.internal_use from sas_accountsdetails " +
+                        "sad inner join sas_accounts sa on sa.transid = sad.transid" +
+                        " WHERE sa.category = 'Credit Note' and sa.batchcode = "
+                        + clsGeneric.AddQuotes(BatchCode);
+
+                    SqlStatement += " order by sa.creditref asc";
+                    //Build Sql Statement - Stop
+                    //Get Batch Details - Start
+                    _IDataReader = _DatabaseFactory.ExecuteReader(
+                        Helper.GetDataBaseType, DataBaseConnectionString, SqlStatement).CreateDataReader();
+                    //Get Batch Details - Stop
+
+                    //loop thro the batch details - start
+                    while (_IDataReader.Read())
+                    {
+                        //Get Transaction Id
+                        TransId = clsGeneric.NullToInteger(_IDataReader["transid"]);
+                        //Updated Mona 19/2/2016
+                        string transstatus = "Closed";
+                        refcode = clsGeneric.NullToString(_IDataReader["refcode"]);
+                        paidamt = Convert.ToDouble(_IDataReader["transamount"]);
+                        //paidamt = Convert.ToDouble(f_IDataReader["paidamount"]);
+                        //use = clsGeneric.NullToString(_IDataReader["internal_use"]);
+                        matric = clsGeneric.NullToString(_IDataReader["creditref"]);
+
+                        string sqlChanges = "select sad.transcode,sad.transstatus,sad.transid,sad.transamount,Case when sad.taxamount is null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount is null then 0 else sad.paidamount end as paidamount from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st " +
+                        " on st.saft_code = sad.refcode left join sas_student ss on ss.sasi_matricno = sa.creditref" +
+                        " where sa.poststatus = 'Posted' and sa.creditref = '" + matric + "' and sad.refcode = '" + refcode + "' and " +
+                    " sa.category in ('Debit Note','AFC','Invoice') and sad.transamount <> 0 order by transid desc";
+                        using (IDataReader drTrack = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                           DataBaseConnectionString, sqlChanges).CreateDataReader())
+                        {
+                            while (drTrack.Read())
+                            {
+                                //if (drTrack.FieldCount > 1 )
+                                //{
+
+                                //}
+                                //else
+                                //{
+                                string status = clsGeneric.NullToString(drTrack["transstatus"]);
+                                newamount = Convert.ToDouble(drTrack["paidamount"]);
+                                oldamount = Convert.ToDouble(drTrack["transamount"]);
+                                newTransId = clsGeneric.NullToInteger(drTrack["transid"]);
+                                string transcodee = clsGeneric.NullToString(drTrack["transcode"]);
+                                toldamount = oldamount - newamount;
+                                amountopen = paidamt - toldamount;
+                                if (status == "Closed")
+                                {
+                                    bool a = UpdatePaidAmountSPAReceipt(paidamt, matric, "Credit Note", TransId);
+                                }
+                                else
+                                {
+                                    //transcode = clsGeneric.NullToString(_IDataReader["transcode"]);
+
+                                    if (toldamount > paidamt)
+                                    {
+                                        if (newamount == 0)
+                                        {
+
+                                        }
+                                        else if (newamount > 0)
+                                        {
+                                            paidamt = newamount + paidamt;
+                                        }
+                                    }
+                                    else if (toldamount <= paidamt)
+                                    {
+
+                                        if (newamount == 0)
+                                        {
+                                            paidamt = toldamount;
+                                        }
+                                        else if (newamount > 0)
+                                        {
+                                            //pamt = transamount - paid;
+                                            paidamt = oldamount;
+                                        }
+                                        //amount = paid;
+                                    }
+                                    balance = oldamount - paidamt;
+                                    if (balance == 0)
+                                    {
+                                        string sqlupdate = "UPDATE SAS_AccountsDetails SET Transstatus = @TransStatus WHERE TransID = @TransID And refcode = @RefCode";
+                                        if (!FormHelp.IsBlank(sqlupdate))
+                                        {
+                                            DbCommand cmd1 = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlupdate, DataBaseConnectionString);
+                                            _DatabaseFactory.AddInParameter(ref cmd1, "@TransID", DbType.Int32, newTransId);
+                                            _DatabaseFactory.AddInParameter(ref cmd1, "@RefCode", DbType.String, refcode);
+                                            _DatabaseFactory.AddInParameter(ref cmd1, "@TransStatus", DbType.String, transstatus);
+                                            _DbParameterCollection = cmd1.Parameters;
+                                            int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd1,
+                                                        DataBaseConnectionString, sqlupdate, _DbParameterCollection);
+                                            if (liRowAffected > -1)
+                                                lbRes = true;
+                                            else
+                                                throw new Exception("Update Failed! No Row has been updated...");
+                                        }
+                                    }
+                                    string sqlCmd = "UPDATE SAS_AccountsDetails SET PaidAmount = @PaidAmount WHERE TransID = @TransID And refcode = @RefCode";
+
+                                    if (!FormHelp.IsBlank(sqlCmd))
+                                    {
+                                        DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmd, DataBaseConnectionString);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, newTransId);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, refcode);
+                                        //_DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, balance);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, paidamt);
+                                        _DbParameterCollection = cmd.Parameters;
+
+                                        int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+                                                    DataBaseConnectionString, sqlCmd, _DbParameterCollection);
+                                        if (liRowAffected > -1)
+                                            lbRes = true;
+                                        else
+                                            throw new Exception("Update Failed! No Row has been updated...");
+                                    }
+                                    //string sqlCmd = "UPDATE SAS_AccountsDetails SET PaidAmount = @PaidAmount WHERE TransID = @TransID And refcode = @RefCode";
+                                    string updateinv = "UPDATE sas_accountsdetails SET inv_no = '" + transcodee + "',paidamount = '" + paidamt + "' WHERE refcode = '" + refcode + "' and transid = '" + TransId + "';";
+
+                                    if (!FormHelp.IsBlank(updateinv))
+                                    {
+
+                                        int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                         DataBaseConnectionString, updateinv);
+
+                                        if (liRowAffected > -1)
+                                        {
+                                            //mode = "Exit";
+                                        }
+                                        else
+                                        { }
+
+                                    }
+                                   
+                                }
+                                if (amountopen > 0)
+                                {
+                                    bool b = UpdatePaidAmountSPAReceipt(amountopen, matric, "Credit Note", TransId);
+                                }
+
+                            //}
+                            }
+                            drTrack.Close();
+
+                        }
+
+                            string sqlget1 = "update sas_accounts set paidamount = (select sum(paidamount) as paidamount from sas_accountsdetails where transid = '" + newTransId + "') where transid = '" + newTransId + "';";
+                            string sqlupdate1 = "update sas_accounts set transstatus = 'Closed' where transamount = paidamount and transid = '" + newTransId + "';";
+                            if (!FormHelp.IsBlank(sqlget1))
+                            {
+                                int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                     DataBaseConnectionString, sqlget1);
+
+                                if (liRowAffected > -1)
+                                { }
+                                else
+                                    throw new Exception("Update Failed! No Row has been updated...");
+                            }
+                            if (!FormHelp.IsBlank(sqlupdate1))
+                            {
+                                int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                     DataBaseConnectionString, sqlupdate1);
+                            }
+
+                        
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MaxModule.Helper.LogError(ex.Message);
+
+                    return BatchCode;
+                }
+
+            //}
+            //else
+            //{
+
+            //}
+            return BatchCode;
+        }
+
+        #endregion
+
+        //#region UpdatePaidAmountForSameFeeCode
+        ////added by Farid @ 09/01/2017
+        ////update paid amount for receipt student and sponsor allocation(student)
+
+        //public bool UpdatePaidAmountForSameFeeCode(double transamount, string creditref, string refcode, int transactionid)
+        //{
+        //    List<AccountsEn> list_stud = new List<AccountsEn>();
+        //    IDataReader _IDataReader = null;
+        //    //Check paid amount For Each Student
+        //    double balance = 0.0;
+        //    double paid = 0.0;
+        //    double pamt = 0.0;
+        //    double amount = 0.0;
+        //    double PAID2 = 0.0;
+        //    List<AccountsDetailsEn> listStud = new List<AccountsDetailsEn>();
+        //    AccountsDetailsEn studEn = new AccountsDetailsEn();
+        //    string transcode = "";
+        //    string mode = "";
+        //    string sqlChanges = "select sad.transcode,sad.transstatus,sad.transid,sad.transamount,Case when sad.taxamount is null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount is null then 0 else sad.paidamount end as paidamount from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st " +
+        //                " on st.saft_code = sad.refcode left join sas_student ss on ss.sasi_matricno = sa.creditref" +
+        //                " where sa.poststatus = 'Posted' and sa.creditref = '" + creditref + "' and sad.refcode = '" + refcode + "' and " +
+        //            " sa.category in ('Debit Note','AFC','Invoice') and sad.transamount <> 0 order by transid desc";
+        //    using (IDataReader drTrack = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+        //       DataBaseConnectionString, sqlChanges).CreateDataReader())
+        //    //Get Batch Details - Stop
+
+        //    //loop thro the batch details - start
+        //    while (_IDataReader.Read())
+        //    {
+        //        //Get Transaction Id
+        //        AccountsDetailsEn loItem = new AccountsDetailsEn();
+        //        loItem.TransactionCode = GetValue<string>(drTrack, "transcode");
+        //        loItem.ReferenceCode = GetValue<string>(drTrack, "refcode");
+        //        loItem.TransactionID = GetValue<int>(drTrack, "transid");
+        //        loItem.TransactionAmount = GetValue<double>(drTrack, "transamount");
+        //        loItem.PaidAmount = GetValue<double>(drTrack, "paidamount");
+        //        loItem.TransStatus = GetValue<string>(drTrack, "transstatus");
+        //        listStud.Add(loItem);
+        //    }
+        //    //string semintake = argEn.Semester;
+
+        //    //listStud = GetFeeCodesPriority(creditref);
+        //    if (listStud.Count > 0)
+        //    {
+        //        for (int i = 0; i < listStud.Count; i++)
+        //        {
+        //            studEn = listStud[i];
+        //            paid = listStud[i].TransactionAmount - listStud[i].PaidAmount;
+        //            if (paid > transamount)
+        //            {
+        //                if (listStud[i].PaidAmount == 0)
+        //                {
+        //                    amount = transamount;
+        //                }
+        //                else if (listStud[i].PaidAmount > 0)
+        //                {
+        //                    pamt = paid - transamount;
+        //                    amount = listStud[i].PaidAmount + transamount;
+        //                }
+        //                PAID2 = transamount;
+        //            }
+        //            if (paid <= transamount)
+        //            {
+
+        //                if (listStud[i].PaidAmount == 0)
+        //                {
+        //                    amount = paid;
+        //                }
+        //                else if (listStud[i].PaidAmount > 0)
+        //                {
+        //                    pamt = transamount - paid;
+        //                    amount = listStud[i].TransactionAmount;
+        //                }
+        //                PAID2 = paid;
+        //            }
+        //            //paid = transamount - listStud[i].TransactionAmount;
+        //            if (transamount > 0)
+        //            {
+        //                if (listStud[i].PaidAmount < listStud[i].TransactionAmount)
+        //                {
+        //                    string sqlCmd1 = "UPDATE sas_accountsdetails SET paidamount = '" + amount + "' WHERE refcode = '" + listStud[i].ReferenceCode + "' and transid = '" + listStud[i].TransactionID + "';";
+
+        //                    if (!FormHelp.IsBlank(sqlCmd1))
+        //                    {
+        //                        int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+        //                             DataBaseConnectionString, sqlCmd1);
+
+        //                        if (liRowAffected > -1)
+        //                        {
+        //                        }
+        //                        else
+        //                            throw new Exception("Update Failed! No Row has been updated...");
+        //                    }
+        //                }
+        //                balance = listStud[i].TransactionAmount - amount;
+        //                if (balance == 0)
+        //                {
+        //                    string sqlCmd = "UPDATE sas_accountsdetails SET transstatus = 'Closed' WHERE refcode = '" + listStud[i].ReferenceCode + "' and transid = '" + listStud[i].TransactionID + "';";
+
+        //                    if (!FormHelp.IsBlank(sqlCmd))
+        //                    {
+        //                        int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+        //                             DataBaseConnectionString, sqlCmd);
+
+        //                        if (liRowAffected > -1)
+        //                        { }
+        //                        else
+        //                            throw new Exception("Update Failed! No Row has been updated...");
+        //                    }
+        //                }
+        //                if (category == "SPA" || category == "Receipt")
+        //                {
+        //                    try
+        //                    {
+        //                        string insert = "INSERT INTO SAS_AccountsDetails(TransID,TransCode,RefCode,TransAmount," +
+        //                            "Tax,Discount,TaxAmount,DiscountAmount,PaidAmount,TempAmount,TempPaidAmount,TransStatus,PostStatus," +
+        //                            "inv_no) VALUES (@TransID,@TransCode,@RefCode,@TransAmount,@Tax," +
+        //                            "@Discount,@TaxAmount,@DiscountAmount,@PaidAmount,@TempAmount,@TempPaidAmount,@TransStatus,@PostStatus," +
+        //                            "@Inv_no) ";
+
+        //                        if (!FormHelp.IsBlank(insert))
+        //                        {
+        //                            DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, insert, DataBaseConnectionString);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, transactionid);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, transcode);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, listStud[i].ReferenceCode);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, listStud[i].TransactionAmount);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, 0);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
+        //                            //_DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, transamount);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, PAID2);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, "Open");
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, "Posted");
+        //                            _DatabaseFactory.AddInParameter(ref cmd, "@Inv_no", DbType.String, listStud[i].TransactionCode);
+        //                            _DbParameterCollection = cmd.Parameters;
+
+
+
+        //                            int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+        //                                DataBaseConnectionString, insert, _DbParameterCollection);
+
+        //                            if (liRowAffected > -1)
+        //                            { }
+        //                            else
+        //                            { }
+
+        //                        }
+
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        throw ex;
+        //                    }
+
+        //                }
+        //                else if (category == "Credit Note")
+        //                {
+
+        //                    if (mode != "Exit")
+        //                    {
+        //                        try
+        //                        {
+        //                            string updateinv = "UPDATE sas_accountsdetails SET inv_no = '" + listStud[i].TransactionCode + "' WHERE transid = '" + transactionid + "';";
+
+        //                            if (!FormHelp.IsBlank(updateinv))
+        //                            {
+
+        //                                int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+        //                                 DataBaseConnectionString, updateinv);
+
+        //                                if (liRowAffected > -1)
+        //                                {
+        //                                    mode = "Exit";
+        //                                }
+        //                                else
+        //                                { }
+
+        //                            }
+
+        //                        }
+        //                        catch (Exception ex)
+        //                        {
+        //                            throw ex;
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //            if (paid < transamount)
+        //            {
+        //                transamount = transamount - paid;
+        //            }
+        //            else if (paid >= transamount)
+        //            {
+        //                transamount = 0;
+        //            }
+        //            string sqlget = "update sas_accounts set paidamount = (select sum(paidamount) as paidamount from sas_accountsdetails where transid = '" + listStud[i].TransactionID + "') where transid = '" + listStud[i].TransactionID + "';";
+        //            string sqlupdate = "update sas_accounts set transstatus = 'Closed' where transamount = paidamount and transid = '" + listStud[i].TransactionID + "';";
+        //            if (!FormHelp.IsBlank(sqlget))
+        //            {
+        //                int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+        //                     DataBaseConnectionString, sqlget);
+
+        //                if (liRowAffected > -1)
+        //                { }
+        //                else
+        //                    throw new Exception("Update Failed! No Row has been updated...");
+        //            }
+        //            if (!FormHelp.IsBlank(sqlupdate))
+        //            {
+        //                int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+        //                     DataBaseConnectionString, sqlupdate);
+        //            }
+
+
+        //        }
+        //        //insert overpaidamount
+        //        if (transamount > 0)
+        //        {
+        //            try
+        //            {
+        //                string overpaid = "INSERT INTO SAS_AccountsDetails(TransID,TransCode,RefCode,TransAmount," +
+        //                    "Tax,Discount,TaxAmount,DiscountAmount,PaidAmount,TempAmount,TempPaidAmount,TransStatus,PostStatus" +
+        //                    ") VALUES (@TransID,@TransCode,@RefCode,@TransAmount,@Tax," +
+        //                    "@Discount,@TaxAmount,@DiscountAmount,@PaidAmount,@TempAmount,@TempPaidAmount,@TransStatus,@PostStatus" +
+        //                    ") ";
+
+        //                if (!FormHelp.IsBlank(overpaid))
+        //                {
+        //                    DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, overpaid, DataBaseConnectionString);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@TransID", DbType.Int32, transactionid);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@TransCode", DbType.String, transcode);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@RefCode", DbType.String, "EXTR");
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@TransAmount", DbType.Double, transamount);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@Tax", DbType.Double, 0);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, 0);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, "Open");
+        //                    _DatabaseFactory.AddInParameter(ref cmd, "@PostStatus", DbType.String, "Posted");
+        //                    //_DatabaseFactory.AddInParameter(ref cmd, "@Inv_no", DbType.String, listStud[i].TransactionCode);
+        //                    _DbParameterCollection = cmd.Parameters;
+
+
+
+        //                    int liRowAffected = _DatabaseFactory.ExecuteNonQuery(Helper.GetDataBaseType, cmd,
+        //                        DataBaseConnectionString, overpaid, _DbParameterCollection);
+
+        //                    if (liRowAffected > -1)
+        //                    { }
+        //                    else
+        //                    { }
+
+        //                }
+
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                throw ex;
+        //            }
+        //        }
+        //    }
+        //    return true;
+        //}
+
+        //#endregion
 
 
     }
