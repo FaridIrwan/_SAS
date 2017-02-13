@@ -494,7 +494,10 @@ Public Class CfPosting
             'Buils Sql Statement - Start
             SqlStatement &= "SELECT DISTINCT A.BankCode AS Bank_Code,A.Subtype AS Sub_Type,"
             SqlStatement &= "(SELECT SUM(Transamount) FROM SAS_Accounts WHERE Batchcode = A.Batchcode) AS Batch_Total,"
-            SqlStatement &= "A.TransDate AS Batch_Date,SAS_Workflow.Date_Time AS Posted_Date,SAS_Workflow.User_id AS Posted_By "
+            SqlStatement &= "CASE WHEN A.Description LIKE 'CIMB CLICKS%' THEN "
+            SqlStatement &= "(SELECT date_time FROM SAS_Clicks_Filedetails where BatchCode = " & clsGeneric.AddQuotes(BatchCode) & ") "
+            SqlStatement &= "ELSE A.TransDate END AS Batch_Date,"
+            SqlStatement &= "SAS_Workflow.Date_Time AS Posted_Date,SAS_Workflow.User_id AS Posted_By "
             SqlStatement &= "FROM SAS_Accounts A INNER JOIN SAS_Workflow ON A.Batchcode = SAS_Workflow.Batch_Code "
             SqlStatement &= "WHERE A.Batchcode = " & clsGeneric.AddQuotes(BatchCode)
             'Buils Sql Statement - Stop
@@ -1073,7 +1076,8 @@ Public Class CfPosting
                 _CfMJLineEn.mjjl_company = CompanyCode
                 _CfMJLineEn.mjjl_amount = TransactionAmount
                 _CfMJLineEn.mjjl_lclamount = TransactionAmount
-                _CfMJLineEn.mjjl_reference = BatchCode.Substring(4, (BatchCode.Length - 4))
+                '_CfMJLineEn.mjjl_reference = BatchCode.Substring(4, (BatchCode.Length - 4))
+                _CfMJLineEn.mjjl_reference = BatchCode
                 'Set Values - Stop
 
                 'Build Sql Statement - Start
@@ -1246,7 +1250,8 @@ Public Class CfPosting
                 _CfMJLineEn.mjjl_amount = TransactionAmount
                 _CfMJLineEn.mjjl_lclamount = TransactionAmount
                 _CfMJLineEn.mjjl_lineno = LineNo + TotalRecords
-                _CfMJLineEn.mjjl_reference = BatchCode.Substring(4, (BatchCode.Length - 4))
+                '_CfMJLineEn.mjjl_reference = BatchCode.Substring(4, (BatchCode.Length - 4))
+                _CfMJLineEn.mjjl_reference = BatchCode
                 'Set Values - Stop
 
                 'Build Sql Statement - Start

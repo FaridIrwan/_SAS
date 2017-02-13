@@ -46,7 +46,7 @@ Partial Class RptStudentAgeingViewer
 
                     Dim StatusQuery As String = Nothing, StudentStatus As String = Nothing, FilterStatus As String = Nothing, SumQuery As String = Nothing
                     If Status <> "-1" Then
-                        StudentStatus = "WHERE EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef AND SASS_Code = '" + Status + "') "
+                        StudentStatus = "WHERE EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef AND SASS_Code = '" + Status + "') "
                         'FilterStatus = "AND SS.SASS_Code = '" + Status + "' "
                         'StatusQuery = "LEFT JOIN SAS_Studentstatus SS ON SS.SASS_Code IN (SELECT SASS_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) "
                     End If
@@ -60,7 +60,7 @@ Partial Class RptStudentAgeingViewer
 
                     paramFields = New ParameterFields()
 
-                    Dim Header As String = "SELECT a.CreditRef as MatricNo,"
+                    Dim Header As String = "SELECT ageing.CreditRef as MatricNo,"
 
                     For i As Integer = 0 To constr.Length - 1
                         If constr(i) <> "" Then
@@ -69,7 +69,7 @@ Partial Class RptStudentAgeingViewer
                                 columnNo = columnNo + 1
 
                                 Header += "(SELECT SAPG_Code || ' - ' || SAPG_ProgramBM FROM SAS_Program WHERE SAPG_Code IN "
-                                Header += "(SELECT SASI_PgId FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef)) AS col" + columnNo.ToString() + ","
+                                Header += "(SELECT SASI_PgId FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef)) AS col" + columnNo.ToString() + ","
 
                                 paramField = New ParameterField()
                                 paramField.Name = "col_" + columnNo.ToString()
@@ -199,38 +199,42 @@ Partial Class RptStudentAgeingViewer
                         End If
 
                         str = Header
-                        str += QueryBuilder(AgeingBy, "a", "HEAD")
+                        str += QueryBuilder(AgeingBy, "ageing", "HEAD")
                         str += "TO_CHAR(DATE '" + DateTo + "', 'DD/MM/YYYY') AS DateTo "
                         str += "FROM ( "
-                        str += "WITH CHK AS (SELECT a.CreditRef,MAX(a.TransDate) AS TransDate,SUM(a.PAID_AMT) AS TransAmount " +
-                                "FROM (" +
-                                "SELECT Creditref,TransDate, " +
-                                "CASE WHEN TransDate > '" + DateTo + "'::date THEN TransAmount " +
-                                "ELSE 0 END AS PAID_AMT " +
-                                "FROM SAS_Accounts " +
-                                "WHERE TransCode IN " +
-                                "	(SELECT SAD.TransCode " +
-                                "	FROM SAS_Accounts SA " +
-                                "	INNER JOIN SAS_AccountsDetails SAD ON SAD.Inv_No=SA.TransCode " +
-                                "	WHERE SA.TransType='Debit' " +
-                                "	AND SA.PostStatus='Posted' " +
-                                "	GROUP BY SAD.TransCode)" +
-                                ") a " +
-                                "GROUP BY a.CreditRef) "
-                        str += "SELECT SA.CreditRef,"
+                        str += "SELECT a.CreditRef,"
                         str += LoadAgeingByQuery("nonFT", AgeingBy, DateTo)
+                        str += "FROM ( "
+                        str += "WITH REC AS (SELECT a.INV_NO,a.TransCode, "
+                        str += "CASE WHEN SAS_Accounts.TransDate > '" + DateTo + "'::date THEN "
+                        str += "CASE WHEN SUM(a.PaidAmount) < SAS_Accounts.TransAmount THEN SUM(a.PaidAmount) "
+                        str += "ELSE SAS_Accounts.TransAmount END "
+                        str += "ELSE 0 END AS PAID_AMT "
+                        str += "FROM ("
+                        str += "SELECT SA.CreditRef,SAD.INV_NO,SAD.TransCode,SAD.PaidAmount "
                         str += "FROM SAS_Accounts SA "
-                        str += "LEFT JOIN CHK ON SA.CreditRef=CHK.CreditRef "
+                        str += "INNER JOIN SAS_AccountsDetails SAD ON SAD.INV_NO=SA.TransCode "
+                        str += "WHERE SA.TransType='Debit' "
+                        str += "AND SA.PostStatus='Posted') a "
+                        str += "INNER JOIN SAS_Accounts ON SAS_Accounts.TransCode=a.TransCode AND SAS_Accounts.Creditref=a.CreditRef "
+                        str += "GROUP BY a.INV_NO,a.TransCode,a.PaidAmount,SAS_Accounts.TransAmount,SAS_Accounts.TransDate"
+                        str += ")"
+                        str += "SELECT DISTINCT SA.CreditRef,SA.TransCode,COALESCE(SUM(REC.PAID_AMT),0) AS PAID_AMT "
+                        str += "FROM SAS_Accounts SA "
+                        str += "LEFT JOIN REC ON REC.INV_NO=SA.TransCode "
                         str += "WHERE SA.TransAmount > 0 "
                         str += "AND SA.SubType <> 'Sponsor' "
                         str += "AND SA.Category <> 'Payment' "
                         str += "AND SA.TransType <> 'Credit' "
                         str += "AND SA.TransStatus <> 'Closed' "
                         str += "AND SA.PostStatus = 'Posted' "
-                        str += "GROUP BY SA.TransId,SA.TransAmount,CHK.TransDate,CHK.TransAmount ) a "
+                        str += "GROUP BY SA.TransId) a "
+                        str += "INNER JOIN SAS_Accounts SA ON SA.TransCode=a.TransCode AND SA.CreditRef=a.CreditRef "
+                        str += "GROUP BY a.CreditRef,a.TransCode,SA.TransDate,SA.TransAmount,SA.PaidAmount,a.PAID_AMT"
+                        str += ") ageing "
                         str += StudentStatus
-                        str += "GROUP BY a.CreditRef "
-                        str += "ORDER BY a.CreditRef"
+                        str += "GROUP BY ageing.CreditRef "
+                        str += "ORDER BY ageing.CreditRef "
                     End If
                     'QUERY BUILDER - END
 
@@ -570,41 +574,41 @@ Partial Class RptStudentAgeingViewer
                 Select Case yr
                     Case 0
                         If stats = "FT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""FirstX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FirstX"","
                         ElseIf stats = "nonFT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FirstX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
                         ElseIf stats = "SPNSR" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
                         End If
                     Case -1
                         If stats = "FT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""SecondX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""SecondX"","
                         ElseIf stats = "nonFT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""SecondX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
                         ElseIf stats = "SPNSR" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 365 AND '" + DateTo + "'::date - SPI.TransDate::date <= 730 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
                         End If
                     Case -2
                         If stats = "FT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 AND '" + DateTo + "'::date - SA.TransDate::date <= 1095 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""ThirdX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 AND '" + DateTo + "'::date - SA.TransDate::date <= 1095 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""ThirdX"","
                         ElseIf stats = "nonFT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 AND '" + DateTo + "'::date - SA.TransDate::date <= 1095 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""ThirdX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 AND '" + DateTo + "'::date - SA.TransDate::date <= 1095 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirdX"","
                         ElseIf stats = "SPNSR" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 730 AND '" + DateTo + "'::date - SPI.TransDate::date <= 1095 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Third"","
                         End If
                     Case -3
                         If stats = "FT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1095 AND '" + DateTo + "'::date - SA.TransDate::date <= 1460 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""FourthX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1095 AND '" + DateTo + "'::date - SA.TransDate::date <= 1460 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FourthX"","
                         ElseIf stats = "nonFT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1095 AND '" + DateTo + "'::date - SA.TransDate::date <= 1460 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FourthX"","
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1095 AND '" + DateTo + "'::date - SA.TransDate::date <= 1460 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FourthX"","
                         ElseIf stats = "SPNSR" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 1095 AND '" + DateTo + "'::date - SPI.TransDate::date <= 1460 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fourth"","
                         End If
                     Case -4
                         If stats = "FT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1460 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""FifthX"" "
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1460 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FifthX"" "
                         ElseIf stats = "nonFT" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1460 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FifthX"" "
+                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1460 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FifthX"" "
                         ElseIf stats = "SPNSR" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 1460 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fifth"" "
                         End If
@@ -616,17 +620,17 @@ Partial Class RptStudentAgeingViewer
         ElseIf AgeingBy = "rbVariousMonths" Then
             '6/12/36 months - START
             If stats = "FT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 182.5 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 547.5 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 547.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Fifth"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 182.5 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""First"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Second"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 547.5 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Third"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 547.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fourth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fifth"" "
             ElseIf stats = "nonFT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 182.5 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FirstX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""SecondX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 547.5 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""ThirdX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 547.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FourthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FifthX"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 182.5 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 547.5 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirdX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 547.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FourthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FifthX"" "
             ElseIf stats = "SPNSR" Then
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 182.5 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 182.5 AND '" + DateTo + "'::date - SPI.TransDate::date <= 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
@@ -639,17 +643,17 @@ Partial Class RptStudentAgeingViewer
         ElseIf AgeingBy = "rbQuaterly" Then
             '30/12/2016 - START
             If stats = "FT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 90 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 90 AND '" + DateTo + "'::date - SA.TransDate::date <= 181 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 181 AND '" + DateTo + "'::date - SA.TransDate::date <= 273 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 273 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Fifth"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 90 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""First"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 90 AND '" + DateTo + "'::date - SA.TransDate::date <= 181 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Second"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 181 AND '" + DateTo + "'::date - SA.TransDate::date <= 273 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Third"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 273 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fourth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fifth"" "
             ElseIf stats = "nonFT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 90 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FirstX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 90 AND '" + DateTo + "'::date - SA.TransDate::date <= 181 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""SecondX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 181 AND '" + DateTo + "'::date - SA.TransDate::date <= 273 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""ThirdX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 273 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FourthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FifthX"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 90 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 90 AND '" + DateTo + "'::date - SA.TransDate::date <= 181 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 181 AND '" + DateTo + "'::date - SA.TransDate::date <= 273 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirdX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 273 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FourthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FifthX"" "
             ElseIf stats = "SPNSR" Then
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 90 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 90 AND '" + DateTo + "'::date - SPI.TransDate::date <= 181 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
@@ -662,33 +666,33 @@ Partial Class RptStudentAgeingViewer
         ElseIf AgeingBy = "rbMonthly" Then
             '30/12/2016 - START
             If stats = "FT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 31 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 31 AND '" + DateTo + "'::date - SA.TransDate::date <= 60 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 60 AND '" + DateTo + "'::date - SA.TransDate::date <= 91 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 91 AND '" + DateTo + "'::date - SA.TransDate::date <= 121 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 121 AND '" + DateTo + "'::date - SA.TransDate::date <= 152 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Fifth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 152 AND '" + DateTo + "'::date - SA.TransDate::date <= 182 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Sixth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182 AND '" + DateTo + "'::date - SA.TransDate::date <= 213 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Seventh"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 213 AND '" + DateTo + "'::date - SA.TransDate::date <= 244 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Eighth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 244 AND '" + DateTo + "'::date - SA.TransDate::date <= 274 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Ninth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 274 AND '" + DateTo + "'::date - SA.TransDate::date <= 305 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Tenth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 305 AND '" + DateTo + "'::date - SA.TransDate::date <= 335 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Eleventh"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 335 AND '" + DateTo + "'::date - SA.TransDate::date <= 366 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Twelfth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 366 THEN " & GetPaidAmount("FT", DateTo) & " ELSE '0.00' END AS ""Thirteenth"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 31 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""First"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 31 AND '" + DateTo + "'::date - SA.TransDate::date <= 60 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Second"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 60 AND '" + DateTo + "'::date - SA.TransDate::date <= 91 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Third"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 91 AND '" + DateTo + "'::date - SA.TransDate::date <= 121 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fourth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 121 AND '" + DateTo + "'::date - SA.TransDate::date <= 152 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fifth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 152 AND '" + DateTo + "'::date - SA.TransDate::date <= 182 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Sixth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182 AND '" + DateTo + "'::date - SA.TransDate::date <= 213 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Seventh"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 213 AND '" + DateTo + "'::date - SA.TransDate::date <= 244 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Eighth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 244 AND '" + DateTo + "'::date - SA.TransDate::date <= 274 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Ninth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 274 AND '" + DateTo + "'::date - SA.TransDate::date <= 305 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Tenth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 305 AND '" + DateTo + "'::date - SA.TransDate::date <= 335 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Eleventh"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 335 AND '" + DateTo + "'::date - SA.TransDate::date <= 366 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Twelfth"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 366 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Thirteenth"" "
             ElseIf stats = "nonFT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 31 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FirstX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 31 AND '" + DateTo + "'::date - SA.TransDate::date <= 60 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""SecondX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 60 AND '" + DateTo + "'::date - SA.TransDate::date <= 91 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""ThirdX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 91 AND '" + DateTo + "'::date - SA.TransDate::date <= 121 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FourthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 121 AND '" + DateTo + "'::date - SA.TransDate::date <= 152 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""FifthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 152 AND '" + DateTo + "'::date - SA.TransDate::date <= 182 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""SixthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182 AND '" + DateTo + "'::date - SA.TransDate::date <= 213 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""SeventhX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 213 AND '" + DateTo + "'::date - SA.TransDate::date <= 244 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""EighthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 244 AND '" + DateTo + "'::date - SA.TransDate::date <= 274 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""NinthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 274 AND '" + DateTo + "'::date - SA.TransDate::date <= 305 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""TenthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 305 AND '" + DateTo + "'::date - SA.TransDate::date <= 335 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""EleventhX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 335 AND '" + DateTo + "'::date - SA.TransDate::date <= 366 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""TwelfthX"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 366 THEN " & GetPaidAmount("nonFT", DateTo) & " ELSE '0.00' END AS ""ThirteenthX"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 31 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 31 AND '" + DateTo + "'::date - SA.TransDate::date <= 60 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 60 AND '" + DateTo + "'::date - SA.TransDate::date <= 91 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirdX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 91 AND '" + DateTo + "'::date - SA.TransDate::date <= 121 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FourthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 121 AND '" + DateTo + "'::date - SA.TransDate::date <= 152 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FifthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 152 AND '" + DateTo + "'::date - SA.TransDate::date <= 182 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SixthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182 AND '" + DateTo + "'::date - SA.TransDate::date <= 213 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SeventhX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 213 AND '" + DateTo + "'::date - SA.TransDate::date <= 244 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""EighthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 244 AND '" + DateTo + "'::date - SA.TransDate::date <= 274 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""NinthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 274 AND '" + DateTo + "'::date - SA.TransDate::date <= 305 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""TenthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 305 AND '" + DateTo + "'::date - SA.TransDate::date <= 335 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""EleventhX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 335 AND '" + DateTo + "'::date - SA.TransDate::date <= 366 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""TwelfthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 366 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirteenthX"" "
             ElseIf stats = "SPNSR" Then
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 31 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 31 AND '" + DateTo + "'::date - SPI.TransDate::date <= 60 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
@@ -739,124 +743,8 @@ Partial Class RptStudentAgeingViewer
                     "SUM(" & Header & ".""EleventhX"")+SUM(" & Header & ".""TwelfthX"") AS ""TotalAmount"","
             End If
 
-            'If str = "SuperHeader" Then
-            '    SumQuery = "COALESCE(" & Header & ".""First"",0) AS ""First"","
-            '    SumQuery += "COALESCE(" & Header & ".""Second"",0) AS ""Second"","
-            '    SumQuery += "COALESCE(" & Header & ".""Third"",0) AS ""Third"","
-            '    SumQuery += "COALESCE(" & Header & ".""Fourth"",0) AS ""Fourth"","
-            '    SumQuery += "COALESCE(" & Header & ".""Fifth"",0) AS ""Fifth"","
-            '    SumQuery += "COALESCE(" & Header & ".""Sixth"",0) AS ""Sixth"","
-            '    SumQuery += "COALESCE(" & Header & ".""Seventh"",0) AS ""Seventh"","
-            '    SumQuery += "COALESCE(" & Header & ".""Eighth"",0) AS ""Eighth"","
-            '    SumQuery += "COALESCE(" & Header & ".""Ninth"",0) AS ""Ninth"","
-            '    SumQuery += "COALESCE(" & Header & ".""Tenth"",0) AS ""Tenth"","
-            '    SumQuery += "COALESCE(" & Header & ".""Eleventh"",0) AS ""Eleventh"","
-            '    SumQuery += "COALESCE(" & Header & ".""Twelfth"",0) AS ""Twelfth"","
-            '    SumQuery += "COALESCE(" & Header & ".""TotalAmount"",0) AS ""TotalAmount"","
-            'ElseIf str = "Header1" Then
-            '    SumQuery = "COALESCE(" & Header & ".""FirstX"",0) AS ""First"","
-            '    SumQuery += "COALESCE(" & Header & ".""SecondX"",0) AS ""Second"","
-            '    SumQuery += "COALESCE(" & Header & ".""ThirdX"",0) AS ""Third"","
-            '    SumQuery += "COALESCE(" & Header & ".""FourthX"",0) AS ""Fourth"","
-            '    SumQuery += "COALESCE(" & Header & ".""FifthX"",0) AS ""Fifth"","
-            '    SumQuery += "COALESCE(" & Header & ".""SixthX"",0) AS ""Sixth"","
-            '    SumQuery += "COALESCE(" & Header & ".""SeventhX"",0) AS ""Seventh"","
-            '    SumQuery += "COALESCE(" & Header & ".""EighthX"",0) AS ""Eighth"","
-            '    SumQuery += "COALESCE(" & Header & ".""NinthX"",0) AS ""Ninth"","
-            '    SumQuery += "COALESCE(" & Header & ".""TenthX"",0) AS ""Tenth"","
-            '    SumQuery += "COALESCE(" & Header & ".""EleventhX"",0) AS ""Eleventh"","
-            '    SumQuery += "COALESCE(" & Header & ".""TwelfthX"",0) AS ""Twelfth"","
-            '    SumQuery += "COALESCE(" & Header & ".""FirstX""+" & Header & ".""SecondX""+" & Header & ".""ThirdX""+" & Header & ".""FourthX""+" & Header & ".""FifthX""+" +
-            '        "" & Header & ".""SixthX""+" & Header & ".""SeventhX""+" & Header & ".""EighthX""+" & Header & ".""NinthX""+" & Header & ".""TenthX""+" & Header & ".""EleventhX""+" +
-            '        "" & Header & ".""TwelfthX"",0) AS ""TotalAmount"" "
-            'ElseIf str = "Header2" Then
-            '    SumQuery = "SUM(" & Header & ".""First"") AS ""First"","
-            '    SumQuery += "SUM(" & Header & ".""Second"") AS ""Second"","
-            '    SumQuery += "SUM(" & Header & ".""Third"") AS ""Third"","
-            '    SumQuery += "SUM(" & Header & ".""Fourth"") AS ""Fourth"","
-            '    SumQuery += "SUM(" & Header & ".""Fifth"") AS ""Fifth"","
-            '    SumQuery += "SUM(" & Header & ".""Sixth"") AS ""Sixth"","
-            '    SumQuery += "SUM(" & Header & ".""Seventh"") AS ""Seventh"","
-            '    SumQuery += "SUM(" & Header & ".""Eighth"") AS ""Eighth"","
-            '    SumQuery += "SUM(" & Header & ".""Ninth"") AS ""Ninth"","
-            '    SumQuery += "SUM(" & Header & ".""Tenth"") AS ""Tenth"","
-            '    SumQuery += "SUM(" & Header & ".""Eleventh"") AS ""Eleventh"","
-            '    SumQuery += "SUM(" & Header & ".""Twelfth"") AS ""Twelfth"","
-            '    SumQuery += "SUM(" & Header & ".""First"")+SUM(" & Header & ".""Second"")+SUM(" & Header & ".""Third"")+SUM(" & Header & ".""Fourth"")+SUM(" & Header & ".""Fifth"")+" +
-            '        "SUM(" & Header & ".""Sixth"")+SUM(" & Header & ".""Seventh"")+SUM(" & Header & ".""Eighth"")+SUM(" & Header & ".""Ninth"")+SUM(" & Header & ".""Tenth"")+" +
-            '        "SUM(" & Header & ".""Eleventh"")+SUM(" & Header & ".""Twelfth"") AS ""TotalAmount"" "
-            'ElseIf str = "Tail" Then
-            '    SumQuery = "CASE WHEN SUM(" & Header & ".""First"") != 0 THEN " +
-            '        "CASE WHEN SUM(" & Header & ".""First"") > PAID_AMT.PaidAmount THEN SUM(" & Header & ".""First"") - PAID_AMT.PaidAmount " +
-            '        "WHEN SUM(" & Header & ".""First"") < PAID_AMT.PaidAmount THEN 0.0 END " +
-            '        "ELSE 0.0 END AS ""FirstX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Second"") != 0 THEN " +
-            '        "CASE WHEN PAID_AMT.PaidAmount - SUM(" & Header & ".""First"") < 0 THEN SUM(" & Header & ".""Second"") ELSE " +
-            '        "CASE WHEN SUM(" & Header & ".""Second"") > (PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) THEN SUM(" & Header & ".""Second"") - (PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) " +
-            '        "WHEN SUM(" & Header & ".""Second"") < (PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""SecondX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Third"") != 0 THEN " +
-            '        "CASE WHEN (PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"") < 0 THEN SUM(" & Header & ".""Third"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Third"") > ((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) " +
-            '        "THEN SUM(" & Header & ".""Third"") - (PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"") " +
-            '        "WHEN SUM(" & Header & ".""Third"") < ((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""ThirdX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Fourth"") != 0 THEN " +
-            '        "CASE WHEN ((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"") < 0 THEN SUM(" & Header & ".""Fourth"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Fourth"") > ((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"") " +
-            '        "THEN SUM(" & Header & ".""Fourth"") - ((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"") " +
-            '        "WHEN SUM(" & Header & ".""Fourth"") < ((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""FourthX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Fifth"") != 0 THEN " +
-            '        "CASE WHEN (((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"") < 0 THEN SUM(" & Header & ".""Fifth"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Fifth"") > (((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"") " +
-            '        "THEN SUM(" & Header & ".""Fifth"") - (((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"") " +
-            '        "WHEN SUM(" & Header & ".""Fifth"") < (((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""FifthX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Sixth"") != 0 THEN " +
-            '        "CASE WHEN ((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"") < 0 THEN SUM(" & Header & ".""Sixth"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Sixth"") > ((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"") " +
-            '        "THEN SUM(" & Header & ".""Sixth"") - ((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"") " +
-            '        "WHEN SUM(" & Header & ".""Sixth"") < ((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""SixthX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Seventh"") != 0 THEN " +
-            '        "CASE WHEN (((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"") < 0 THEN SUM(" & Header & ".""Seventh"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Seventh"") > (((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"") " +
-            '        "THEN SUM(" & Header & ".""Seventh"") - (((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"") " +
-            '        "WHEN SUM(" & Header & ".""Seventh"") < (((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""SeventhX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Eighth"") != 0 THEN " +
-            '        "CASE WHEN ((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"") < 0 THEN SUM(" & Header & ".""Eighth"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Eighth"") > ((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"") " +
-            '        "THEN SUM(" & Header & ".""Eighth"") - ((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"") " +
-            '        "WHEN SUM(" & Header & ".""Eighth"") < ((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""EighthX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Ninth"") != 0 THEN " +
-            '        "CASE WHEN (((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"") < 0 THEN SUM(" & Header & ".""Ninth"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Ninth"") > (((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"") " +
-            '        "THEN SUM(" & Header & ".""Ninth"") - (((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"") " +
-            '        "WHEN SUM(" & Header & ".""Ninth"") < (((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""NinthX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Tenth"") != 0 THEN " +
-            '        "CASE WHEN ((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"") < 0 THEN SUM(" & Header & ".""Tenth"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Tenth"") > ((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"") " +
-            '        "THEN SUM(" & Header & ".""Tenth"") - ((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"") " +
-            '        "WHEN SUM(" & Header & ".""Tenth"") < ((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""TenthX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Eleventh"") != 0 THEN " +
-            '        "CASE WHEN (((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"") < 0 THEN SUM(" & Header & ".""Eleventh"") " +
-            '        "ELSE CASE WHEN SUM(" & Header & ".""Eleventh"") > (((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"") " +
-            '        "THEN SUM(" & Header & ".""Eleventh"") - (((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"") " +
-            '        "WHEN SUM(" & Header & ".""Eleventh"") < (((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"") THEN 0.0 END " +
-            '        "END ELSE 0.0 END AS ""EleventhX"","
-            '    SumQuery += "CASE WHEN SUM(" & Header & ".""Twelfth"") != 0 THEN " +
-            '       "CASE WHEN ((((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"")) - SUM(" & Header & ".""Eleventh"") < 0 THEN SUM(" & Header & ".""Twelfth"") " +
-            '       "ELSE CASE WHEN SUM(" & Header & ".""Twelfth"") > ((((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"")) - SUM(" & Header & ".""Eleventh"") " +
-            '       "THEN SUM(" & Header & ".""Twelfth"") - ((((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"")) - SUM(" & Header & ".""Eleventh"") " +
-            '       "WHEN SUM(" & Header & ".""Twelfth"") < ((((((((((PAID_AMT.PaidAmount - SUM(" & Header & ".""First"")) - SUM(" & Header & ".""Second"")) - SUM(" & Header & ".""Third"")) - SUM(" & Header & ".""Fourth"")) - SUM(" & Header & ".""Fifth"")) - SUM(" & Header & ".""Sixth"")) - SUM(" & Header & ".""Seventh"")) - SUM(" & Header & ".""Eighth"")) - SUM(" & Header & ".""Ninth"")) - SUM(" & Header & ".""Tenth"")) - SUM(" & Header & ".""Eleventh"") THEN 0.0 END " +
-            '       "END ELSE 0.0 END AS ""TwelfthX"" "
-            'End If
         Else
+
             If str = "HEAD" Then
                 SumQuery = "SUM(" & Header & ".""FirstX"") AS ""First"","
                 SumQuery += "SUM(" & Header & ".""SecondX"") AS ""Second"","
@@ -952,30 +840,16 @@ Partial Class RptStudentAgeingViewer
 #Region "GetPaidAmount"
     'added by Hafiz @ 06/02/2017
 
-    Protected Function GetPaidAmount(ByVal stats As String, ByVal DateTo As String) As String
+    Protected Function GetPaidAmount(ByVal stats As String) As String
 
         Dim Query As String = String.Empty
 
         If stats = "FT" Then
-            Query = " CASE WHEN CHK.TransDate > '" & DateTo & "'::date THEN " +
-               "CASE WHEN SAD.PaidAmount > 0 THEN " +
-               "CASE WHEN CHK.TransAmount>SAD.PaidAmount THEN " +
-               "COALESCE(SAD.TransAmount, 0) " +
-               "ELSE COALESCE(SAD.TransAmount, 0)-(COALESCE(SAD.PaidAmount, 0)-CHK.TransAmount) END " +
-               "ELSE COALESCE(SAD.TransAmount, 0)-COALESCE(SAD.PaidAmount, 0) END " +
-               "ELSE " +
-               "COALESCE(SAD.TransAmount, 0)-COALESCE(SAD.PaidAmount, 0) " +
-               "END "
+            Query = ""
         ElseIf stats = "nonFT" Then
-            Query = " CASE WHEN CHK.TransDate > '" & DateTo & "'::date THEN " +
-               "CASE WHEN SA.PaidAmount > 0 THEN " +
-               "CASE WHEN CHK.TransAmount>SA.PaidAmount THEN " +
-               "COALESCE(SA.TransAmount, 0) " +
-               "ELSE COALESCE(SA.TransAmount, 0)-(COALESCE(SA.PaidAmount, 0)-CHK.TransAmount) END " +
-               "ELSE COALESCE(SA.TransAmount, 0)-COALESCE(SA.PaidAmount, 0) END " +
-               "ELSE " +
-               "COALESCE(SA.TransAmount, 0)-COALESCE(SA.PaidAmount, 0) " +
-               "END "
+            Query = " CASE WHEN SA.PaidAmount=SUM(a.PAID_AMT) THEN COALESCE(SA.TransAmount,0)-0 " +
+                "ELSE COALESCE(SA.TransAmount,0)-(COALESCE(SA.PaidAmount,0)-SUM(a.PAID_AMT)) " +
+                "END"
         End If
 
         Return Query

@@ -9558,6 +9558,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 pamt = paid - transamount;
                                 amount = listStud[i].PaidAmount + transamount;
                             }
+
                             PAID2 = transamount;
                         }
                         if (paid <= transamount)
@@ -9572,6 +9573,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 pamt = transamount - paid;
                                 amount = listStud[i].TransactionAmount;
                             }
+
                             PAID2 = paid;
                         }
                         //paid = transamount - listStud[i].TransactionAmount;
@@ -9630,7 +9632,6 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                         _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
-                                        //_DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, transamount);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, PAID2);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
