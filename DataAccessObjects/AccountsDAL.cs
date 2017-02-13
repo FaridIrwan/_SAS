@@ -9457,6 +9457,7 @@ public double GetSponserStuAllocateAmount(string BatchId)
             double paid = 0.0;
             double pamt = 0.0;
             double amount = 0.0;
+            double PAID2 = 0.0;
             List<AccountsDetailsEn> listStud = new List<AccountsDetailsEn>();
             AccountsDetailsEn studEn = new AccountsDetailsEn();
             string transcode = "";
@@ -9490,9 +9491,10 @@ public double GetSponserStuAllocateAmount(string BatchId)
                             else if (listStud[i].PaidAmount > 0)
                             {
                                 pamt = paid - transamount;
-                                //amount = pamt + listStud[i].PaidAmount;
                                 amount = listStud[i].PaidAmount + transamount;
                             }
+
+                            PAID2 = transamount;
                         }
                         if (paid <= transamount)
                         {
@@ -9506,7 +9508,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                 pamt = transamount - paid;
                                 amount = listStud[i].TransactionAmount;
                             }
-                            //amount = paid;
+
+                            PAID2 = paid;
                         }
                         //paid = transamount - listStud[i].TransactionAmount;
                         if (transamount > 0)
@@ -9564,7 +9567,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
                                         _DatabaseFactory.AddInParameter(ref cmd, "@Discount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TaxAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@DiscountAmount", DbType.Double, 0);
-                                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, amount);
+                                        //_DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, amount);
+                                        _DatabaseFactory.AddInParameter(ref cmd, "@PaidAmount", DbType.Double, PAID2);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TempAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TempPaidAmount", DbType.Double, 0);
                                         _DatabaseFactory.AddInParameter(ref cmd, "@TransStatus", DbType.String, "Open");

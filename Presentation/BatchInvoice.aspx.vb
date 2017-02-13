@@ -1459,7 +1459,7 @@ Partial Class BatchInvoice
 
         Dim dgitem As DataGridItem
         Dim i As Integer = 0
-        
+
         Dim newListStu As New List(Of StudentEn)
         Dim currListSt As New List(Of StudentEn)
         If Not Session(ReceiptsClass.SessionStuChange) Is Nothing Then
@@ -1546,24 +1546,24 @@ Partial Class BatchInvoice
                         'Dim ReferenceCode As String = dgView.DataKeys(dgView.SelectedIndex).ToString()
                         Dim MatricNo As String = item.Cells(dgViewCell.MatricNo).Text
                         'Dim MatricNo As String = dgView.Items(dgView.SelectedIndex).Cells(dgViewCell.MatricNo).Text
-                Dim getselectedReferenCode As New List(Of StudentEn)
-                currListSt.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode And x.MatricNo = MatricNo)
-                Dim updateCurrList As New AccountsDetailsEn
-                updateCurrList = ListTRD.Where(Function(x) x.ReferenceCode = ReferenceCode).FirstOrDefault()
-                getselectedReferenCode = currListSt.Where(Function(x) x.ReferenceCode = ReferenceCode).ToList()
-                If getselectedReferenCode.Count > 0 Then
-                    updateCurrList.TransactionAmount = 0
-                    updateCurrList.GSTAmount = 0
-                    updateCurrList.TempAmount = 0
-                    For Each obj In getselectedReferenCode
-                        updateCurrList.TransactionAmount = updateCurrList.TransactionAmount + obj.TransactionAmount
-                        updateCurrList.GSTAmount = updateCurrList.GSTAmount + obj.GSTAmount
-                        updateCurrList.TempAmount = updateCurrList.TransactionAmount - updateCurrList.GSTAmount
-                    Next
-                    updateCurrList.StudentQty = getselectedReferenCode.Count
-                Else
-                    ListTRD.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode)
-                End If
+                        Dim getselectedReferenCode As New List(Of StudentEn)
+                        currListSt.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode And x.MatricNo = MatricNo)
+                        Dim updateCurrList As New AccountsDetailsEn
+                        updateCurrList = ListTRD.Where(Function(x) x.ReferenceCode = ReferenceCode).FirstOrDefault()
+                        getselectedReferenCode = currListSt.Where(Function(x) x.ReferenceCode = ReferenceCode).ToList()
+                        If getselectedReferenCode.Count > 0 Then
+                            updateCurrList.TransactionAmount = 0
+                            updateCurrList.GSTAmount = 0
+                            updateCurrList.TempAmount = 0
+                            For Each obj In getselectedReferenCode
+                                updateCurrList.TransactionAmount = updateCurrList.TransactionAmount + obj.TransactionAmount
+                                updateCurrList.GSTAmount = updateCurrList.GSTAmount + obj.GSTAmount
+                                updateCurrList.TempAmount = updateCurrList.TransactionAmount - updateCurrList.GSTAmount
+                            Next
+                            updateCurrList.StudentQty = getselectedReferenCode.Count
+                        Else
+                            ListTRD.RemoveAll(Function(x) x.ReferenceCode = ReferenceCode)
+                        End If
                     End If
                 Next
                 If ListTRD.Count > 0 Then
@@ -1608,10 +1608,10 @@ Partial Class BatchInvoice
                     txtTotal.Visible = False
                     lblTotal.Visible = False
                 End If
-                    
+
                 Session("AddFee") = ListTRD
                 Session(ReceiptsClass.SessionStuToSave) = currListSt
-                        dgView.SelectedIndex = -1
+                dgView.SelectedIndex = -1
 
             Catch ex As Exception
                 LogError.Log("BatchInvoice", "ibtnRemoveFee_Click", ex.Message)
@@ -1988,7 +1988,7 @@ Partial Class BatchInvoice
 
         If (Request.QueryString("Formid") = "CN" Or Request.QueryString("Formid") = "DN") And Not Session("Module") Is Nothing Then
             If listFee.Count <> 0 Then
-                
+
                 While i < listFee.Count
                     totalTransAmount = 0
                     totalGSTAmount = 0
@@ -2447,7 +2447,7 @@ Partial Class BatchInvoice
             If Request.QueryString("Formid") = "Inv" Then
                 eob.TransType = "Credit"
                 eob.Category = "Invoice"
-                
+
             ElseIf Request.QueryString("Formid") = "CN" Then
                 eob.TransType = "Debit"
                 eob.Category = "Credit Note"

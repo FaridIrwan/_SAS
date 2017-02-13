@@ -3147,7 +3147,7 @@ Partial Class Receipts
                                     'DirectCast(dgStudentView.Items(Index_2).Cells(16).FindControl("BankSlipID"), TextBox).Text =
                                     '    ListStudentEn(_DataGridItem.ItemIndex).TransactionCode
                                     'DirectCast(dgStudentView.Items(Index_2).Cells(17).FindControl("txtTransDate"), TextBox).Text =
-                                    '    ListStudentEn(_DataGridItem.ItemIndex).ReceiptDate.ToString("yyyy-MM-dd")
+                                    '    ListStudentEn(_DataGridItem.ItemIndex).ReceiptDate.ToString("yyyy-MM-dd") 
                                     DirectCast(_DataGridItem.FindControl("txtTransDate"), TextBox).Text = ListStudentEn(_DataGridItem.ItemIndex).ReceiptDate.ToString("yyyy-MM-dd")
                                     'get & Set Grid Controls - Stop
                                     If String.IsNullOrEmpty(ListStudentEn(Index_2).SourceType) Then
