@@ -1033,7 +1033,7 @@ namespace HTS.SAS.DataAccessObjects
                                 " and (SAS_StudentCategoryAccess.Status = 'true') AND sass_code IN (SELECT sass_code FROM sas_studentstatus where sass_blstatus  ='true')" +
                                " and B.SASI_Reg_Status =" + Helper.StuRegistered
                                 + " and B.sass_code =" + clsGeneric.AddQuotes(Helper.StuActive) +
-                                " and TO_DATE( c.SASS_sDATE,'DD/MM/YYYY') <= current_date and TO_DATE( c.SASS_EDATE,'DD/MM/YYYY') >= current_date";
+                                " and TO_DATE( c.SASS_sDATE,'YYYY-MM-DD') <= current_date and TO_DATE( c.SASS_EDATE,'YYYY-MM-DD') >= current_date";
                 //" and TO_DATE( c.SASS_sDATE,'DD/MM/YYYY') <= current_date and  TO_DATE( c.SASS_EDATE,'YYYY/MM/DD') >= current_date ";
 
                 //sqlCmd = sqlCmd + " order by A.SASI_MatricNo";
