@@ -5644,6 +5644,8 @@ Partial Class BatchInvoice
 #Region "File Upload "
 
     'added by Hafiz @ 14/12/2016
+    'modified by Hafiz @ 14/02/2017
+
     Protected Sub File_Upload(ByVal sender As Object, ByVal e As System.EventArgs) Handles UploadBTN.Click
 
         Try
@@ -5672,19 +5674,13 @@ Partial Class BatchInvoice
 
                     If New FileHelper().BatchInvoiceFileUpload(UploadedFile) Then
 
-                        Dim obj As Object = Session("UploadFile")
-
-                        Dim ds As DataSet = New DataSet()
-                        ds.Tables.Add(New Helper().ToDataTable(obj))
-
-                        dgUploadFile.DataSource = ds
-                        dgUploadFile.DataBind()
+                        Call PopulateDGUploadFile()
 
                         lblMsg.Text = "File Successfully Uploaded."
                         tblUploadFile.Visible = False
 
-                        Dim dt As DataTable = ds.Tables(0)
-                        Session("uf_DataTable") = dt
+                        Dim obj As Object = Session("UploadFile")
+                        Dim dt As DataTable = New Helper().ToDataTable(obj)
 
                         Call GetUploadedFileDetails(dt)
 
@@ -5700,6 +5696,45 @@ Partial Class BatchInvoice
         Catch ex As Exception
             lblMsg.Text = ex.Message
         End Try
+
+    End Sub
+
+#End Region
+
+#Region "PopulateDGUploadFile"
+    'added by Hafiz @ 14/02/2017
+
+    Public Sub PopulateDGUploadFile()
+
+        Dim NewList As List(Of FileHelper.InvoiceUploadFileEn) = New List(Of FileHelper.InvoiceUploadFileEn)
+        Dim UploadList As List(Of FileHelper.InvoiceUploadFileEn) = Session("UploadFile")
+        Dim UploadFailed As List(Of FileHelper.InvoiceUploadFileEn) = Session("UploadFail")
+
+        NewList.AddRange(UploadList)
+        NewList.AddRange(UploadFailed)
+
+        dgUploadFile.DataSource = NewList.OrderBy(Function(x) x.MatricNo)
+        dgUploadFile.DataBind()
+
+        Dim i As Integer = 0
+        While i < dgUploadFile.Items.Count
+
+            If UploadFailed.Where(Function(x) x.MatricNo.Equals(dgUploadFile.Items(i).Cells(0).Text) AndAlso
+                                                                dgUploadFile.Items(i).Cells(1).Text.Equals("not available")).Count > 0 Then
+                dgUploadFile.Items(i).Cells(0).ForeColor = Drawing.Color.Red
+                dgUploadFile.Items(i).Cells(1).ForeColor = Drawing.Color.Red
+            End If
+
+            If UploadFailed.Where(Function(x) x.FeeCode.Equals(dgUploadFile.Items(i).Cells(2).Text) AndAlso
+                                                               dgUploadFile.Items(i).Cells(3).Text.Equals("not available")).Count > 0 Then
+                dgUploadFile.Items(i).Cells(2).ForeColor = Drawing.Color.Red
+                dgUploadFile.Items(i).Cells(3).ForeColor = Drawing.Color.Red
+            End If
+
+            i += 1
+        End While
+       
+        Session("uf_DataTable") = New Helper().ToDataTable(NewList)
 
     End Sub
 
@@ -5782,11 +5817,11 @@ Partial Class BatchInvoice
             For j As Integer = 0 To tables(i).Rows.Count - 1
 
                 FeeType = New FeeTypesEn()
-                FeeType.FeeTypeCode = tables(i).Rows(j).Item("FeeCode")
+                FeeType.FeeTypeCode = IIf(Not IsDBNull(tables(i).Rows(j).Item("FeeCode")), tables(i).Rows(j).Item("FeeCode"), "")
                 FeeType.SCCode = ""
                 FeeType.FeeType = ""
                 FeeType.Hostel = ""
-                FeeType.Description = tables(i).Rows(j).Item("FeeDesc")
+                FeeType.Description = IIf(Not IsDBNull(tables(i).Rows(j).Item("FeeDesc")), tables(i).Rows(j).Item("FeeDesc"), "")
                 FeeType.Status = True
 
                 Dim stu As StudentEn = New StudentDAL().GetItem(tables(i).Rows(j).Item("MatricNo"))
@@ -5795,8 +5830,8 @@ Partial Class BatchInvoice
                 objStu = New StudentEn()
                 objStu.MatricNo = stu.MatricNo
                 objStu.StudentName = stu.StudentName
-                objStu.ReferenceCode = objFeeTyp.FeeTypeCode
-                objStu.Description = objFeeTyp.Description
+                objStu.ReferenceCode = MaxGeneric.clsGeneric.NullToString(objFeeTyp.FeeTypeCode)
+                objStu.Description = MaxGeneric.clsGeneric.NullToString(objFeeTyp.Description)
 
                 If stu.CategoryCode = ReceiptsClass.Student_BUKAN_WARGANEGARA Or _
                     stu.CategoryCode = ReceiptsClass.student_International Or _

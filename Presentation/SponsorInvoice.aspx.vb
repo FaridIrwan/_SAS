@@ -1677,6 +1677,7 @@ Partial Class SponsorInvoice
                                     objStu.Internal_Use = ListObjectsStu(j).ProgramID
                                     objStu.SponsorLimit = ListObjectsStu(j).SponsorLimit
                                     objStu.OutstandingAmount = ListObjectsStu(j).OutstandingAmount
+                                    objStu.AllocatedAmount = ListObjectsStu(j).AllocatedAmount
                                     newListStu.Add(objStu)
                                     'ListTRD.Add(objStu2)
                                     totalActualFeeAmount = totalTransAmount - totalGSTAmount
@@ -1728,6 +1729,7 @@ Partial Class SponsorInvoice
                                         objStu.Internal_Use = ListObjectsStu(j).ProgramID
                                         objStu.SponsorLimit = ListObjectsStu(j).SponsorLimit
                                         objStu.OutstandingAmount = ListObjectsStu(j).OutstandingAmount
+                                        objStu.AllocatedAmount = ListObjectsStu(j).AllocatedAmount
                                         newListStu.Add(objStu)
                                         totalActualFeeAmount = totalTransAmount - totalGSTAmount
 
@@ -1820,6 +1822,7 @@ Partial Class SponsorInvoice
                                 objStu.Internal_Use = stu.ProgramID
                                 objStu.SponsorLimit = stu.SponsorLimit
                                 objStu.OutstandingAmount = stu.OutstandingAmount
+                                objStu.AllocatedAmount = stu.AllocatedAmount
                                 totalActualFeeAmount = totalTransAmount - totalGSTAmount
 
                                 If Not ListTRD.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode) Then
@@ -1867,6 +1870,7 @@ Partial Class SponsorInvoice
                                     objStu.Internal_Use = stu.ProgramID
                                     objStu.SponsorLimit = stu.SponsorLimit
                                     objStu.OutstandingAmount = stu.OutstandingAmount
+                                    objStu.AllocatedAmount = stu.AllocatedAmount
                                     totalActualFeeAmount = totalTransAmount - totalGSTAmount
 
                                     If Not ListTRD.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode) Then
@@ -1906,6 +1910,12 @@ Partial Class SponsorInvoice
         AddStudColumnDgView()
         dgView.DataSource = newListStu
         dgView.DataBind()
+        'If ListObjectsStu.Count > 0 Then
+        '    newListStu.AddRange(ListObjectsStu.Where(Function(y) Not newListStu.Any(Function(z) z.MatricNo = y.MatricNo)).Select(Function(x) New StudentEn With {
+        '                                                                             .OutstandingAmount = x.OutstandingAmount, .AllocatedAmount = x.AllocatedAmount,
+        '                                                                             .SponsorLimit = x.SponsorLimit
+        '                                                                             }))
+        'End If
 
         'GROUP FEE TYPE - START
         dgFeeType.DataSource = ListTRD
@@ -1944,8 +1954,11 @@ Partial Class SponsorInvoice
                     eob.TempAmount = sumamountstudent
                     eob.TempAmount = String.Format("{0:F}", eob.TempAmount)
                     dgItem1.Cells(3).Text = String.Format("{0:F}", eob.TempAmount)
+
                     If stu.SponsorLimit = 0 And stu.AllocatedAmount = 0 Then
                         dgItem1.Cells(8).Text = "-"
+                    Else
+                        dgItem1.Cells(8).Text = String.Format("{0:F}", stu.OutstandingAmount)
                     End If
                 Next
 
@@ -2070,7 +2083,7 @@ Partial Class SponsorInvoice
         'End If
         Session("SponsorShip") = sponsorship
         Session("LstStueObj") = ListObjectsStu
-        dgstudent1.DataSource = ListObjectsStu
+        dgstudent1.DataSource = ListObjectsStu.OrderBy(Function(x) x.currsemyear).ToList()
         dgstudent1.DataBind()
         Dim sponsorfee As New List(Of StudentEn)
         sponsorfee = objup.GetSponsorFeeList(ddlSponsor.SelectedValue)
@@ -2460,7 +2473,7 @@ Partial Class SponsorInvoice
                     lblStatus.Value = "Ready"
 
                     hfProgramCount.Value = lststud3.Count
-                    dgstudent1.DataSource = lststud3
+                    dgstudent1.DataSource = lststud3.OrderBy(Function(x) x.currsemyear).ToList()
                     dgstudent1.DataBind()
 
                     ddlSponsor.SelectedValue = obj.CreditRefOne
@@ -2603,7 +2616,7 @@ Partial Class SponsorInvoice
                     lblStatus.Value = "Posted"
                     ibtnAddStudent.Enabled = False
                     hfProgramCount.Value = lststud3.Count
-                    dgstudent1.DataSource = lststud3
+                    dgstudent1.DataSource = lststud3.OrderBy(Function(x) x.currsemyear).ToList()
                     dgstudent1.DataBind()
                     'Changing Status
                     'lblStatus.Value = "Posted"
@@ -3562,8 +3575,8 @@ Partial Class SponsorInvoice
         Session("LstStueObjFromDB") = saveAllStu
         Session("LstStueObj") = saveAllStu
 
-        
-        dgstudent1.DataSource = saveAllStu
+
+        dgstudent1.DataSource = saveAllStu.OrderBy(Function(x) x.currsemyear).ToList()
         dgstudent1.DataBind()
         MultiView1.SetActiveView(View3)
         chkStudentall.Visible = True
@@ -3585,6 +3598,19 @@ Partial Class SponsorInvoice
                     'saveAllStu.AddRange(saveAllStu
                     If stu.SponsorLimit = 0 And stu.AllocatedAmount = 0 Then
                         dgItem1.Cells(8).Text = "-"
+
+                    Else
+                        dgItem1.Cells(8).Text = String.Format("{0:F}", stu.OutstandingAmount)
+                    End If
+                Next
+
+                For Each stud In lstobjects.Where(Function(x) x.MatricNo = obj And x.MatricNo = dgItem1.Cells(1).Text).ToList()
+
+                    If stud.SponsorLimit = 0 And stud.AllocatedAmount = 0 Then
+                        dgItem1.Cells(8).Text = "-"
+
+                    Else
+                        dgItem1.Cells(8).Text = String.Format("{0:F}", stud.OutstandingAmount)
                     End If
                 Next
 
@@ -3615,6 +3641,7 @@ Partial Class SponsorInvoice
         Session("sstr") = ""
         Session("prgstr") = ""
         Session("spnstr") = ""
+        Session("lstobjects") = lstobjects
         If Not lstobjects Is Nothing Then
             OnViewStudentGrid()
         Else
@@ -3870,6 +3897,7 @@ Partial Class SponsorInvoice
         Dim eob As New StudentEn
         'checkProgWithStu()
         Dim listsponsor As New List(Of StudentEn)
+        Dim lstobjects As New List(Of StudentEn)
         If Not Session("listsponsor") Is Nothing Then
             listsponsor = Session("listsponsor")
         Else
@@ -3881,6 +3909,11 @@ Partial Class SponsorInvoice
             'mylst.Distinct()
         Else
             mylst = New List(Of StudentEn)
+        End If
+        If Not Session("lstobjects") Is Nothing Then
+            lstobjects = Session("lstobjects")
+        Else
+            lstobjects = New List(Of StudentEn)
         End If
 
         If mylst1.Count > 0 Then
@@ -3952,7 +3985,7 @@ Partial Class SponsorInvoice
             'Exit Sub
         End If
         'newStuList.Any(Function(x) Not StuChgMatricNo.Any(Function(y) y.MatricNo = x.MatricNo))
-        dgstudent1.DataSource = mylst
+        dgstudent1.DataSource = mylst.OrderBy(Function(x) x.currsemyear).ToList()
         dgstudent1.DataBind()
         Dim sumamountstudent As Double = 0
         Dim lstmatric As List(Of String)
@@ -3968,6 +4001,16 @@ Partial Class SponsorInvoice
                     dgItem1.Cells(3).Text = String.Format("{0:F}", eob.TempAmount)
                     If stu.SponsorLimit = 0 And stu.AllocatedAmount = 0 Then
                         dgItem1.Cells(8).Text = "-"
+                    End If
+                Next
+
+                For Each stud In lstobjects.Where(Function(x) x.MatricNo = obj And x.MatricNo = dgItem1.Cells(1).Text).ToList()
+
+                    If stud.SponsorLimit = 0 And stud.AllocatedAmount = 0 Then
+                        dgItem1.Cells(8).Text = "-"
+
+                    Else
+                        dgItem1.Cells(8).Text = String.Format("{0:F}", stud.OutstandingAmount)
                     End If
                 Next
 

@@ -417,6 +417,11 @@ Partial Class FeePosting
                 'ibtnSave.ToolTip = "Access Denied"
 
                 If ddlstatus.SelectedValue = 1 Then
+
+                    Dim ChkBoxHeader As CheckBox = DirectCast(dgView.HeaderRow.FindControl("chkboxSelectAll"), CheckBox)
+                    ChkBoxHeader.Checked = False
+                    ChkBoxHeader.Enabled = False
+
                     lblStatus.Value = "Ready"
                     ibtnStatus.ImageUrl = "images/Ready.gif"
                 End If
@@ -1915,11 +1920,7 @@ Partial Class FeePosting
         GetData(ddlFaculty.SelectedValue, ddlSemester.SelectedValue, ddlBidang.SelectedValue, _BatchId, ddlCurrSem.SelectedValue)
 
         Dim ChkBoxHeader As CheckBox = DirectCast(dgView.HeaderRow.FindControl("chkboxSelectAll"), CheckBox)
-        If Not String.IsNullOrEmpty(_BatchId) Then
-            ChkBoxHeader.Enabled = False
-        Else
-            ChkBoxHeader.Enabled = True
-        End If
+        ChkBoxHeader.Enabled = False
     End Sub
 
     Sub ClearCheckedData()

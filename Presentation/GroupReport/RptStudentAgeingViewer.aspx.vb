@@ -44,7 +44,7 @@ Partial Class RptStudentAgeingViewer
                     DateTo = y2 + "/" + m2 + "/" + d2
                     DateFrom = "2013/01/01"
 
-                    Dim StatusQuery As String = Nothing, StudentStatus As String = Nothing, FilterStatus As String = Nothing, SumQuery As String = Nothing
+                    Dim StudentStatus As String = Nothing, FilterStatus As String = Nothing, SumQuery As String = Nothing
                     If Status <> "-1" Then
                         StudentStatus = "WHERE EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef AND SASS_Code = '" + Status + "') "
                         'FilterStatus = "AND SS.SASS_Code = '" + Status + "' "
@@ -88,12 +88,12 @@ Partial Class RptStudentAgeingViewer
 
                         Header_FT = "COALESCE(SFGL.GL_account,SKGL.GL_account) AS col" + columnNo.ToString() + ","
 
-                        FT_join = "LEFT JOIN SAS_Faculty_GLaccount SFGL ON SFGL.SAFT_Code = a.RefCode AND SFGL.SAFC_Code = "
-                        FT_join += "(SELECT SASI_Faculty FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef) "
-                        FT_join += "LEFT JOIN SAS_Kolej_glaccount SKGL ON SKGL.SAFT_Code = a.RefCode AND SKGL.Sako_code = "
-                        FT_join += "(SELECT SAKO_Code FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef) "
+                        FT_join = "LEFT JOIN SAS_Faculty_GLaccount SFGL ON SFGL.SAFT_Code = ageing.RefCode AND SFGL.SAFC_Code = "
+                        FT_join += "(SELECT SASI_Faculty FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) "
+                        FT_join += "LEFT JOIN SAS_Kolej_glaccount SKGL ON SKGL.SAFT_Code = ageing.RefCode AND SKGL.Sako_code = "
+                        FT_join += "(SELECT SAKO_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) "
 
-                        FT_filter = "WHERE a.RefCode = '" & FeeType & "' "
+                        FT_filter = "AND ageing.RefCode = '" & FeeType & "' "
 
                         paramField = New ParameterField()
                         paramField.Name = "col_" + columnNo.ToString()
@@ -127,70 +127,45 @@ Partial Class RptStudentAgeingViewer
 
                         str = Header
                         str += Header_FT
-                        str += QueryBuilder(AgeingBy, "a", "HEAD")
+                        str += QueryBuilder(AgeingBy, "ageing", "HEAD")
                         str += "TO_CHAR(DATE '" + DateTo + "', 'DD/MM/YYYY') AS DateTo "
                         str += "FROM ( "
-                        str += "WITH CHK AS (SELECT a.CreditRef,MAX(a.TransDate) AS TransDate,SUM(a.PAID_AMT) AS TransAmount " +
-                                "FROM (" +
-                                "SELECT Creditref,TransDate, " +
-                                "CASE WHEN TransDate > '" + DateTo + "'::date THEN TransAmount " +
+                        str += "SELECT a.CreditRef,SAD.RefCode,"
+                        str += LoadAgeingByQuery("FT", AgeingBy, DateTo)
+                        str += "FROM ( "
+                        str += "WITH REC AS (SELECT a.INV_NO,a.TransCode,a.RefCode, " +
+                                "CASE WHEN SAS_Accounts.TransDate > '" + DateTo + "'::date THEN " +
+                                "SUM(a.PaidAmount) " +
                                 "ELSE 0 END AS PAID_AMT " +
-                                "FROM SAS_Accounts " +
-                                "WHERE TransCode IN " +
-                                "	(SELECT SAD.TransCode " +
-                                "	FROM SAS_Accounts SA " +
-                                "	INNER JOIN SAS_AccountsDetails SAD ON SAD.Inv_No=SA.TransCode " +
-                                "	WHERE SA.TransType='Debit' " +
-                                "	AND SA.PostStatus='Posted' " +
-                                "	GROUP BY SAD.TransCode)" +
-                                ") a " +
-                                "GROUP BY a.CreditRef) "
-                        str += "SELECT SAD.RefCode,SA.CreditRef,"
-                        str += LoadAgeingByQuery("FT", AgeingBy, DateTo)
+                                "FROM ( " +
+                                "SELECT SA.CreditRef,SAD.RefCode,SAD.INV_NO,SAD.TransCode,SAD.PaidAmount " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_AccountsDetails SAD ON SAD.INV_NO=SA.TransCode " +
+                                "WHERE SA.TransType='Debit' " +
+                                "AND SA.PostStatus='Posted' ) a " +
+                                "INNER JOIN SAS_Accounts ON SAS_Accounts.TransCode=a.TransCode AND SAS_Accounts.Creditref=a.CreditRef " +
+                                "GROUP BY a.INV_NO,a.TransCode,a.RefCode,SAS_Accounts.TransDate " +
+                                "ORDER BY a.INV_NO ) "
+                        str += "SELECT DISTINCT SA.CreditRef,SA.TransCode,SA.TransDate,REC.RefCode,"
+                        str += "COALESCE(SUM(REC.PAID_AMT),0) AS PAID_AMT "
                         str += "FROM SAS_Accounts SA "
-                        str += "INNER JOIN SAS_AccountsDetails SAD ON SAD.TransId=SA.TransId "
-                        str += "LEFT JOIN CHK ON SA.CreditRef=CHK.CreditRef "
-                        'STOP KAT SINI
-
-
-                        str += "WHERE SA.TransAmount > 0 "
+                        str += "INNER JOIN REC ON REC.INV_NO=SA.TransCode "
+                        str += "WHERE SA.TransAmount > 0"
                         str += "AND SA.SubType <> 'Sponsor' "
                         str += "AND SA.Category <> 'Payment' "
                         str += "AND SA.TransType <> 'Credit' "
+                        str += "AND SA.TransStatus <> 'Closed' "
                         str += "AND SA.PostStatus = 'Posted' "
-                        str += "GROUP BY SAD.RefCode,SA.CreditRef,SA.TransDate,SAD.TransAmount ) a "
-                        str += "INNER JOIN PAID_AMT ON PAID_AMT.CreditRef=a.CreditRef "
-                        str += FT_join
-                        str += FT_filter
-                        str += "GROUP BY a.CreditRef,SFGL.GL_account,SKGL.GL_account,PAID_AMT.PaidAmount ) b "
-
-                        str += "UNION "
-
-                        str += "SELECT * FROM "
-                        str += "(SELECT a.CreditRef,"
-                        'str += FT_str
-                        str += QueryBuilder(AgeingBy, "a", "Header2")
-                        str += "FROM "
-                        str += "(SELECT SAD.RefCode,SA.CreditRef,"
-                        str += LoadAgeingByQuery("FT", AgeingBy, DateTo)
-                        str += "FROM SAS_Accounts SA "
-                        str += "INNER JOIN SAS_AccountsDetails SAD ON SAD.TransId=SA.TransId "
-                        str += "WHERE SA.TransAmount > 0 "
-                        str += "AND SA.SubType <> 'Sponsor' "
-                        str += "AND SA.Category <> 'Payment' "
-                        str += "AND SA.TransType <> 'Credit' "
-                        str += "AND SA.PostStatus = 'Posted' "
-                        str += "GROUP BY SAD.RefCode,SA.CreditRef,SA.TransDate,SAD.TransAmount ) a "
-                        str += FT_join
-                        str += FT_filter
-                        str += "GROUP BY a.CreditRef,SFGL.GL_account,SKGL.GL_account ) b "
-                        str += "WHERE b.CreditRef NOT IN (SELECT CreditRef FROM SAS_Accounts WHERE TransType='Credit') "
+                        str += "GROUP BY SA.TransId,REC.RefCode ) a "
+                        str += "INNER JOIN SAS_Accounts SA ON SA.TransCode=a.TransCode AND SA.CreditRef=a.CreditRef "
+                        str += "INNER JOIN SAS_AccountsDetails SAD ON SAD.TransCode=a.TransCode "
+                        str += "GROUP BY a.CreditRef,SA.TransDate,SAD.RefCode,SAD.TransAmount "
                         str += ") ageing "
-                        str += StatusQuery
-                        str += "WHERE ageing.CreditRef IN (SELECT SASI_MatricNo FROM SAS_Student) "
-                        str += FilterStatus
+                        str += FT_join
+                        str += StudentStatus
+                        str += FT_filter
+                        str += "GROUP BY ageing.CreditRef,SFGL.GL_account,SKGL.GL_account "
                         str += "ORDER BY ageing.CreditRef"
-
                     Else
                         If AgeingBy = "rbMonthly" Then
                             ReportPath = "~/GroupReport/RptStudentAgeingType1b_Month.rpt"
@@ -620,11 +595,11 @@ Partial Class RptStudentAgeingViewer
         ElseIf AgeingBy = "rbVariousMonths" Then
             '6/12/36 months - START
             If stats = "FT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 182.5 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 547.5 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 547.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fifth"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 182.5 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FirstX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""SecondX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 547.5 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""ThirdX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 547.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FourthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FifthX"" "
             ElseIf stats = "nonFT" Then
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 182.5 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
@@ -643,11 +618,11 @@ Partial Class RptStudentAgeingViewer
         ElseIf AgeingBy = "rbQuaterly" Then
             '30/12/2016 - START
             If stats = "FT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 90 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 90 AND '" + DateTo + "'::date - SA.TransDate::date <= 181 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 181 AND '" + DateTo + "'::date - SA.TransDate::date <= 273 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 273 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fifth"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 90 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FirstX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 90 AND '" + DateTo + "'::date - SA.TransDate::date <= 181 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""SecondX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 181 AND '" + DateTo + "'::date - SA.TransDate::date <= 273 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""ThirdX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 273 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FourthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FifthX"" "
             ElseIf stats = "nonFT" Then
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 90 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 90 AND '" + DateTo + "'::date - SA.TransDate::date <= 181 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
@@ -666,19 +641,19 @@ Partial Class RptStudentAgeingViewer
         ElseIf AgeingBy = "rbMonthly" Then
             '30/12/2016 - START
             If stats = "FT" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 31 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 31 AND '" + DateTo + "'::date - SA.TransDate::date <= 60 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 60 AND '" + DateTo + "'::date - SA.TransDate::date <= 91 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 91 AND '" + DateTo + "'::date - SA.TransDate::date <= 121 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 121 AND '" + DateTo + "'::date - SA.TransDate::date <= 152 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Fifth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 152 AND '" + DateTo + "'::date - SA.TransDate::date <= 182 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Sixth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182 AND '" + DateTo + "'::date - SA.TransDate::date <= 213 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Seventh"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 213 AND '" + DateTo + "'::date - SA.TransDate::date <= 244 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Eighth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 244 AND '" + DateTo + "'::date - SA.TransDate::date <= 274 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Ninth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 274 AND '" + DateTo + "'::date - SA.TransDate::date <= 305 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Tenth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 305 AND '" + DateTo + "'::date - SA.TransDate::date <= 335 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Eleventh"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 335 AND '" + DateTo + "'::date - SA.TransDate::date <= 366 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Twelfth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 366 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""Thirteenth"" "
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 31 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FirstX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 31 AND '" + DateTo + "'::date - SA.TransDate::date <= 60 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""SecondX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 60 AND '" + DateTo + "'::date - SA.TransDate::date <= 91 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""ThirdX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 91 AND '" + DateTo + "'::date - SA.TransDate::date <= 121 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FourthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 121 AND '" + DateTo + "'::date - SA.TransDate::date <= 152 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FifthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 152 AND '" + DateTo + "'::date - SA.TransDate::date <= 182 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""SixthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 182 AND '" + DateTo + "'::date - SA.TransDate::date <= 213 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""SeventhX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 213 AND '" + DateTo + "'::date - SA.TransDate::date <= 244 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""EighthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 244 AND '" + DateTo + "'::date - SA.TransDate::date <= 274 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""NinthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 274 AND '" + DateTo + "'::date - SA.TransDate::date <= 305 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""TenthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 305 AND '" + DateTo + "'::date - SA.TransDate::date <= 335 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""EleventhX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 335 AND '" + DateTo + "'::date - SA.TransDate::date <= 366 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""TwelfthX"","
+                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 366 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""ThirteenthX"" "
             ElseIf stats = "nonFT" Then
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 31 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 31 AND '" + DateTo + "'::date - SA.TransDate::date <= 60 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
@@ -845,7 +820,8 @@ Partial Class RptStudentAgeingViewer
         Dim Query As String = String.Empty
 
         If stats = "FT" Then
-            Query = ""
+            Query = " CASE WHEN COALESCE(SAD.TransAmount,0) - SUM(a.PAID_AMT) < 0 THEN 0 " +
+                "ELSE COALESCE(SAD.TransAmount,0) - SUM(a.PAID_AMT) END"
         ElseIf stats = "nonFT" Then
             Query = " CASE WHEN SA.PaidAmount=SUM(a.PAID_AMT) THEN COALESCE(SA.TransAmount,0)-0 " +
                 "ELSE COALESCE(SA.TransAmount,0)-(COALESCE(SA.PaidAmount,0)-SUM(a.PAID_AMT)) " +
