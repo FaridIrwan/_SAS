@@ -2709,7 +2709,9 @@ Public Class FileHelper
             _OleDbConnection.Close()
             _OleDbConnection.Dispose()
 
-            Return ReadInvoiceUploadedFile(FileContents)
+            Dim NewDataTable As DataTable = HasNull(FileContents)
+
+            Return ReadInvoiceUploadedFile(NewDataTable)
 
         Catch ex As Exception
             Throw ex
@@ -2719,23 +2721,51 @@ Public Class FileHelper
 
 #End Region
 
+#Region "Check Datatable Empty Space"
+    'added by Hafiz @ 14/02/2017
+
+    Public Function HasNull(ByVal dt As DataTable) As DataTable
+
+        Dim dt1 As DataTable = dt.Clone
+
+        For i As Integer = 0 To dt.Rows.Count - 1
+
+            Dim currentRow As DataRow = dt.Rows(i)
+            For Each colValue As Object In currentRow.ItemArray
+
+                If Not String.IsNullOrEmpty(colValue.ToString()) Then
+                    dt1.ImportRow(currentRow)
+                    Exit For
+                End If
+
+            Next
+
+        Next
+
+        Return dt1
+
+    End Function
+
+#End Region
+
 #Region "ReadInvoiceUploadedFile"
 
     'added by Hafiz @ 14/12/2016
     'read/verify uploaded file
+    'modified by Hafiz @ 14/02/2017
 
     Public Function ReadInvoiceUploadedFile(ByVal FileContents As DataTable) As Boolean
 
         Dim MatricNo As String = Nothing, FeeCode As String = Nothing, Amount As Double = 0.0
         Dim SqlStatement As String = Nothing
         Dim _studEn As StudentEn = Nothing
-        Dim _ListUploadFileEN As New List(Of InvoiceUploadFileEn)
+        Dim _ListUploadFileEN As New List(Of InvoiceUploadFileEn), _ListUploadFail As New List(Of InvoiceUploadFileEn)
 
         Try
             'get info from column - START
             MatricNo = clsGeneric.NullToString(FileContents.Columns(0).ColumnName)
             FeeCode = clsGeneric.NullToString(FileContents.Columns(1).ColumnName)
-            Amount = clsGeneric.NullToString(FileContents.Columns(2).ColumnName)
+            Amount = clsGeneric.NullToDecimal(FileContents.Columns(2).ColumnName)
             'Description = clsGeneric.NullToString(FileContents.Columns(3).ColumnName)
 
             _studEn = New StudentDAL().GetItem(MatricNo)
@@ -2754,10 +2784,10 @@ Public Class FileHelper
 
                     _ListUploadFileEN.Add(_UploadFileEn)
                 Else
-                    Throw New Exception("Fee-Type Not Available.")
+                    AddToFailedList(MatricNo, FeeCode, Amount, _ListUploadFail)
                 End If
             Else
-                Throw New Exception("Student Not Available.")
+                AddToFailedList(MatricNo, FeeCode, Amount, _ListUploadFail)
             End If
             'get info from column - END
 
@@ -2766,7 +2796,7 @@ Public Class FileHelper
 
                 MatricNo = clsGeneric.NullToString(dr(0))
                 FeeCode = clsGeneric.NullToString(dr(1))
-                Amount = clsGeneric.NullToString(dr(2))
+                Amount = clsGeneric.NullToDecimal(dr(2))
                 'Description = clsGeneric.NullToString(dr(3))
 
                 _studEn = New StudentEn()
@@ -2786,16 +2816,18 @@ Public Class FileHelper
 
                         _ListUploadFileEN.Add(_UploadFileEn)
                     Else
-                        Throw New Exception("Fee-Type Not Available.")
+                        AddToFailedList(MatricNo, FeeCode, Amount, _ListUploadFail)
                     End If
                 Else
-                    Throw New Exception("Student Not Available.")
+                    AddToFailedList(MatricNo, FeeCode, Amount, _ListUploadFail)
                 End If
 
             Next
             'get info from row - END
 
             Session("UploadFile") = _ListUploadFileEN
+            Session("UploadFail") = _ListUploadFail
+
             Return True
 
         Catch ex As Exception
@@ -2803,6 +2835,24 @@ Public Class FileHelper
         End Try
 
     End Function
+
+#End Region
+
+#Region "AddToFailedList"
+    'added by Hafiz @ 14/02/2017
+
+    Public Sub AddToFailedList(ByVal MatricNo As String, ByVal FeeCode As String, ByVal Amount As String, ByRef _ListUploadFail As List(Of InvoiceUploadFileEn))
+
+        Dim _UploadFailEn As New InvoiceUploadFileEn()
+        _UploadFailEn.MatricNo = MatricNo
+        _UploadFailEn.StudentName = "not available"
+        _UploadFailEn.FeeCode = FeeCode
+        _UploadFailEn.FeeDesc = "not available"
+        _UploadFailEn.Amount = Amount
+
+        _ListUploadFail.Add(_UploadFailEn)
+
+    End Sub
 
 #End Region
 
