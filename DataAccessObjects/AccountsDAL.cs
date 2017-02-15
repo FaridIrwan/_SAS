@@ -9010,12 +9010,12 @@ public double GetSponserStuAllocateAmount(string BatchId)
                     String sub = GetValue<string>(_IDataReader, "subcategory");
                     String use = GetValue<string>(_IDataReader, "internal_use");
 
-                    if (sub == "UpdatePaidAmount")
-                    {
-                        //Build Update Statement - Start
-                        UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '2' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
-                    }
-                    else if(sub == "" && use != "")
+                    //if (sub == "UpdatePaidAmount")
+                    //{
+                    //    //Build Update Statement - Start
+                    //    UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '2' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
+                    //}
+                    if(sub == "" && use != "")
                     {
                         UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '0' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
                     }
