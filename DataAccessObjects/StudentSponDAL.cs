@@ -202,6 +202,32 @@ namespace HTS.SAS.DataAccessObjects
         {
             bool lbRes = false;
             string sqlCmd;
+            string d1, m1, y1, d2, m2, y2;
+            string todate = ""; string fromdate = "";
+            if (argEn.SDate != "")
+            {
+                d1 = argEn.SDate.Substring(0, 2);
+                m1 = argEn.SDate.Substring(3, 2);
+                y1 = argEn.SDate.Substring(6, 4);
+                fromdate = y1 + "-" + m1 + "-" + d1;
+            }
+            else if (argEn.SDate == "")
+            {
+                //loItem.Intake = "-1";
+            }
+
+            if (argEn.EDate != "")
+            {
+                d2 = argEn.EDate.Substring(0, 2);
+                m2 = argEn.EDate.Substring(3, 2);
+                y2 = argEn.EDate.Substring(6, 4);
+                todate = y2 + "-" + m2 + "-" + d2;
+            }
+            else if (argEn.EDate == "")
+            {
+                //loItem.CurretSemesterYear = "-1";
+            }
+                            
             try
             {
                 sqlCmd = "INSERT INTO SAS_StudentSpon(SASI_MatricNo,SASS_Sponsor,SASS_SDate,SASS_EDate,SASS_Status,SASS_Num,SASS_Type,sass_limit) " +
@@ -211,8 +237,8 @@ namespace HTS.SAS.DataAccessObjects
                             DbCommand cmd = _DatabaseFactory.GetDbCommand(Helper.GetDataBaseType, sqlCmd, DataBaseConnectionString);
                             _DatabaseFactory.AddInParameter(ref cmd, "@SASI_MatricNo", DbType.String, argEn.MatricNo);
                             _DatabaseFactory.AddInParameter(ref cmd, "@SASS_Sponsor", DbType.String, argEn.Sponsor);
-                            _DatabaseFactory.AddInParameter(ref cmd, "@SASS_SDate", DbType.String, argEn.SDate);
-                            _DatabaseFactory.AddInParameter(ref cmd, "@SASS_EDate", DbType.String, argEn.EDate);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@SASS_SDate", DbType.String, fromdate);
+                            _DatabaseFactory.AddInParameter(ref cmd, "@SASS_EDate", DbType.String, todate);
                             _DatabaseFactory.AddInParameter(ref cmd, "@SASS_Status", DbType.Boolean, argEn.Status);
                             _DatabaseFactory.AddInParameter(ref cmd, "@SASS_Num", DbType.Int32, argEn.Num);                            
                             _DatabaseFactory.AddInParameter(ref cmd, "@SASS_Type", DbType.Boolean, argEn.FullySponsered);
@@ -356,8 +382,35 @@ namespace HTS.SAS.DataAccessObjects
             StudentSponEn loItem = new StudentSponEn();
             loItem.MatricNo = GetValue<string>(argReader, "SASI_MatricNo");
             loItem.Sponsor = GetValue<string>(argReader, "SASS_Sponsor");
-            loItem.SDate = GetValue<string>(argReader, "SASS_SDate");
-            loItem.EDate = GetValue<string>(argReader, "SASS_EDate");
+            string code = GetValue<string>(argReader, "SASS_SDate");
+            string fromdate = ""; string todate = "";
+            string d1, m1, y1, d2, m2, y2;
+            if (code != "")
+            {
+                y1 = code.Substring(0, 4);
+                m1 = code.Substring(5, 2);
+                d1 = code.Substring(8, 2);
+                fromdate = d1 + "/" + m1 + "/" + y1;
+            }
+            else if (code == "")
+            {
+                //loItem.Intake = "-1";
+            }
+            string code2 = GetValue<string>(argReader, "SASS_EDate");
+            if (code2 != "")
+            {
+                y2 = code2.Substring(0, 4);
+                m2 = code2.Substring(5, 2);
+                d2 = code2.Substring(8, 2);
+                todate = d2 + "/" + m2 + "/" + y2;
+            }
+            else if (code2 == "")
+            {
+                //loItem.CurretSemesterYear = "-1";
+            }
+
+            loItem.SDate = fromdate;
+            loItem.EDate = todate;
             loItem.Status = GetValue<bool>(argReader, "SASS_Status");
             loItem.Num = GetValue<int>(argReader, "SASS_Num");
             loItem.FullySponsered = GetValue<bool>(argReader, "SASS_Type");

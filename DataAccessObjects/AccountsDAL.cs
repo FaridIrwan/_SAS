@@ -8993,7 +8993,8 @@ public double GetSponserStuAllocateAmount(string BatchId)
             try
             {
                 //Build Sql Statement - Start
-                SqlStatement = "SELECT creditref,subcategory from sas_accounts WHERE batchcode = "
+                //SqlStatement = "SELECT creditref,subcategory from sas_accounts WHERE batchcode = "
+                SqlStatement = "SELECT distinct sa.creditref,sa.subcategory,sad.internal_use from sas_accounts sa inner join sas_accountsdetails sad on sad.transid = sa.transid and sa.batchcode = "
                     + clsGeneric.AddQuotes(BatchCode);
                 //Build Sql Statement - Stop
 
@@ -9007,16 +9008,18 @@ public double GetSponserStuAllocateAmount(string BatchId)
                 {
                     String creditref = GetValue<string>(_IDataReader, "creditref");
                     String sub = GetValue<string>(_IDataReader, "subcategory");
+                    String use = GetValue<string>(_IDataReader, "internal_use");
 
-                    if (sub == "UpdatePaidAmount")
-                    {
-                        //Build Update Statement - Start
-                        UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '2' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
-                    }
-                    else
+                    //if (sub == "UpdatePaidAmount")
+                    //{
+                    //    //Build Update Statement - Start
+                    //    UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '2' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
+                    //}
+                    if(sub == "" && use != "")
                     {
                         UpdateStatement += "UPDATE sas_student SET sasi_poststatus = '0' WHERE sasi_matricno = " + clsGeneric.AddQuotes(creditref) + ";";
                     }
+
                     //Build Update Statement - Stop
                 }
                 //loop thro the batch details - stop
