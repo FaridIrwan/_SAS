@@ -920,7 +920,7 @@ Public Class DatabaseProvider
     'End Function
 
     Public Function GetStudentDetails(ByVal loen As AccountsEn, ByVal programid As String, ByVal safc_code As String, ByVal poststatus As String, ByVal currentsemester As String,
-                                       ByVal semester As String, ByVal creditref As String, ByVal recstatus As String, ByVal batch As String) As DataTable
+                                       ByVal semester As String, ByVal intake As String, ByVal creditref As String, ByVal recstatus As String, ByVal batch As String) As DataTable
 
         'Create Instances - Start
         Dim _DataTable As New DataTable
@@ -951,6 +951,7 @@ Public Class DatabaseProvider
             _NpgsqlDatabase.AddInParameter(_DbCommand, "poststatus", DbType.String, poststatus)
             _NpgsqlDatabase.AddInParameter(_DbCommand, "currentsemester", DbType.String, currentsemester)
             _NpgsqlDatabase.AddInParameter(_DbCommand, "semester", DbType.String, semester)
+            _NpgsqlDatabase.AddInParameter(_DbCommand, "intake", DbType.String, intake)
             _NpgsqlDatabase.AddInParameter(_DbCommand, "creditref", DbType.String, creditref)
             _NpgsqlDatabase.AddInParameter(_DbCommand, "recstatus", DbType.String, recstatus)
             _NpgsqlDatabase.AddInParameter(_DbCommand, "Batch", DbType.String, batch)
