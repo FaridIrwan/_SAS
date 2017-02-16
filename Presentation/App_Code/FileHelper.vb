@@ -917,6 +917,10 @@ Public Class FileHelper
             FooterContent = DirectDebitFileFooter(BatchNumber, TotalRecords, TotalAmount, HashTotal)
             'Create Footer Content - Stop
 
+            If Not Directory.Exists(GetDownloadFilePath()) Then
+                Directory.CreateDirectory(GetDownloadFilePath())
+            End If
+
             'Build Direct Debit File Name - Start
             DirectDebitFileName = Path.GetFileNameWithoutExtension(UploadFileName)
             DirectDebitFileName &= "_" & Format(CDate(Now), "yyyyMMdd") & "_PTPTN.txt"

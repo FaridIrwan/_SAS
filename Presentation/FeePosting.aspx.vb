@@ -317,7 +317,7 @@ Partial Class FeePosting
                 End If
             Next
 
-            link.NavigateUrl = "FeeStructure.aspx?Formid=FS&IsFeePosting=1&ProgramId=" & dgItem1.Cells(1).Text & "&Semester=" & semester & "&PostStatus=" _
+            link.NavigateUrl = "FeeStructure.aspx?Formid=FS&IsFeePosting=1&ProgramId=" & dgItem1.Cells(1).Text & "&Semester=" & semester & "&Intake=" & dgItem1.Cells(5).Text.Replace("/", "").Replace("-", "") & "&PostStatus=" _
                             & ddlstatus.SelectedValue & "&BatchCode=" & dgItem1.Cells(6).Text & "&Faculty=" & dgItem1.Cells(4).Text & "&BidangCode=" & dgItem1.Cells(9).Text _
                             & "&CurrSem=" & dgItem1.Cells(10).Text
             link.Target = "MyPopup"
@@ -465,6 +465,10 @@ Partial Class FeePosting
         Dim Status As String = Nothing, Batch As String = Nothing, StudentMatricNos As String = Nothing
         'Variable Declarations - Stop
 
+        Dim fsObj As New FeeStructDAL
+        Dim feestructList As New List(Of FeeStructEn)
+        Dim semester As String = String.Empty
+
         Try
 
             If ddlstatus.SelectedValue = 1 Then
@@ -529,6 +533,21 @@ Partial Class FeePosting
                         End If
 
                         _AFCEn.CurrentSemester = ListProgramInfoEn(idx).CurrentSemester
+
+                        feestructList = fsObj.GetListCurrentEffectiveSemester(ListProgramInfoEn(idx).BidangCode)
+
+                        For Index = 0 To feestructList.Count - 1
+                            If Index = feestructList.Count - 1 Then
+                                _AFCEn.Intake = feestructList(Index).STCode
+                                Exit For
+                            Else
+                                If _AFCEn.Semester >= feestructList(Index).STCode Then
+                                    _AFCEn.Intake = feestructList(Index).STCode
+                                    Exit For
+                                End If
+                            End If
+                        Next
+
                         _AFCEn.DueDate = Trim(txtDueDate.Text)
                         _AFCEn.TransDate = Trim(txtInvoiceDate.Text)
                         _AFCEn.Bdate = Trim(txtBatchDate.Text)

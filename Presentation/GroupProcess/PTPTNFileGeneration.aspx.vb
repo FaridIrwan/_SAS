@@ -131,6 +131,11 @@ Partial Class PTPTNFileGeneration
             UploadedPtptnFile = GetUploadFilePath & Path.GetFileName(UploadedPtptnFile)
             'Get Uploaded File - Stop
 
+            If Not Directory.Exists(GetUploadFilePath) Then
+                Directory.CreateDirectory(GetUploadFilePath)
+            End If
+
+
             'Check file uploaded - Start
             If _FileHelper.IsPtptnFileUploaded(UploadedPtptnFile) Then
                 Call DisplayMessage("File Uploaded Previously")
