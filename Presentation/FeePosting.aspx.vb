@@ -418,9 +418,11 @@ Partial Class FeePosting
 
                 If ddlstatus.SelectedValue = 1 Then
 
-                    Dim ChkBoxHeader As CheckBox = DirectCast(dgView.HeaderRow.FindControl("chkboxSelectAll"), CheckBox)
-                    ChkBoxHeader.Checked = False
-                    ChkBoxHeader.Enabled = False
+                    If dgView.Rows.Count <> 0 Then
+                        Dim ChkBoxHeader As CheckBox = DirectCast(dgView.HeaderRow.FindControl("chkboxSelectAll"), CheckBox)
+                        ChkBoxHeader.Checked = False
+                        ChkBoxHeader.Enabled = False
+                    End If
 
                     lblStatus.Value = "Ready"
                     ibtnStatus.ImageUrl = "images/Ready.gif"
