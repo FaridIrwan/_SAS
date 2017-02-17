@@ -1011,7 +1011,7 @@ namespace HTS.SAS.DataAccessObjects
             List<FeeTypesEn> loEnList = new List<FeeTypesEn>();
 
             string sqlCmd = "SELECT distinct SAS_FeeTypes.saft_code, SAS_FeeTypes.saft_taxmode, " +
-                            "SAS_FeeTypes.SAFT_Desc, SAS_FeeTypes.SAFT_Priority, SAS_FeeTypes.SAFT_FeeType";
+                            "SAS_FeeTypes.SAFT_Desc, SAS_FeeTypes.SAFT_Priority, SAS_FeeTypes.SAFT_FeeType, SAS_FeeTypes.SAFT_Hostel";
 
             if (argEn.SCCode.Length != 0)
             {
@@ -1066,6 +1066,7 @@ namespace HTS.SAS.DataAccessObjects
                             loItem.Description = GetValue<string>(loReader, "SAFT_Desc");
                             loItem.Priority = GetValue<int>(loReader, "SAFT_Priority");
                             loItem.FeeType = GetValue<string>(loReader, "SAFT_FeeType");
+                            loItem.Hostel = GetValue<string>(loReader, "SAFT_Hostel");
                             if (argEn.SCCode.Length != 0)
                             {
                                 loItem.SCCode = GetValue<string>(loReader, "SASC_Code");

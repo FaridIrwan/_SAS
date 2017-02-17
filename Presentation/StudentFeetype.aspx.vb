@@ -2,6 +2,8 @@ Imports HTS.SAS.Entities
 Imports HTS.SAS.BusinessObjects
 Imports System.Data
 Imports System.Collections.Generic
+Imports System.Linq
+
 Partial Class StudentFeetype
     Inherits System.Web.UI.Page
     Dim listfee As New List(Of FeeTypesEn)
@@ -177,13 +179,7 @@ Partial Class StudentFeetype
             ibtnClose.Visible = True
             Label3.Visible = True
 
-            'Dim chk As CheckBox
-            'Dim dgitem As DataGridItem
-
-            'For Each dgitem In dgView.Items
-            '    chk = dgitem.Cells(0).Controls(1)
-            '    chk.Checked = True
-            'Next
+            Session("list") = listobj
 
         Else
             Response.Write("No Fee types are Available")
@@ -226,6 +222,13 @@ Partial Class StudentFeetype
                 eobj.TaxId = dgView.Items(dgView.SelectedIndex).Cells(8).Text
                 eobj.LocalCategory = dgView.Items(dgView.SelectedIndex).Cells(13).Text
                 eobj.NonLocalCategory = dgView.Items(dgView.SelectedIndex).Cells(12).Text
+
+                'added by Hafiz @ 17/02/2017
+                If Not Session("list") Is Nothing Then
+                    Dim ListFeeTypes As List(Of FeeTypesEn) = Session("list")
+                    eobj.Hostel = ListFeeTypes.Where(Function(x) x.FeeTypeCode = eobj.FeeTypeCode).Select(Function(y) y.Hostel).FirstOrDefault
+                End If
+
                 listfee.Add(eobj)
                 eobj = Nothing
             End If
@@ -258,6 +261,13 @@ Partial Class StudentFeetype
                     eobj.TaxId = dgi.Cells(8).Text
                     eobj.LocalCategory = dgi.Cells(13).Text
                     eobj.NonLocalCategory = dgi.Cells(12).Text
+
+                    'added by Hafiz @ 17/02/2017
+                    If Not Session("list") Is Nothing Then
+                        Dim ListFeeTypes As List(Of FeeTypesEn) = Session("list")
+                        eobj.Hostel = ListFeeTypes.Where(Function(x) x.FeeTypeCode = eobj.FeeTypeCode).Select(Function(y) y.Hostel).FirstOrDefault
+                    End If
+
                     listfee.Add(eobj)
                     eobj = Nothing
                 End If

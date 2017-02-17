@@ -695,12 +695,12 @@
     <matricno>173668</matricno>
     <col1>53 - BACELOR PERAKAUNAN</col1>
     <col2 />
-    <First>120</First>
+    <First>80</First>
     <Second>0</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
-    <TotalAmount>120</TotalAmount>
+    <TotalAmount>80</TotalAmount>
     <dateto>15/02/2017</dateto>
   </Table>
   <Table>
@@ -743,35 +743,35 @@
     <matricno>173668</matricno>
     <col1>53 - BACELOR PERAKAUNAN</col1>
     <col2>S-01-12226-DA-R69000</col2>
-    <First>10</First>
+    <First>0</First>
     <Second>0</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
-    <TotalAmount>10</TotalAmount>
+    <TotalAmount>0</TotalAmount>
     <dateto>15/02/2017</dateto>
   </Table>
   <Table>
     <matricno>173668</matricno>
     <col1>53 - BACELOR PERAKAUNAN</col1>
     <col2>S-01-12234-DA-R60120</col2>
-    <First>10</First>
+    <First>0</First>
     <Second>0</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
-    <TotalAmount>10</TotalAmount>
+    <TotalAmount>0</TotalAmount>
     <dateto>15/02/2017</dateto>
   </Table>
   <Table>
     <matricno>173668</matricno>
     <col1>53 - BACELOR PERAKAUNAN</col1>
-    <First>80</First>
+    <First>60</First>
     <Second>0</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
-    <TotalAmount>80</TotalAmount>
+    <TotalAmount>60</TotalAmount>
     <dateto>15/02/2017</dateto>
   </Table>
   <Table>

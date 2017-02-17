@@ -120,6 +120,8 @@ Partial Class BatchInvoice
             Session("liststu") = Nothing
             Session("ListObj") = Nothing
             Session("Module") = Nothing
+            Session("SelectAll") = False
+            Session("CBSelected") = Nothing
             ClearSession()
             'Loading UserRightsGetlisStudent     
             LoadUserRights()
@@ -353,6 +355,8 @@ Partial Class BatchInvoice
         ClearSession()
     End Sub
 
+    'modified by Hafiz @ 16/02/2017
+    'maintain checkbox stated
     Protected Sub txtFeeAmt_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         hfValidateAmt.Value = False
         Dim eobjTRD As AccountsDetailsEn
@@ -368,6 +372,8 @@ Partial Class BatchInvoice
         Dim chk As CheckBox
         Dim TaxMode As String
         Dim GetGST As DataSet
+        Dim CBSelected As New List(Of Integer)
+
         If Not Session(ReceiptsClass.SessionStuChange) Is Nothing Then
             listStu = Session(ReceiptsClass.SessionStuChange)
         End If
@@ -377,8 +383,10 @@ Partial Class BatchInvoice
                     chk = dgitem.Cells(0).Controls(1)
                     If chk.Checked = True Then
                         chk.Checked = True
+                        CBSelected.Add(dgitem.ItemIndex)
                     Else
                         chk.Checked = False
+                        CBSelected.Remove(dgitem.ItemIndex)
                     End If
 
                     Dim currMatricNo As String
@@ -451,6 +459,8 @@ Partial Class BatchInvoice
                     i = i + 1
                 Next
                 Session(ReceiptsClass.SessionStuChange) = newListStu
+
+                Session("CBSelected") = CBSelected
                 dgView.DataSource = newListStu
                 dgView.DataBind()
             Else
@@ -458,8 +468,10 @@ Partial Class BatchInvoice
                     chk = dgitem.Cells(0).Controls(1)
                     If chk.Checked = True Then
                         chk.Checked = True
+                        CBSelected.Add(dgitem.ItemIndex)
                     Else
                         chk.Checked = False
+                        CBSelected.Remove(dgitem.ItemIndex)
                     End If
                     Session("AddFee") = Nothing
                     txt = dgitem.Cells(dgViewCell.Fee_Amount).Controls(1)
@@ -524,6 +536,8 @@ Partial Class BatchInvoice
                     i = i + 1
                 Next
                 Session("AddFee") = ListTRD
+                Session("CBSelected") = CBSelected
+
                 dgView.DataSource = ListTRD
                 dgView.DataBind()
                 'AddTotal()
@@ -1101,62 +1115,66 @@ Partial Class BatchInvoice
         TaxId = 14
     End Enum
 
-
+    'modified by Hafiz @ 16/02/2017
+    'maintain checkbox stated
     Protected Sub dgView_ItemDataBound(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.DataGridItemEventArgs) Handles dgView.ItemDataBound
         Dim txtAmount As TextBox
         Dim GSTAmt As Double = 0
         Dim TaxId As Integer = 0
         Dim TaxMode As Integer = 0
         Dim chk As CheckBox
+        Dim CBSelected As New List(Of Integer)
+
         TaxId = Session("TaxId")
+        If Session("CBSelected") IsNot Nothing Then
+            CBSelected = Session("CBSelected")
+        End If
 
         Select Case e.Item.ItemType
+
             Case ListItemType.Item, ListItemType.AlternatingItem, ListItemType.SelectedItem
                 chk = e.Item.Cells(dgViewCell.CheckBox).Controls(1)
-                'If chk.Checked = True Then
-                '    chk.Checked = True
-                'Else
-                '    chk.Checked = False
-                'End If
+
                 txtAmount = CType(e.Item.FindControl("txtFeeAmt"), TextBox)
                 txtAmount.Attributes.Add("onKeyPress", "checkValue();")
                 txtAmount.Text = String.Format("{0:F}", CDbl(txtAmount.Text))
-                sumAmt = sumAmt + CDbl(e.Item.Cells(dgViewCell.TransactionAmount).Text)
 
-                'GSTAmt = _GstSetupDal.GetGstAmount(TaxId, MaxGeneric.clsGeneric.NullToDecimal(CDbl(e.Item.Cells(4).Text)))
-                'sumGST = sumGST + GSTAmt               
-                sumGST = sumGST + CDbl(e.Item.Cells(dgViewCell.GSTAmount).Text)
-                'GSTAmt = _GstSetupDal.GetGstAmount(TaxId, MaxGeneric.clsGeneric.NullToDecimal(FeeAmount))
-                'Else
-                'chk.Checked = False
-                'End If
+                If CBSelected.Count <> 0 Then
+                    If CBSelected.Contains(e.Item.ItemIndex) Then
+                        chk.Checked = True
+                        sumAmt = sumAmt + CDbl(e.Item.Cells(dgViewCell.TransactionAmount).Text)
+                        sumGST = sumGST + CDbl(e.Item.Cells(dgViewCell.GSTAmount).Text)
+                    End If
+                Else
+                    If Not Session("SelectAll") = True Then
+                        sumAmt = sumAmt + CDbl(e.Item.Cells(dgViewCell.TransactionAmount).Text)
+                        sumGST = sumGST + CDbl(e.Item.Cells(dgViewCell.GSTAmount).Text)
+                    End If
+                End If
+
             Case ListItemType.Footer
-                'chk = e.Item.Cells(dgViewCell.CheckBox).Controls(1)
-                'If chk.Checked = True Then
-                '    chk.Checked = True
-                'Else
-                '    chk.Checked = False
-                'End If
+
                 e.Item.Cells(dgViewCell.TransactionAmount).Text = sumAmt.ToString
                 e.Item.Cells(dgViewCell.Total_Fee_Amount).Text = String.Format("{0:F}", sumAmt)
+                e.Item.Cells(dgViewCell.GSTAmount).Text = String.Format("{0:F}", sumGST)
+
+                txtTotalFeeAmt.Text = String.Format("{0:F}", sumAmt)
                 txtTotal.Text = String.Format("{0:F}", sumAmt)
 
-                e.Item.Cells(dgViewCell.GSTAmount).Text = String.Format("{0:F}", sumGST)
                 dgFeeType.Columns(dgFeeTypeCell.Total_Fee_Amount).FooterText = String.Format("{0:F}", sumAmt)
                 dgFeeType.Columns(dgFeeTypeCell.GSTAmount).FooterText = String.Format("{0:F}", sumGST)
-                txtTotalFeeAmt.Text = String.Format("{0:F}", sumAmt)
                 dgFeeType.DataBind()
+
         End Select
 
-        If chkSelectedView.Checked = True Then
-            Select Case e.Item.ItemType
-                Case ListItemType.Item, ListItemType.AlternatingItem
-                    chk = CType(e.Item.FindControl("chkview"), CheckBox)
-                    chk.Checked = True
-
-            End Select
-            'End If
-        End If
+        'If chkSelectedView.Checked = True Then
+        '    Select Case e.Item.ItemType
+        '        Case ListItemType.Item, ListItemType.AlternatingItem
+        '            chk = CType(e.Item.FindControl("chkview"), CheckBox)
+        '            chk.Checked = True
+        '    End Select
+        '    'End If
+        'End If
 
     End Sub
 
@@ -2174,54 +2192,9 @@ Partial Class BatchInvoice
                     totalGSTAmount = 0
                     If Not currListSt.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode) Then
                         For Each stu In StuChgMatricNo
-                            objStu = New StudentEn
-                            objStu.MatricNo = stu.MatricNo
-                            objStu.StudentName = stu.StudentName
-                            'objStu.ProgramID = stu.ProgramID
-                            'objStu.CurrentSemester = stu.CurrentSemester
-                            objStu.ReferenceCode = eobjFt.FeeTypeCode
-                            objStu.Description = eobjFt.Description
-                            If TakeLocalFeeAmount = True Then
-                                objStu.TransactionAmount = String.Format("{0:F}", eobjFt.LocalAmount)
-                                objStu.GSTAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
-                                objStu.TaxAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
-                            Else
-                                If stu.CategoryCode = ReceiptsClass.Student_BUKAN_WARGANEGARA Or stu.CategoryCode = ReceiptsClass.student_International _
-                                    Or hfStdCategory.Value = ReceiptsClass.Student_BUKAN_WARGANEGARA Or hfStdCategory.Value = ReceiptsClass.student_International Then
-                                    objStu.TransactionAmount = String.Format("{0:F}", eobjFt.NonLocalAmount)
-                                    objStu.GSTAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
-                                    objStu.TaxAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
-                                Else
-                                    objStu.TransactionAmount = String.Format("{0:F}", eobjFt.LocalAmount)
-                                    objStu.GSTAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
-                                    objStu.TaxAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
-                                End If
-                            End If
 
-                            totalTransAmount = totalTransAmount + objStu.TransactionAmount
-                            totalGSTAmount = totalGSTAmount + objStu.GSTAmount
-                            objStu.Priority = eobjFt.Priority
-                            objStu.PostStatus = "Ready"
-                            objStu.TransStatus = "Open"
-                            objStu.TaxId = eobjFt.TaxId
-                            totalActualFeeAmount = totalTransAmount - totalGSTAmount
-                            If Not ListTRD.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode) Then
-                                ListTRD.Add(New AccountsDetailsEn With {.ReferenceCode = eobjFt.FeeTypeCode, .Description = eobjFt.Description, .TransactionAmount = totalTransAmount,
-                                                                              .GSTAmount = totalGSTAmount, .TaxAmount = objStu.GSTAmount, .TempAmount = totalActualFeeAmount,
-                                                                        .TempPaidAmount = objStu.TransactionAmount, .TaxId = objStu.TaxId, .StudentQty = 1, .Priority = objStu.Priority})
-                            Else
-                                Dim assignNewTotal As AccountsDetailsEn = ListTRD.Where(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode).FirstOrDefault()
-                                assignNewTotal.TransactionAmount = totalTransAmount
-                                assignNewTotal.GSTAmount = totalGSTAmount
-                                assignNewTotal.TempAmount = totalActualFeeAmount
-                                assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
-                            End If
-                            newListStu.Add(objStu)
-                            objStu = Nothing
-                        Next
-                    Else
-                        For Each stu In StuChgMatricNo
-                            If Not currListSt.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode And x.MatricNo = stu.MatricNo) Then
+                            'modified by Hafiz @ 17/02/2017
+                            If CheckHostelFlag(stu, eobjFt) = True Then
                                 objStu = New StudentEn
                                 objStu.MatricNo = stu.MatricNo
                                 objStu.StudentName = stu.StudentName
@@ -2229,27 +2202,21 @@ Partial Class BatchInvoice
                                 'objStu.CurrentSemester = stu.CurrentSemester
                                 objStu.ReferenceCode = eobjFt.FeeTypeCode
                                 objStu.Description = eobjFt.Description
-                                If existingFeeType.ReferenceCode <> Nothing Then
-                                    objStu.TransactionAmount = existingFeeType.TempPaidAmount
-                                    objStu.GSTAmount = existingFeeType.TaxAmount
-                                    objStu.TaxAmount = existingFeeType.TaxAmount
+                                If TakeLocalFeeAmount = True Then
+                                    objStu.TransactionAmount = String.Format("{0:F}", eobjFt.LocalAmount)
+                                    objStu.GSTAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
+                                    objStu.TaxAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
                                 Else
-                                    If TakeLocalFeeAmount = True Then
+                                    If stu.CategoryCode = ReceiptsClass.Student_BUKAN_WARGANEGARA Or stu.CategoryCode = ReceiptsClass.student_International _
+                                        Or hfStdCategory.Value = ReceiptsClass.Student_BUKAN_WARGANEGARA Or hfStdCategory.Value = ReceiptsClass.student_International Then
+                                        objStu.TransactionAmount = String.Format("{0:F}", eobjFt.NonLocalAmount)
+                                        objStu.GSTAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
+                                        objStu.TaxAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
+                                    Else
                                         objStu.TransactionAmount = String.Format("{0:F}", eobjFt.LocalAmount)
                                         objStu.GSTAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
                                         objStu.TaxAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
-                                    Else
-                                        If stu.CategoryCode = ReceiptsClass.Student_BUKAN_WARGANEGARA Or stu.CategoryCode = ReceiptsClass.student_International Then
-                                            objStu.TransactionAmount = String.Format("{0:F}", eobjFt.NonLocalAmount)
-                                            objStu.GSTAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
-                                            objStu.TaxAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
-                                        Else
-                                            objStu.TransactionAmount = String.Format("{0:F}", eobjFt.LocalAmount)
-                                            objStu.GSTAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
-                                            objStu.TaxAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
-                                        End If
                                     End If
-
                                 End If
 
                                 totalTransAmount = totalTransAmount + objStu.TransactionAmount
@@ -2265,18 +2232,88 @@ Partial Class BatchInvoice
                                                                             .TempPaidAmount = objStu.TransactionAmount, .TaxId = objStu.TaxId, .StudentQty = 1, .Priority = objStu.Priority})
                                 Else
                                     Dim assignNewTotal As AccountsDetailsEn = ListTRD.Where(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode).FirstOrDefault()
-                                    assignNewTotal.TransactionAmount = assignNewTotal.TransactionAmount + objStu.TransactionAmount
-                                    assignNewTotal.GSTAmount = assignNewTotal.GSTAmount + objStu.GSTAmount
-                                    assignNewTotal.TempAmount = assignNewTotal.TransactionAmount - assignNewTotal.GSTAmount
+                                    assignNewTotal.TransactionAmount = totalTransAmount
+                                    assignNewTotal.GSTAmount = totalGSTAmount
+                                    assignNewTotal.TempAmount = totalActualFeeAmount
                                     assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
                                 End If
                                 newListStu.Add(objStu)
                                 objStu = Nothing
+
+                            Else
+                                ErrorDescription += "Fail to Add [Fee Code:" & eobjFt.FeeTypeCode & "].[Matric No:" & stu.MatricNo & "] Hostel Flag Is Disable." + "<br>"
+                                LogError.Log("BatchInvoice", "addFeeType", ErrorDescription)
+                            End If
+
+                        Next
+                    Else
+                        For Each stu In StuChgMatricNo
+                            If Not currListSt.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode And x.MatricNo = stu.MatricNo) Then
+
+                               'modified by Hafiz @ 17/02/2017
+                                If CheckHostelFlag(stu, eobjFt) = True Then
+                                    objStu = New StudentEn
+                                    objStu.MatricNo = stu.MatricNo
+                                    objStu.StudentName = stu.StudentName
+                                    'objStu.ProgramID = stu.ProgramID
+                                    'objStu.CurrentSemester = stu.CurrentSemester
+                                    objStu.ReferenceCode = eobjFt.FeeTypeCode
+                                    objStu.Description = eobjFt.Description
+                                    If existingFeeType.ReferenceCode <> Nothing Then
+                                        objStu.TransactionAmount = existingFeeType.TempPaidAmount
+                                        objStu.GSTAmount = existingFeeType.TaxAmount
+                                        objStu.TaxAmount = existingFeeType.TaxAmount
+                                    Else
+                                        If TakeLocalFeeAmount = True Then
+                                            objStu.TransactionAmount = String.Format("{0:F}", eobjFt.LocalAmount)
+                                            objStu.GSTAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
+                                            objStu.TaxAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
+                                        Else
+                                            If stu.CategoryCode = ReceiptsClass.Student_BUKAN_WARGANEGARA Or stu.CategoryCode = ReceiptsClass.student_International Then
+                                                objStu.TransactionAmount = String.Format("{0:F}", eobjFt.NonLocalAmount)
+                                                objStu.GSTAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
+                                                objStu.TaxAmount = String.Format("{0:F}", eobjFt.NonLocalGSTAmount)
+                                            Else
+                                                objStu.TransactionAmount = String.Format("{0:F}", eobjFt.LocalAmount)
+                                                objStu.GSTAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
+                                                objStu.TaxAmount = String.Format("{0:F}", eobjFt.LocalGSTAmount)
+                                            End If
+                                        End If
+
+                                    End If
+
+                                    totalTransAmount = totalTransAmount + objStu.TransactionAmount
+                                    totalGSTAmount = totalGSTAmount + objStu.GSTAmount
+                                    objStu.Priority = eobjFt.Priority
+                                    objStu.PostStatus = "Ready"
+                                    objStu.TransStatus = "Open"
+                                    objStu.TaxId = eobjFt.TaxId
+                                    totalActualFeeAmount = totalTransAmount - totalGSTAmount
+                                    If Not ListTRD.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode) Then
+                                        ListTRD.Add(New AccountsDetailsEn With {.ReferenceCode = eobjFt.FeeTypeCode, .Description = eobjFt.Description, .TransactionAmount = totalTransAmount,
+                                                                                      .GSTAmount = totalGSTAmount, .TaxAmount = objStu.GSTAmount, .TempAmount = totalActualFeeAmount,
+                                                                                .TempPaidAmount = objStu.TransactionAmount, .TaxId = objStu.TaxId, .StudentQty = 1, .Priority = objStu.Priority})
+                                    Else
+                                        Dim assignNewTotal As AccountsDetailsEn = ListTRD.Where(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode).FirstOrDefault()
+                                        assignNewTotal.TransactionAmount = assignNewTotal.TransactionAmount + objStu.TransactionAmount
+                                        assignNewTotal.GSTAmount = assignNewTotal.GSTAmount + objStu.GSTAmount
+                                        assignNewTotal.TempAmount = assignNewTotal.TransactionAmount - assignNewTotal.GSTAmount
+                                        assignNewTotal.StudentQty = assignNewTotal.StudentQty + 1
+                                    End If
+                                    newListStu.Add(objStu)
+                                    objStu = Nothing
+
+                                Else
+                                    ErrorDescription += "Fail to Add [Fee Code:" & eobjFt.FeeTypeCode & "].[Matric No:" & stu.MatricNo & "] Hostel Flag Is Disable." + "<br>"
+                                    LogError.Log("BatchInvoice", "addFeeType", ErrorDescription)
+                                End If
+
                             End If
                         Next
                     End If
                 Next
             End If
+
             Session("AddFee") = ListTRD
             dgFeeType.DataSource = ListTRD
             dgFeeType.DataBind()
@@ -2292,12 +2329,18 @@ Partial Class BatchInvoice
         If dgView.Items.Count > 0 Then
             Dim chk As CheckBox
             Dim dgitem As DataGridItem
-            'chkSelectedView.Checked = True
+            chkSelectedView.Checked = True
             If chkSelectedView.Checked = True Then
                 For Each dgitem In dgView.Items
                     chk = dgitem.Cells(0).Controls(1)
                     chk.Checked = True
                 Next
+            End If
+
+            lblMsg.Text = ErrorDescription
+        Else
+            If Not ErrorDescription Is Nothing Then
+                lblMsg.Text = ErrorDescription
             End If
         End If
         If dgFeeType.Items.Count > 0 Then
@@ -2326,6 +2369,31 @@ Partial Class BatchInvoice
             pnlDgView.Visible = True
         End If
     End Sub
+
+#Region "CheckHostelFlag"
+
+    'added by Hafiz @ 17/02/2017
+    'check Hostel Flag
+    Protected Function CheckHostelFlag(ByVal stu As StudentEn, eobjFt As FeeTypesEn) As Boolean
+
+        If Request.QueryString("Formid") = "DN" Then
+
+            If eobjFt.Hostel = "H" Then
+                Dim Stud As StudentEn = New StudentDAL().GetItem(stu.MatricNo)
+                If Not Stud.Hostel = True Then
+                    Return False
+                End If
+            End If
+
+        End If
+
+        Return True
+
+    End Function
+
+#End Region
+
+
 
     Private Sub addStuToExistingFee(ByVal stuList As List(Of StudentEn))
         Dim objStu As New StudentEn
@@ -2924,7 +2992,7 @@ Partial Class BatchInvoice
 
                         dgView.DataSource = ListTranctionDetails
                         dgView.DataBind()
-                        
+
                         Dim mylst As New List(Of StudentEn)
                         Dim bsobj As New AccountsBAL
                         Dim loen As New StudentEn
@@ -3855,6 +3923,8 @@ Partial Class BatchInvoice
         Session("lstStu") = Nothing
         Session("liststu") = Nothing
         Session("LstStueObj") = Nothing
+        Session("SelectAll") = False
+        Session("CBSelected") = Nothing
         dgStudent.DataSource = Nothing
         dgStudent.DataBind()
         dgUploadFile.DataSource = Nothing
@@ -4918,19 +4988,23 @@ Partial Class BatchInvoice
                 Else
 
                 End If
+
                 Dim chk As CheckBox
                 Dim dgitem As DataGridItem
-                'chkSelectedView.Checked = True
+                Dim CBSelected As New List(Of Integer)
+
+                chkSelectedView.Checked = True
                 If chkSelectedView.Checked = True Then
                     For Each dgitem In dgView.Items
                         chk = dgitem.Cells(0).Controls(1)
                         chk.Checked = True
-
-                        If CInt(Request.QueryString("IsView")).Equals(1) Then
-                            chk.Enabled = False
-                        End If
+                        CBSelected.Add(dgitem.ItemIndex)
+                        'If CInt(Request.QueryString("IsView")).Equals(1) Then
+                        '    chk.Enabled = False
+                        'End If
                     Next
                 End If
+                Session("CBSelected") = CBSelected
                 pnlDgView.Visible = True
             Else
                 dgView.DataSource = Nothing
@@ -5141,21 +5215,14 @@ Partial Class BatchInvoice
         End If
         Session(ReceiptsClass.SessionStuToSave) = StuToSave
     End Sub
-    Protected Sub chkSelectedView_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        'If Not Session(ReceiptsClass.SessionStuChange) Is Nothing Then
-        '    getStudentDetailsChange = Session(ReceiptsClass.SessionStuChange)
-        'Else
-        '    getStudentDetailsChange = New List(Of StudentEn)
-        'End If
 
-        'If Not Session(ReceiptsClass.SessionStuToSave) Is Nothing Then
-        '    StuToSave = Session(ReceiptsClass.SessionStuToSave)
-        'Else
-        '    StuToSave = New List(Of StudentEn)
-        'End If
+    'modified by Hafiz @ 16/02/2017
+    'maintain checkbox stated
+    Protected Sub chkSelectedView_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
 
         Dim chk As CheckBox
         Dim dgitem As DataGridItem
+        Dim CBSelected As New List(Of Integer)
 
         If chkSelectedView.Checked = True Then
             Dim eobjstu As New StudentEn
@@ -5164,21 +5231,25 @@ Partial Class BatchInvoice
                 chk.Checked = True
                 If chk.Checked = True Then
                     chk.Checked = True
+                    CBSelected.Add(dgitem.ItemIndex)
                 End If
             Next
-            ' StuToSave = getStudentDetailsChange
         Else
             For Each dgitem In dgView.Items
                 chk = dgitem.Cells(dgViewCell.CheckBox).Controls(1)
                 chk.Checked = False
                 If chk.Checked = False Then
                     chk.Checked = False
+                    CBSelected.Remove(dgitem.ItemIndex)
                 End If
                 StuToSave = New List(Of StudentEn)
             Next
         End If
-        'Session("lstStu") = listStu
-        ' Session(ReceiptsClass.SessionStuToSave) = StuToSave
+
+        Session("SelectAll") = True
+        Session("CBSelected") = CBSelected
+        RebindDGView()
+
     End Sub
 
     Private Sub AddStudColumnDgView()
@@ -5434,6 +5505,9 @@ Partial Class BatchInvoice
             chkFeeType.Checked = False
         End If
     End Sub
+
+    'modified by Hafiz @ 16/02/2017
+    'maintain checkbox stated
     Protected Sub chk_SelectCheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         If Not Session(ReceiptsClass.SessionStuChange) Is Nothing Then
             getStudentDetailsChange = Session(ReceiptsClass.SessionStuChange)
@@ -5449,10 +5523,9 @@ Partial Class BatchInvoice
 
         Dim chk As CheckBox
         Dim dgitem As DataGridItem
-        Dim txtAmount As TextBox
-        Dim totalAmt2 As Double = 0
-        Dim totalAmt3 As Double = 0
         Dim eobjstu As New StudentEn
+        Dim CBSelected As New List(Of Integer)
+
         For Each dgitem In dgView.Items
 
             chk = dgitem.Cells(dgViewCell.CheckBox).Controls(1)
@@ -5461,23 +5534,48 @@ Partial Class BatchInvoice
             End If
             If chk.Checked = True Then
                 chk.Checked = True
-                txtAmount = CType(dgitem.FindControl("txtFeeAmt"), TextBox)
-                txtAmount.Attributes.Add("onKeyPress", "checkValue();")
-                txtAmount.Text = String.Format("{0:F}", CDbl(txtAmount.Text))
-                sumAmt = sumAmt + CDbl(dgitem.Cells(dgViewCell.TransactionAmount).Text)
+                CBSelected.Add(dgitem.ItemIndex)
             Else
                 chk.Checked = False
-
+                CBSelected.Remove(dgitem.ItemIndex)
             End If
 
-            'totalAmt3 += totalAmt2
         Next
-        txtTotal.Text = String.Format("{0:F}", sumAmt)
+
         Session("lstStu") = listStu
         Session(ReceiptsClass.SessionStuToSave) = StuToSave
-        'dgView.DataSource = StuToSave
-        'dgView.DataBind()
+
+        Session("CBSelected") = CBSelected
+        RebindDGView()
     End Sub
+
+#Region "RebindDGView"
+    'added by Hafiz @ 16/02/2017
+    'rebind dgView
+
+    Public Sub RebindDGView()
+
+        If Session("CBSelected") IsNot Nothing Then
+
+            Dim CBSelected As List(Of Integer) = Session("CBSelected")
+
+            If Session(ReceiptsClass.SessionStuChange) IsNot Nothing Then
+                Dim ListStu As New List(Of StudentEn)
+                ListStu = Session(ReceiptsClass.SessionStuChange)
+                dgView.DataSource = ListStu
+            ElseIf Session("AddFee") IsNot Nothing Then
+                Dim ListAddFee As New List(Of AccountsDetailsEn)
+                ListAddFee = Session("AddFee")
+                dgView.DataSource = ListAddFee
+            End If
+
+            dgView.DataBind()
+
+        End If
+
+    End Sub
+
+#End Region
 
     Private Sub OnSearchView()
         Session("loaddata") = "View"
@@ -5733,7 +5831,7 @@ Partial Class BatchInvoice
 
             i += 1
         End While
-       
+
         Session("uf_DataTable") = New Helper().ToDataTable(NewList)
 
     End Sub
