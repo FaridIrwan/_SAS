@@ -132,7 +132,7 @@ namespace HTS.SAS.DataAccessObjects
                 loItem.BatchCode = "";
                 //Check Whether Fee Strucuture Is Exist
                 AFCDetailsEn loAfcdetails = new AFCDetailsEn();
-                string sem = argEn.CurrentSemester;
+                string sem = argEn.Intake;
                 for (int i = 0; i < argEn.AFCDetailslist.Count; i++)
                 {
                     loAfcdetails = argEn.AFCDetailslist[i];
@@ -998,8 +998,8 @@ namespace HTS.SAS.DataAccessObjects
                 {
                     loAfcdetails = argEn.AFCDetailslist[i];
 
-                    using (IDataReader loReader = _DatabaseFactory.GetStudentDetails(loen, loAfcdetails.ProgramID, argEn.SAFC_Code, argEn.PostStatus, argEn.CurrentSemester, 
-                        argEn.Semester, argEn.CreditRef, RecStatus, batch).CreateDataReader())
+                    using (IDataReader loReader = _DatabaseFactory.GetStudentDetails(loen, loAfcdetails.ProgramID, argEn.SAFC_Code, argEn.PostStatus, argEn.CurrentSemester,
+                        argEn.Semester, argEn.Intake, argEn.CreditRef, RecStatus, batch).CreateDataReader())
                     {
                         while (loReader.Read())
                         {

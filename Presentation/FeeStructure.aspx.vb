@@ -87,7 +87,7 @@ Partial Class FeeStructure
                     loEnStud.BatchCode = Request.QueryString("BatchCode")
                     loEnStud.MatricNo = Request.QueryString("MatricNo")
                     loEnStud.CurretSemesterYear = Request.QueryString("CurrSem")
-                    loEnStud.Intake = Request.QueryString("Semester")
+                    loEnStud.Intake = Request.QueryString("Intake")
                     loEnStud.PostStatus = Request.QueryString("PostStatus")
                     If Request.QueryString("PostStatus") = 0 Then
                         listStud = loStud.GetListByProgram(loEnStud)

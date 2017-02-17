@@ -38,6 +38,7 @@ namespace HTS.SAS.Entities
         private string csSAFT_Code;
         private string csPostStatus;
         private string csSASI_CurSemYr;
+        private string csIntake;
 
         public List<AFCDetailsEn> AFCDetailslist
         {
@@ -264,6 +265,13 @@ namespace HTS.SAS.Entities
             set { csSASI_CurSemYr = value; }
         }
 
+        [System.Xml.Serialization.XmlElement]
+        //[DataMember]
+        public string Intake
+        {
+            get { return csIntake; }
+            set { csIntake = value; }
+        }
     }
 }
 //---------------------------------------------------------------------------------
