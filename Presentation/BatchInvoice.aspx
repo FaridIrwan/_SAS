@@ -950,7 +950,7 @@
                         <td></td>
                         <td colspan="3" style="height: 12px" align="left">
                             <asp:Label ID="lblMsg" runat="server" CssClass="lblError" Style="text-align: center"
-                                Width="348px"></asp:Label>
+                                Width="444px"></asp:Label>
                         </td>
                     </tr>
                     <tr>
