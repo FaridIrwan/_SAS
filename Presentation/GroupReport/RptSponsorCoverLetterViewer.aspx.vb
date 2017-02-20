@@ -30,7 +30,7 @@ Partial Class GroupReport_RptSponsorCoverLetterViewer
 
                 str = "select si.batchcode, stu.sasi_matricno, stu.sasi_name, stu.sasi_cursemyr, stu.sasi_icno, prog.sapg_programbm, ft.saft_code, ft.saft_desc, ft.saft_feetype," +
                 " ft.saft_taxmode, sid.transamount, sid.taxamount, sid.tax, ft.SAFT_Hostel, ft.SAFT_Priority, ft.SAFT_Remarks, ft.SAFT_Status, sid.Transid," +
-                " sid.RefCode, sid.TransTempCode, sid.TransCode, sid.internal_use, si.creditref1, stu.sasc_code" +
+                " sid.RefCode, sid.TransTempCode, sid.TransCode, sid.internal_use, si.creditref1, stu.sasc_code, si.temppaidamount" +
                     " from sas_sponsorInvoice si" +
                     " inner join sas_sponsorInvoiceDetails sid on si.transcode = sid.transcode and si.transtempcode = sid.transtempcode" +
                     " inner join sas_feetypes ft on ft.saft_code = sid.refcode" +
