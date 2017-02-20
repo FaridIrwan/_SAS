@@ -3,6 +3,7 @@ Imports MaxGeneric
 Imports System.Data
 Imports HTS.SAS.BusinessObjects
 Imports HTS.SAS.Entities
+Imports System.Collections.Generic
 #End Region
 
 Partial Class AFCDetails
@@ -61,39 +62,7 @@ Partial Class AFCDetails
 
 #Region "Bind Grid "
 
-    'Private Sub BindGrid(ByVal TransID As String, Optional ByVal Category As String = "", Optional ByVal SubType As String = "")
-    'mofified by Hafiz @ 31/3/2016 - adding MatricNo params
-    'Private Sub BindGrid(ByVal TransID As String, Optional ByVal Category As String = "", Optional ByVal SubType As String = "", Optional ByVal MatricNo As String = "",
-    '                     Optional ByVal CurSem As String = "")
-    'mofified by Mona @ 30/6/2016
-    'Private Sub BindGrid(ByVal TransID As String, Optional ByVal MatricNo As String = "", Optional ByVal CurSem As String = "")
-
-    '    'Create Instances
-    '    Dim WorkFlowAccountDetails As DataSet = Nothing
-    '    Dim ProgStudentDetails As DataSet = Nothing
-    '    Dim StudentFeeDetails As DataSet = Nothing
-    '    'varaible declearation
-    '    'Dim TransID As Integer = Nothing
-    '    Dim StudentCount As Integer = 0
-    '    Dim BatchAmount As Decimal = 0
-
-    '    Try
-
-    '        StudentFeeDetails = _AccountsDAL.GetAFCDetails(MatricNo, CurSem, TransID)
-    '        If StudentFeeDetails.Tables(0).Rows.Count = 0 Then
-    '            lblMsg.Text = "No Records"
-    '        Else
-    '            dgFeeType.DataSource = StudentFeeDetails
-    '            dgFeeType.DataBind()
-    '        End If
-
-    '    Catch ex As Exception
-
-    '        MaxModule.Helper.LogError(ex.Message)
-
-    '    End Try
-
-    'End Sub
+    
     Private Sub BindGrid(ByVal docno As String)
 
         'Create Instances
@@ -104,7 +73,9 @@ Partial Class AFCDetails
         'Dim TransID As Integer = Nothing
         Dim StudentCount As Integer = 0
         Dim BatchAmount As Decimal = 0
-
+        Dim obj As New AccountsBAL
+        Dim eob As New AccountsEn
+        Dim item As New AccountsEn
         Try
 
             StudentFeeDetails = _AccountsDAL.GetAFCDetails(docno)
@@ -114,7 +85,17 @@ Partial Class AFCDetails
                 dgFeeType.DataSource = StudentFeeDetails
                 dgFeeType.DataBind()
             End If
+            eob.TransactionCode = docno
+            item = obj.GetItemByTransCode(eob)
 
+            If item.BatchCode <> "" Then
+                txtBatchNo.Text = item.BatchCode
+                txtBatchDate.Text = item.BatchDate
+                txtDesc.Text = item.Description
+                txtAmount.Text = item.TransactionAmount
+                txttotalpaid.Text = item.PaidAmount
+                txtstatuss.Text = item.TransStatus
+            End If
         Catch ex As Exception
 
             MaxModule.Helper.LogError(ex.Message)

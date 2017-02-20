@@ -2658,10 +2658,10 @@ Partial Class SponsorInvoice
                     Next
                 End If
                 'ddlSponsor.SelectedIndex = -1
-                If mylst.Count > 0 Then
+                If ListObjects.Count > 0 Then
                     BindSponsor()
-                    ddlSponsor.SelectedValue = mylst(0).SponsorCode
-                    Session("SponsorValue") = mylst(0).SponsorCode
+                    ddlSponsor.SelectedValue = obj.CreditRefOne
+                    Session("SponsorValue") = obj.CreditRefOne
                     Dim sponsorDetail As New SponsorEn
                     Dim SponsorList As New List(Of SponsorEn)
                     SponsorList = Session(ReceiptsClass.SessionSponsorList)
