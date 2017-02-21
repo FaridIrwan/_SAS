@@ -54,7 +54,7 @@ Partial Class addSpnRecpts
                 While j < eobjlist.Count
 
                     For Each dgItem1 In dgView.Items
-                        If dgItem1.Cells(1).Text = eobjlist(j).TempTransCode Then
+                        If dgItem1.Cells(1).Text = eobjlist(j).TempTransCode And dgItem1.Cells(0).Text = eobjlist(j).TransactionCode Then
                             Dim espn1 As Double = 0
                             Dim available As Double = 0
                             Dim espn2 As New AccountsEn
@@ -93,7 +93,7 @@ Partial Class addSpnRecpts
             While j < eobjlist.Count
 
                 For Each dgItem1 In dgView.Items
-                    If dgItem1.Cells(1).Text = eobjlist(j).TempTransCode Then
+                    If dgItem1.Cells(1).Text = eobjlist(j).TempTransCode And dgItem1.Cells(0).Text = eobjlist(j).TransactionCode Then
                         Dim espn1 As Double = 0
                         Dim available As Double = 0
                         Dim espn2 As New AccountsEn
