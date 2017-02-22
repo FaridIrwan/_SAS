@@ -88,7 +88,7 @@ Partial Class StudentFeetype
         Dim ListStuCat As New List(Of StudentCategoryEn)
         ddlStudentCategory.DataTextField = "Description"
         ddlStudentCategory.DataValueField = "StudentCategoryCode"
-        
+
         Try
             ddlStudentCategory.DataSource = bStuCategory.GetStudentCategoryListAll(eStuCategory)
             ddlStudentCategory.DataBind()

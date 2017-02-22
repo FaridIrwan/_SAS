@@ -330,12 +330,12 @@
             }
             if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?")) {
                 if (document.getElementById("<%=txtBatchNo.ClientID%>").value == "") {
-                     alert("Error - Batch number not found or empty.");
-                     return false;
-                 }
-                 else {
-                     new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value + '',
-                                        'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
+                    alert("Error - Batch number not found or empty.");
+                    return false;
+                }
+                else {
+                    new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value + '',
+                                       'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
                     return true;
                 }
             }
@@ -617,7 +617,7 @@
             var hfStudentCount = document.getElementById("<%=hfStudentCount.ClientID%>").value
             var strCat = document.getElementById("<%=hfStdCategory.ClientID%>").value;
 
-            if (hfStudentCount > 0) {                
+            if (hfStudentCount > 0) {
                 var new_window = window.open('StudentFeetype.aspx?Student=' + strCat, 'Hanodale', 'width=520,height=500,resizable=0');
                 new_window.focus();
             }
@@ -840,8 +840,8 @@
                     <table class="menuoff" onmouseout="className='menuoff';" onmouseover="className='menuon';" style="border-collapse: collapse;">
                         <tr>
                             <td style="width: 3%; height: 14px">
-                                <div id="wrap">
-                                    <ul id="navbar">
+                                <div id="Div1">
+                                    <ul id="Ul1">
                                         <li><a href="#">
                                             <img src="images/find.png" width="24" height="24" border="0" align="middle" />
                                             &nbsp;Search
@@ -1108,6 +1108,13 @@
                                                             Width="300px" Visible ="false"></asp:TextBox>
                                                     </td>
                                                 </tr>
+                                                 <tr>
+                                                    <td style="height: 25px" valign="top">
+                                                       
+                                                    </td>
+                                                   
+                                                    
+                                                </tr>
                                             </table>
                                             <table>
                                                 <tr>
@@ -1322,6 +1329,18 @@
                                                         <asp:BoundColumn DataField="TempPaidAmount" HeaderText="Original Amount" ItemStyle-HorizontalAlign="Right" DataFormatString="{0:F}"></asp:BoundColumn>
                                                         <asp:BoundColumn DataField="Transstatus" HeaderText="Status" Visible ="false"></asp:BoundColumn>
                                                         <asp:BoundColumn DataField="Internal_Use" HeaderText="OpenTransID" Visible="false"></asp:BoundColumn>
+                                                        <asp:BoundColumn DataField="batchno" HeaderText="Inv_no" Visible="false"></asp:BoundColumn>
+                                                       
+                                                        <asp:BoundColumn DataField="cat" HeaderText="Category" Visible ="false"></asp:BoundColumn>
+                                                        <asp:BoundColumn DataField="Inv_no" HeaderText="docno" Visible ="false"></asp:BoundColumn>
+                                                         <asp:TemplateColumn HeaderText="View" Visible ="false">
+                                <HeaderStyle HorizontalAlign="Center" />
+                                <ItemTemplate>
+                                    <center>
+                                        <asp:HyperLink ID="View" runat="server">View</asp:HyperLink></center>
+                                </ItemTemplate>
+                            </asp:TemplateColumn>
+                                                        <asp:BoundColumn DataField="PaidAmount" HeaderText="PaidAmt" Visible ="false"></asp:BoundColumn>
                                                     </Columns>
                                                 </asp:DataGrid>
                                             </td>
@@ -1330,10 +1349,10 @@
                                     <table style="width: 100%; text-align: right;">
                                         <tr>
                                             <td style="width: 76%">
-                                                <asp:Label ID="lblTotal" runat="server" Text="Total Amount" Width="65px" ></asp:Label>
+                                                <asp:Label ID="lblTotal" runat="server" Text="Total Amount" Width="65px" Visible ="false"></asp:Label>
                                             </td>
                                             <td style="text-align: left">
-                                                <asp:TextBox ID="txtTotal" runat="server" Width="106px"  Style="text-align: right"  Enabled="false"></asp:TextBox>
+                                                <asp:TextBox ID="txtTotal" runat="server" Width="106px"  Style="text-align: right"  Enabled="false" Visible ="false"></asp:TextBox>
                                             </td>
                                         </tr>
                                     </table>

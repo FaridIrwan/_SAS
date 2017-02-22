@@ -1796,12 +1796,12 @@ where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
             string newKolej = null;
             string newBlock = null;
             string newRoom = null;
-
+            int cursem = 0;
             string sqlCmd = "Select count(*) as cnt From SAS_Student where SASI_MatricNo = '" + argEn.MatricNo + "'";
 
             //if program/credit hours/hostel changes
             //changes by farid on 08062016
-            string sqlChanges = "Select sasi_cursemyr as Sesi,SASI_PgId as Program, SASI_CrditHrs as CdtHour, SASI_Hostel as Hostel, sasi_faculty as Faculty, sako_code as Kolej, sabk_code as Block, sart_code as Room From SAS_Student where SASI_MatricNo = '" + argEn.MatricNo + "'";
+            string sqlChanges = "Select sasi_cursem as sem,sasi_cursemyr as Sesi,SASI_PgId as Program, SASI_CrditHrs as CdtHour, SASI_Hostel as Hostel, sasi_faculty as Faculty, sako_code as Kolej, sabk_code as Block, sart_code as Room From SAS_Student where SASI_MatricNo = '" + argEn.MatricNo + "'";
             //if matric no exist
             string sqlCount = "Select count(*) as track From sas_trackingnotes where SASI_MatricNo = '" + argEn.MatricNo + "'";
 
@@ -1812,7 +1812,7 @@ where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
                     OutProg = clsGeneric.NullToString(drTrack["Program"]);
 
                 OutFaculty = clsGeneric.NullToString(drTrack["Faculty"]);
-
+                
                 OutCdtHr = Convert.ToDouble(drTrack["CdtHour"]);
                 if (FormHelp.IsBlank(OutCdtHr))
                 {
@@ -1825,10 +1825,22 @@ where stu.sasi_matricno = " + clsGeneric.AddQuotes(MatricNo) +
                 OutRoom = clsGeneric.NullToString(drTrack["Room"]);
                 //added by farid on 08062016
                 OldSesi = clsGeneric.NullToString(drTrack["Sesi"]);
-
+                cursem = clsGeneric.NullToInteger(drTrack["sem"]);
                 drTrack.Close();
                 if (FormHelp.IsBlank(OutProg))
                     throw new Exception("Record Doesn't Exist!");
+                if (cursem < argEn.CurrentSemester)
+                {
+                    string UpdateStatement = "UPDATE sas_student SET sasi_poststatus = '0' WHERE sasi_matricno = " + clsGeneric.AddQuotes(argEn.MatricNo) + ";";
+                    if (!FormHelp.IsBlank(UpdateStatement))
+                    {
+                        if (_DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                            DataBaseConnectionString, UpdateStatement) > -1)
+                        {
+                            
+                        }
+                    }
+                }
             }
 
             try
@@ -4630,6 +4642,7 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
             {
                 sqlCmd = "select distinct sa.cursemyr,sad.transid,ss.sasi_name,sa.creditref,sad.refcode,st.saft_desc::text || ' | ' || sa.description::text AS saft_desc,st.saft_priority,saft_taxmode,sad.transamount," +
                     "Case when sad.taxamount Is Null then 0 else sad.taxamount end as taxamount,Case when sad.paidamount Is Null then 0 else sad.paidamount end as paidamount," +
+                    " sa.batchcode,sa.transcode,sa.category, " +
                     " sad.transstatus from sas_accountsdetails sad inner join sas_accounts sa on sa.transid = sad.transid left join sas_feetypes st on st.saft_code = sad.refcode" +
                     " left join sas_student ss on ss.sasi_matricno = sa.creditref" +
                     " where sa.poststatus = 'Posted' and " +
@@ -4690,6 +4703,10 @@ or (fsd.safd_type = 'T' and fsd.safd_feefor = '0' and fsd.safd_sem = 0)
                             loItem.Priority = GetValue<int>(loReader, "saft_priority");
                             calculate = (loItem.TransactionAmount - loItem.GSTAmount);
                             loItem.TempAmount = calculate;
+                            loItem.batchno = GetValue<string>(loReader, "batchcode");
+                            loItem.cat = GetValue<string>(loReader, "category");
+                            loItem.Inv_no = GetValue<string>(loReader, "transcode");
+
                             
                             
 

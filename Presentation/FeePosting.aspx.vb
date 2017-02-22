@@ -513,6 +513,8 @@ Partial Class FeePosting
 
             If list Is Nothing Then
                 Throw New Exception("Select at least one data to save.")
+            ElseIf ddlCurrSem.SelectedValue = "-1" Then
+                Throw New Exception("Please select Posting For")
             Else
                 If list.Count > 0 Then
 
@@ -561,9 +563,9 @@ Partial Class FeePosting
                             m1 = Mid(_AFCEn.CurrentSemester, 5, 4)
                             y1 = Mid(_AFCEn.CurrentSemester, 9, 2)
                             Dim semestercode As String = d1 + "/" + m1 + "-" + y1
-                            _AFCEn.Description = "AFC-" & semestercode
+                            _AFCEn.Description = "Tuition Fees For Semester " & semestercode
                         Else
-                            _AFCEn.Description = "AFC-" & _AFCEn.CurrentSemester
+                            _AFCEn.Description = "Tuition Fees For Semester " & _AFCEn.CurrentSemester
                         End If
                         '_AFCEn.Description = "AFC-" & _AFCEn.CurrentSemester
                         _AFCEn.Updatetime = DateTime.Now

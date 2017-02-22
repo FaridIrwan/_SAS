@@ -385,28 +385,22 @@ namespace HTS.SAS.DataAccessObjects
             string code = GetValue<string>(argReader, "SASS_SDate");
             string fromdate = ""; string todate = "";
             string d1, m1, y1, d2, m2, y2;
-            if (code != "")
+            
+            if (!string.IsNullOrWhiteSpace(code))
             {
                 y1 = code.Substring(0, 4);
                 m1 = code.Substring(5, 2);
                 d1 = code.Substring(8, 2);
                 fromdate = d1 + "/" + m1 + "/" + y1;
             }
-            else if (code == "")
-            {
-                //loItem.Intake = "-1";
-            }
+
             string code2 = GetValue<string>(argReader, "SASS_EDate");
-            if (code2 != "")
+            if (!string.IsNullOrWhiteSpace(code2))
             {
                 y2 = code2.Substring(0, 4);
                 m2 = code2.Substring(5, 2);
                 d2 = code2.Substring(8, 2);
                 todate = d2 + "/" + m2 + "/" + y2;
-            }
-            else if (code2 == "")
-            {
-                //loItem.CurretSemesterYear = "-1";
             }
 
             loItem.SDate = fromdate;
