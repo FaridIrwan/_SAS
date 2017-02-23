@@ -335,9 +335,6 @@
             }
             else
             {
-                PageMethods.CheckGL(onSuccess, onFailure);
-
-
                 if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?"))
                 {
                     if (document.getElementById("<%=txtBatchNo.ClientID%>").value == "")
@@ -357,11 +354,6 @@
                     return false;
                 }
             }
-        }
-
-        function onSuccess(result)
-        {
-            alert(result);
         }
 
         function validate() {
