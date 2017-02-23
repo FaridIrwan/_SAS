@@ -2003,15 +2003,6 @@ Partial Class FeePosting
 
 #End Region
 
-#Region "CheckGL"
-
-    '<System.Web.Services.WebMethod()> _
-    'Public Function CheckGL() As Boolean
-    '    Return New WorkflowDAL().CheckGL("MJ", txtBatchNo.Text, "Student", "AFC")
-    'End Function
-
-#End Region
-
 End Class
 
 
