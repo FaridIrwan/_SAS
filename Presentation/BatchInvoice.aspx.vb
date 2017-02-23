@@ -47,6 +47,9 @@ Partial Class BatchInvoice
     Private StuChgMatricNo As New List(Of StudentEn)
     Private StuToSave As New List(Of StudentEn)
     'Global Declaration - Ended
+
+    Shared List_Failed As List(Of WorkflowEn) = Nothing
+
 #End Region
 
 #Region "Done By "
@@ -70,6 +73,8 @@ Partial Class BatchInvoice
             Session("Menuid") = Request.QueryString("Menuid")
             MenuId.Value = GetMenuId()
             lblStatus.Value = "New"
+            GLflagTrigger.Value = Nothing
+            Session("List_Failed") = Nothing
 
             If CInt(Request.QueryString("IsStudentLedger")).Equals(1) Then
                 btnViewStu.Visible = False
@@ -275,6 +280,12 @@ Partial Class BatchInvoice
         Else
             ibtnStudent.Enabled = True
             btnupload.Enabled = True
+        End If
+
+        If GLflagTrigger.Value = "ON" Then
+            If List_Failed.Count > 0 Then
+                Session("List_Failed") = List_Failed
+            End If
         End If
     End Sub
 
@@ -1310,6 +1321,7 @@ Partial Class BatchInvoice
             End If
             'Session("BatchNo") = txtBatchNo.Text
         End If
+
     End Sub
 
     Protected Sub txtRecNo_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtRecNo.TextChanged
@@ -3968,6 +3980,9 @@ Partial Class BatchInvoice
         Session("LstStueObj") = Nothing
         Session("SelectAll") = False
         Session("CBSelected") = Nothing
+        GLflagTrigger.Value = Nothing
+        Session("List_Failed") = Nothing
+
         dgStudent.DataSource = Nothing
         dgStudent.DataBind()
         dgUploadFile.DataSource = Nothing
@@ -6030,16 +6045,18 @@ Partial Class BatchInvoice
         gvFileUploadGrid.DataSource = lisStud.OrderBy(Function(x) x.MatricNo)
         gvFileUploadGrid.DataBind()
     End Sub
+
 #End Region
 
 #Region "Get Details From The Uploaded File"
+    'modified by Hafiz @ 22/02/2017
 
     Protected Sub GetUploadedFileDetails(ByVal dt As DataTable)
 
         Dim totalTransAmount As Double = 0, totalGSTAmount As Double = 0, totalActualFeeAmount As Double = 0
         Dim FeeType As FeeTypesEn = Nothing
         Dim objStu As New StudentEn
-        Dim newListStu As New List(Of StudentEn)
+        Dim newListStu As New List(Of StudentEn), StudFailedList As New List(Of StudentEn)
         ListTRD = New List(Of AccountsDetailsEn)
 
         Dim tables As List(Of DataTable) = dt.AsEnumerable().GroupBy(Function(r) r.Field(Of String)("MatricNo")).Select(Function(g) g.CopyToDataTable()).ToList()
@@ -6058,48 +6075,64 @@ Partial Class BatchInvoice
                 Dim stu As StudentEn = New StudentDAL().GetItem(tables(i).Rows(j).Item("MatricNo"))
                 Dim objFeeTyp As FeeTypesEn = New FeeTypesDAL().GetFeeDetails(FeeType).Distinct.FirstOrDefault()
 
-                objStu = New StudentEn()
-                objStu.MatricNo = stu.MatricNo
-                objStu.StudentName = stu.StudentName
-                objStu.ReferenceCode = MaxGeneric.clsGeneric.NullToString(objFeeTyp.FeeTypeCode)
-                objStu.Description = MaxGeneric.clsGeneric.NullToString(objFeeTyp.Description)
+                If CheckHostelFlag(stu, objFeeTyp) = True Then
+                    objStu = New StudentEn()
+                    objStu.MatricNo = stu.MatricNo
+                    objStu.StudentName = stu.StudentName
+                    objStu.ReferenceCode = MaxGeneric.clsGeneric.NullToString(objFeeTyp.FeeTypeCode)
+                    objStu.Description = MaxGeneric.clsGeneric.NullToString(objFeeTyp.Description)
 
-                If stu.CategoryCode = ReceiptsClass.Student_BUKAN_WARGANEGARA Or _
-                    stu.CategoryCode = ReceiptsClass.student_International Or _
-                    hfStdCategory.Value = ReceiptsClass.Student_BUKAN_WARGANEGARA Or _
-                    hfStdCategory.Value = ReceiptsClass.student_International Then
-                    objStu.TransactionAmount = String.Format("{0:F}", objFeeTyp.NonLocalAmount)
-                    objStu.GSTAmount = String.Format("{0:F}", objFeeTyp.NonLocalGSTAmount)
-                    objStu.TaxAmount = String.Format("{0:F}", objFeeTyp.NonLocalGSTAmount)
+                    If stu.CategoryCode = ReceiptsClass.Student_BUKAN_WARGANEGARA Or _
+                        stu.CategoryCode = ReceiptsClass.student_International Or _
+                        hfStdCategory.Value = ReceiptsClass.Student_BUKAN_WARGANEGARA Or _
+                        hfStdCategory.Value = ReceiptsClass.student_International Then
+                        objStu.TransactionAmount = String.Format("{0:F}", objFeeTyp.NonLocalAmount)
+                        objStu.GSTAmount = String.Format("{0:F}", objFeeTyp.NonLocalGSTAmount)
+                        objStu.TaxAmount = String.Format("{0:F}", objFeeTyp.NonLocalGSTAmount)
+                    Else
+                        objStu.TransactionAmount = String.Format("{0:F}", objFeeTyp.LocalAmount)
+                        objStu.GSTAmount = String.Format("{0:F}", objFeeTyp.LocalGSTAmount)
+                        objStu.TaxAmount = String.Format("{0:F}", objFeeTyp.LocalGSTAmount)
+                    End If
+
+                    If tables(i).Rows(j).Item("Amount") > 0 Then
+                        objStu.TransactionAmount = String.Format("{0:F}", CDbl(tables(i).Rows(j).Item("Amount")))
+                    End If
+
+                    totalTransAmount = totalTransAmount + objStu.TransactionAmount
+                    totalGSTAmount = totalGSTAmount + objStu.GSTAmount
+                    objStu.Priority = objFeeTyp.Priority
+                    objStu.PostStatus = "Ready"
+                    objStu.TransStatus = "Open"
+                    objStu.TaxId = objFeeTyp.TaxId
+                    totalActualFeeAmount = totalTransAmount - totalGSTAmount
+                    ListTRD.Add(New AccountsDetailsEn With {.ReferenceCode = objFeeTyp.FeeTypeCode, .Description = objFeeTyp.Description, .TransactionAmount = totalTransAmount,
+                                                            .GSTAmount = totalGSTAmount, .TaxAmount = objStu.GSTAmount, .TempAmount = totalActualFeeAmount,
+                                                            .TempPaidAmount = objStu.TransactionAmount, .TaxId = objStu.TaxId, .StudentQty = 1, .Priority = objStu.Priority})
+                    newListStu.Add(objStu)
+                    objStu = Nothing
                 Else
-                    objStu.TransactionAmount = String.Format("{0:F}", objFeeTyp.LocalAmount)
-                    objStu.GSTAmount = String.Format("{0:F}", objFeeTyp.LocalGSTAmount)
-                    objStu.TaxAmount = String.Format("{0:F}", objFeeTyp.LocalGSTAmount)
+                    objStu = New StudentEn()
+                    objStu.MatricNo = stu.MatricNo
+                    objStu.StudentName = stu.StudentName
+                    objStu.ReferenceCode = MaxGeneric.clsGeneric.NullToString(objFeeTyp.FeeTypeCode)
+
+                    StudFailedList.Add(objStu)
+
+                    ErrorDescription += "[Matric No:" & stu.MatricNo & "] Hostel Flag Is Disable.Thus,[Fee Code:" & objFeeTyp.FeeTypeCode & "] Will Be Exclude." + "<br>"
+                    LogError.Log("BatchInvoice", "Debit Note Upload", ErrorDescription)
                 End If
-
-                If tables(i).Rows(j).Item("Amount") > 0 Then
-                    objStu.TransactionAmount = String.Format("{0:F}", CDbl(tables(i).Rows(j).Item("Amount")))
-                End If
-
-                totalTransAmount = totalTransAmount + objStu.TransactionAmount
-                totalGSTAmount = totalGSTAmount + objStu.GSTAmount
-                objStu.Priority = objFeeTyp.Priority
-                objStu.PostStatus = "Ready"
-                objStu.TransStatus = "Open"
-                objStu.TaxId = objFeeTyp.TaxId
-                totalActualFeeAmount = totalTransAmount - totalGSTAmount
-                ListTRD.Add(New AccountsDetailsEn With {.ReferenceCode = objFeeTyp.FeeTypeCode, .Description = objFeeTyp.Description, .TransactionAmount = totalTransAmount,
-                                                        .GSTAmount = totalGSTAmount, .TaxAmount = objStu.GSTAmount, .TempAmount = totalActualFeeAmount,
-                                                        .TempPaidAmount = objStu.TransactionAmount, .TaxId = objStu.TaxId, .StudentQty = 1, .Priority = objStu.Priority})
-                newListStu.Add(objStu)
-                objStu = Nothing
-
             Next
         Next
 
         Session("AddFee") = ListTRD
         Session("stuChange") = newListStu
+        Session("HostelChecker") = StudFailedList
         BindGridView()
+
+        If Not Session("HostelChecker") Is Nothing Then
+            ContructFailedListDgUpload()
+        End If
 
     End Sub
 
@@ -6241,6 +6274,46 @@ Partial Class BatchInvoice
         BindGridView()
 
     End Sub
+
+#End Region
+
+#Region "ContructFailedListDgUpload"
+    'added by Hafiz @ 22/02/2017
+
+    Protected Sub ContructFailedListDgUpload()
+
+        Dim LIST As List(Of StudentEn) = Session("HostelChecker")
+
+        Dim i As Integer = 0
+        While i < dgUploadFile.Items.Count
+
+            If LIST.Where(Function(x) x.MatricNo.Equals(dgUploadFile.Items(i).Cells(0).Text) And x.StudentName.Equals(dgUploadFile.Items(i).Cells(1).Text) _
+                              And x.ReferenceCode.Equals(dgUploadFile.Items(i).Cells(2).Text)).Count > 0 Then
+
+                For x As Integer = 0 To dgUploadFile.Items(i).Cells.Count - 1
+                    dgUploadFile.Items(i).Cells(x).ForeColor = Drawing.Color.Red
+                Next
+
+            End If
+
+            i += 1
+        End While
+
+        If Not ErrorDescription Is Nothing Then
+            lblMsg.Text = ErrorDescription
+        End If
+
+    End Sub
+
+#End Region
+
+#Region "CheckGL"
+    'added by Hafiz @ 19/02/2017
+
+    <System.Web.Services.WebMethod()> _
+    Public Shared Function CheckGL(ByVal BatchNo As String, ByVal Category As String) As Boolean
+        Return New WorkflowDAL().CheckGL("MJ", BatchNo, "Student", List_Failed, Category)
+    End Function
 
 #End Region
 

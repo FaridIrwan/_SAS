@@ -20,6 +20,7 @@ Public Class CfGeneric
     Public Const CfCbPayBatchTbl As String = "cb_paybatch"
     Public Const CfCbRecBatchTbl As String = "cb_rcptbatch"
     Public Const CfCbPayDetailsTbl As String = "cb_payrmt"
+    Public Const CfCbPayFlowTbl As String = "my_payflow"
     Public Const CfGSTDist As String = "ut_gstdist"
     'Table Names - Stop
 
