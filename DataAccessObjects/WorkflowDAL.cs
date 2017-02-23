@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Data.Common;
 using HTS.SAS.Entities;
 using MaxGeneric;
+using System.Linq;
 
 #endregion
 
@@ -23,6 +24,8 @@ namespace HTS.SAS.DataAccessObjects
 
         private string DataBaseConnectionString = Helper.
            GetConnectionString();
+
+        public MaxModule.CfCommon _CfCommon = new MaxModule.CfCommon();
 
         #endregion
 
@@ -1014,6 +1017,578 @@ namespace HTS.SAS.DataAccessObjects
                 throw ex;
             }
             return Remarks;
+        }
+
+        #endregion
+
+        #region CheckGL
+        //added by Hafiz @ 17/02/2017
+        //legend -> type=MJ/CB, subtype=Student/Sponsor, category=AFC/Invoice/Receipts/Payment
+
+        public bool CheckGL(string Type, string BatchCode, string SubType, ref List<WorkflowEn> List_Failed, string Category = "")
+        {
+            bool result = false;
+            List_Failed = new List<WorkflowEn>();
+
+            if (Type == "MJ")
+            {
+                bool debit_flag = false, credit_flag = false;
+                bool dbt_skip = false, crdt_skip = false;
+
+                //DEBIT LINE - START
+                string SqlStatement = null, SOURCE = null;
+
+                try
+                {
+                    if (SubType == "Sponsor")
+                    {
+                        if (Category == MaxModule.CfGeneric.CategoryTypeCreditNote)
+                        {
+                            SOURCE = "Accounts";
+
+                            SqlStatement = "SELECT SPN.SASR_Code AS id,SPN.SASR_Name AS name,SA.GLcode AS glcode " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_Sponsor SPN ON SPN.SASR_Code= SA.CreditRef " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode);
+                        }
+                        else
+                        {
+                            SOURCE = "Sponsor";
+
+                            SqlStatement = "SELECT SPN.SASR_Code AS id,SPN.SASR_Name AS name,SPN.SASR_Glaccount AS glcode " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_Sponsor SPN ON SPN.SASR_Code= SA.CreditRef " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode);
+                        }
+                    }
+                    else if (SubType == "Student")
+                    {
+                        if (Category == MaxModule.CfGeneric.CategoryTypeLoan)
+                        {
+                            SOURCE = "University Funds";
+
+                            SqlStatement ="SELECT SA.CreditRef AS id,SS.SASI_Name AS name,SU.SAUF_Glcode AS glcode " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_StudentLoan SL ON SA.Batchcode=SL.Batchcode " +
+                                "INNER JOIN SAS_Universityfund SU ON SA.SubRef1=SU.SAUF_Code " +
+                                "INNER JOIN SAS_Student SS ON SA.CreditRef=SS.SASI_MatricNo " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode);
+                        }
+                        else if (Category == MaxModule.CfGeneric.CategoryTypeCreditNote)
+                        {
+                            dbt_skip = true;
+
+                            List<WorkflowEn> FacultyGL = new List<WorkflowEn>();
+                            FacultyGL = ConstructQuery(BatchCode, "FacultyGL");
+
+                            if (FacultyGL.Count() > 0)
+                            {
+                                foreach (WorkflowEn enFGL in FacultyGL)
+                                {
+                                    if (string.IsNullOrEmpty(enFGL.GLCODE))
+                                    {
+                                        List_Failed.Add(enFGL);
+                                    }
+                                    else
+                                    {
+                                        debit_flag = true;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                debit_flag = true;
+                            }
+
+                            List<WorkflowEn> KolejGL = new List<WorkflowEn>();
+                            KolejGL = ConstructQuery(BatchCode, "KolejGL");
+
+                            if (KolejGL.Count() > 0)
+                            {
+                                foreach (WorkflowEn enKGL in KolejGL)
+                                {
+                                    if (string.IsNullOrEmpty(enKGL.GLCODE))
+                                    {
+                                        List_Failed.Add(enKGL);
+                                    }
+                                    else
+                                    {
+                                        debit_flag = true;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                debit_flag = true;
+                            }
+                        }
+                        else
+                        {
+                            SOURCE = "Program";
+
+                             SqlStatement = "SELECT SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
+                                "FROM SAS_Student SS " +
+                                "INNER JOIN SAS_Accounts SA ON SA.CreditRef = SS.SASI_MatricNo " +
+                                "INNER JOIN SAS_Program SP ON SP.SAPG_Code = SS.SASI_PgId " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " ";
+                        }
+                    }
+
+                    if (dbt_skip == false)
+                    {
+                        if (!FormHelp.IsBlank(SqlStatement))
+                        {
+                            using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                                DataBaseConnectionString, SqlStatement).CreateDataReader())
+                            {
+                                while (loReader.Read())
+                                {
+                                    WorkflowEn _WorkflowEn = new WorkflowEn();
+                                    _WorkflowEn.ID = GetValue<string>(loReader, "id");
+                                    _WorkflowEn.NAME = GetValue<string>(loReader, "name");
+                                    _WorkflowEn.GLCODE = clsGeneric.NullToString(GetValue<string>(loReader, "glcode"));
+                                    _WorkflowEn.SOURCE = SOURCE;
+
+                                    if (!string.IsNullOrEmpty(_WorkflowEn.GLCODE))
+                                    {
+                                        debit_flag = true;
+                                    }
+                                    else
+                                    {
+                                        List_Failed.Add(_WorkflowEn);
+                                    }
+                                }
+                                loReader.Close();
+                            }
+                        }
+                        else
+                        {
+                            debit_flag = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                //DEBIT LINE - END
+
+                //CREDIT LINE - START
+                String SqlStatement1 = null, SOURCE1 = null;
+
+                try
+                {
+                    if (SubType == "Sponsor")
+                    {
+                        if (Category == MaxModule.CfGeneric.CategoryTypeDebitNote)
+                        {
+                            SOURCE1 = "Accounts";
+
+                            SqlStatement1 = "SELECT SPN.SASR_Code AS id,SPN.SASR_Name AS name,SA.GLcode AS glcode " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_Sponsor SPN ON SPN.SASR_Code= SA.CreditRef " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode);
+                        }
+                        else if (Category == MaxModule.CfGeneric.CategoryTypeAllocation)
+                        {
+                            SOURCE1 = "Program";
+
+                            SqlStatement1 = "SELECT SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_Student SS ON SS.SASI_MatricNo=SA.CreditRef " +
+                                "INNER JOIN SAS_Program SP ON SP.SAPG_Code=SS.SASI_PgId " +
+                                "WHERE SA.BatchCode = " + clsGeneric.AddQuotes(BatchCode) + " " +
+                                "AND SA.Category='SPA' " +
+                                "GROUP BY id,name,SP.SAPG_TI";
+                        }
+                        else
+                        {
+                            SOURCE1 = "Sponsor";
+
+                            SqlStatement1 = "SELECT SPN.SASR_Code AS id,SPN.SASR_Name AS name,SPN.SASR_Glaccount AS glcode " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_Sponsor SPN ON SPN.SASR_Code= SA.CreditRef " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode);
+                        }
+                    }
+                    else if (SubType == "Student")
+                    {
+                        if (Category == MaxModule.CfGeneric.CategoryTypeLoan)
+                        {
+                            SOURCE1 = "University Funds";
+
+                            SqlStatement1 = "SELECT SA.CreditRef AS id,SS.SASI_Name AS name,SU.SAUF_Glcode AS glcode " +
+                                "FROM SAS_Accounts SA " +
+                                "INNER JOIN SAS_StudentLoan SL ON SA.Batchcode=SL.Batchcode " +
+                                "INNER JOIN SAS_Universityfund SU ON SA.SubRef1=SU.SAUF_Code " +
+                                "INNER JOIN SAS_Student SS ON SA.CreditRef=SS.SASI_MatricNo " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode);
+                        }
+                        else if (Category == MaxModule.CfGeneric.CategoryTypeCreditNote)
+                        {
+                            SOURCE1 = "Program";
+
+                            SqlStatement1 = "SELECT SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
+                                "FROM SAS_Student SS " +
+                                "INNER JOIN SAS_Accounts SA ON SA.CreditRef = SS.SASI_MatricNo " +
+                                "INNER JOIN SAS_Program SP ON SP.SAPG_Code = SS.SASI_PgId " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " ";
+                        }
+                        else
+                        {
+                            crdt_skip = true;
+
+                            List<WorkflowEn> FacultyGL = new List<WorkflowEn>();
+                            FacultyGL = ConstructQuery(BatchCode, "FacultyGL");
+
+                            if (FacultyGL.Count() > 0)
+                            {
+                                foreach (WorkflowEn enFGL in FacultyGL)
+                                {
+                                    if (string.IsNullOrEmpty(enFGL.GLCODE))
+                                    {
+                                        List_Failed.Add(enFGL);
+                                    }
+                                    else
+                                    {
+                                        credit_flag = true;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                credit_flag = true;
+                            }
+
+                            List<WorkflowEn> KolejGL = new List<WorkflowEn>();
+                            KolejGL = ConstructQuery(BatchCode, "KolejGL");
+
+                            if (KolejGL.Count() > 0)
+                            {
+                                foreach (WorkflowEn enKGL in KolejGL)
+                                {
+                                    if (string.IsNullOrEmpty(enKGL.GLCODE))
+                                    {
+                                        List_Failed.Add(enKGL);
+                                    }
+                                    else
+                                    {
+                                        credit_flag = true;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                credit_flag = true;
+                            }
+                        }
+                    }
+
+                    if (crdt_skip == false)
+                    {
+                        if (!FormHelp.IsBlank(SqlStatement1))
+                        {
+                            using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                                DataBaseConnectionString, SqlStatement1).CreateDataReader())
+                            {
+                                while (loReader.Read())
+                                {
+                                    WorkflowEn _WorkflowEn = new WorkflowEn();
+                                    _WorkflowEn.ID = GetValue<string>(loReader, "id");
+                                    _WorkflowEn.NAME = GetValue<string>(loReader, "name");
+                                    _WorkflowEn.GLCODE = clsGeneric.NullToString(GetValue<string>(loReader, "glcode"));
+                                    _WorkflowEn.SOURCE = SOURCE1;
+
+                                    if (!string.IsNullOrEmpty(_WorkflowEn.GLCODE))
+                                    {
+                                        credit_flag = true;
+                                    }
+                                    else
+                                    {
+                                        List_Failed.Add(_WorkflowEn);
+                                    }
+                                }
+                                loReader.Close();
+                            }
+                        }
+                        else
+                        {
+                            credit_flag = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+
+                if (debit_flag == true && credit_flag == true)
+                {
+                    if (List_Failed.Count == 0)
+                    {
+                        result = true;
+                    }
+                }
+
+            }
+            else if (Type == "CBR")
+            {
+                bool debit_flag = false, credit_flag = false;
+                String Payee_Name = "", InnerJoin = "", GL_CODE = "";
+
+                String SqlStatement = null;
+
+                try
+                {
+                    if (SubType == "Sponsor")
+                    {
+                        Payee_Name = "SAS_Sponsor.SASR_Name AS Payee_Name,";
+                        InnerJoin = "INNER JOIN SAS_Sponsor ON SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code ";
+                    }
+                    else
+                    {
+                        Payee_Name = "SAS_Student.SASI_Name AS Payee_Name,";
+                        InnerJoin = "INNER JOIN SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo ";
+                    }
+
+                    SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY SAS_Accounts.TransID) AS Row_No,";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Description LIKE 'CIMB CLICKS%' THEN SAS_Accounts.SubRef1 ";
+                    SqlStatement += "ELSE SAS_Accounts.BankRecNo END AS Bank_Slip_No,";
+                    SqlStatement += "SAS_Accounts.BatchCode As Batch_Code,";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Description LIKE 'CIMB CLICKS%' THEN 'CIMB Clicks Upload' ";
+                    SqlStatement += "ELSE 'Bank Receipt Manual' END AS Description,";
+                    SqlStatement += Payee_Name;
+                    SqlStatement += "SAS_Accounts.TransAmount AS Trans_Amount,";
+                    SqlStatement += "SAS_Accounts.BankCode AS Bank_Code,";
+                    SqlStatement += "SUBSTRING(SAS_Accounts.PaymentMode,1,3) AS Payment_Mode,";
+                    SqlStatement += "SAS_Accounts.CreditRef AS Matric_No ";
+                    SqlStatement += "FROM SAS_Accounts ";
+                    SqlStatement += "LEFT JOIN SAS_AccountsDetails ON SAS_Accounts.TransID = SAS_AccountsDetails.TransID ";
+                    SqlStatement += InnerJoin;
+                    SqlStatement += "WHERE SAS_Accounts.BatchCode = " + clsGeneric.AddQuotes(BatchCode);
+
+                    if (!FormHelp.IsBlank(SqlStatement))
+                    {
+                        using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                            DataBaseConnectionString, SqlStatement).CreateDataReader())
+                        {
+                            while (loReader.Read())
+                            {
+                                string Bank_Code = GetValue<string>(loReader, "Bank_Code");
+                                string Matric_No = GetValue<string>(loReader, "Matric_No");
+
+                                WorkflowEn _WorkflowEn = new WorkflowEn();
+                                _WorkflowEn.ID = Matric_No;
+                                _WorkflowEn.NAME = GetValue<string>(loReader, "Payee_Name");
+                                _WorkflowEn.SOURCE = "Bank Details";
+
+                                GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.BankCode, Type, SubType);
+                                if (!string.IsNullOrEmpty(GL_CODE))
+                                {
+                                    debit_flag = true;
+                                }
+                                else
+                                {
+                                    List_Failed.Add(_WorkflowEn);
+                                }
+
+                                GL_CODE = string.Empty;
+                                _WorkflowEn.SOURCE = string.Empty;
+                                _WorkflowEn.SOURCE = (SubType == "Sponsor") ? "Sponsor" : "Program";
+
+                                GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.StudentProgram, Type, SubType);
+                                if (!string.IsNullOrEmpty(GL_CODE))
+                                {
+                                    credit_flag = true;
+                                }
+                                else
+                                {
+                                    List_Failed.Add(_WorkflowEn);
+                                }
+
+                            }
+                            loReader.Close();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+
+                if (debit_flag == true && credit_flag == true)
+                {
+                    if (List_Failed.Count == 0)
+                    {
+                        result = true;
+                    }
+                }
+
+            }
+            else if (Type == "CBP")
+            {
+                bool debit_flag = false, credit_flag = false;
+                String Payee_Name = "", InnerJoin = "", GroupBy = "", GL_CODE = "";
+
+                String SqlStatement = null;
+
+                try
+                {
+                    if (SubType == "Sponsor")
+                    {
+                        Payee_Name = "SAS_Sponsor.SASR_Name AS Payee_Name,";
+                        InnerJoin = "INNER JOIN SAS_Sponsor ON SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code ";
+                        GroupBy = "SAS_Sponsor.SASR_Name";
+                    }
+                    else
+                    {
+                        Payee_Name = "SAS_Student.SASI_Name AS Payee_Name,";
+                        InnerJoin = "INNER JOIN SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo ";
+                        GroupBy = "SAS_Student.SASI_name";
+                    }
+
+                    SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY SAS_Accounts.Paymentmode) AS Row_No, ";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Category='Payment' THEN SAS_Accounts.Transamount ";
+                    SqlStatement += "ELSE SUM(SAS_Accounts.Transamount) END AS Trans_Amount,";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Voucherno = '' THEN CASE WHEN SAS_Accounts.Transcode = '' THEN ";
+                    SqlStatement += "SUBSTRING(SAS_Accounts.Transtempcode FROM 2 FOR Length(SAS_Accounts.Transtempcode)) ELSE ";
+                    SqlStatement += "SAS_Accounts.Transcode END ELSE SAS_Accounts.Voucherno END AS Trans_Code,";
+                    SqlStatement += "SAS_Accounts.Paymentmode AS Payment_Mode,";
+                    SqlStatement += Payee_Name;
+                    SqlStatement += "SAS_Workflow.Date_Time AS Posted_Date,";
+                    SqlStatement += "SAS_Accounts.CreditRef AS Matric_No,";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN ";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Subtype = 'Student' THEN (SELECT SASI_Bank FROM SAS_Student WHERE SASI_MatricNo = SAS_Accounts.CreditRef) ";
+                    SqlStatement += "ELSE SAS_Accounts.Bankcode END ";
+                    SqlStatement += "ELSE SAS_Accounts.Bankcode END AS Bank_Code,";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN ";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Subtype = 'Student' THEN (SELECT SASB_Desc FROM SAS_Studentbank WHERE SASB_Code = (SELECT SASI_Bank FROM SAS_Student WHERE ";
+                    SqlStatement += "SASI_MatricNo = SAS_Accounts.CreditRef )) ";
+                    SqlStatement += "ELSE '' END ";
+                    SqlStatement += "ELSE '' END AS Bank_Name,";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN ";
+                    SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN (SELECT SASI_Accno FROM SAS_Student WHERE SASI_MatricNo = SAS_Accounts.CreditRef ) ";
+                    SqlStatement += "ELSE '' END ";
+                    SqlStatement += "ELSE '' END AS Bank_Acct ";
+                    SqlStatement += "FROM  SAS_Accounts ";
+                    SqlStatement += InnerJoin;
+                    SqlStatement += "INNER JOIN SAS_Workflow ON SAS_Accounts.Batchcode = SAS_Workflow.Batch_Code ";
+                    SqlStatement += "WHERE SAS_Accounts.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " ";
+                    SqlStatement += "GROUP BY SAS_Accounts.Category,SAS_Accounts.Transamount,SAS_Accounts.TransId,SAS_Accounts.Voucherno,SAS_Accounts.Paymentmode,";
+                    SqlStatement += "SAS_Accounts.PayeeName,SAS_Accounts.Bankcode,SAS_Accounts.CreditRef,SAS_Workflow.Date_Time," + GroupBy;
+
+                    if (!FormHelp.IsBlank(SqlStatement))
+                    {
+                        using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                            DataBaseConnectionString, SqlStatement).CreateDataReader())
+                        {
+                            while (loReader.Read())
+                            {
+                                string Bank_Code = GetValue<string>(loReader, "Bank_Code");
+                                string Matric_No = GetValue<string>(loReader, "Matric_No");
+
+                                WorkflowEn _WorkflowEn = new WorkflowEn();
+                                _WorkflowEn.ID = Matric_No;
+                                _WorkflowEn.NAME = GetValue<string>(loReader, "Payee_Name");
+                                _WorkflowEn.SOURCE = (SubType == "Sponsor") ? "Sponsor" : "Bank Details";
+
+                                GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.BankCode, Type, SubType);
+                                if (!string.IsNullOrEmpty(GL_CODE))
+                                {
+                                    debit_flag = true;
+                                }
+                                else
+                                {
+                                    List_Failed.Add(_WorkflowEn);
+                                }
+
+                                GL_CODE = string.Empty;
+                                _WorkflowEn.SOURCE = string.Empty;
+                                _WorkflowEn.SOURCE = (SubType == "Sponsor") ? "Bank Details" : "Program";
+
+                                GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.StudentProgram, Type, SubType);
+                                if (!string.IsNullOrEmpty(GL_CODE))
+                                {
+                                    credit_flag = true;
+                                }
+                                else
+                                {
+                                    List_Failed.Add(_WorkflowEn);
+                                }
+
+                            }
+                            loReader.Close();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+
+                if (debit_flag == true && credit_flag == true)
+                {
+                    if (List_Failed.Count == 0)
+                    {
+                        result = true;
+                    }
+                }
+            }
+            
+            return result;
+        }
+
+        public List<WorkflowEn> ConstructQuery(string BatchCode,string stats)
+        {
+            String SqlStatement = "", SOURCE = null;
+            List<WorkflowEn> LIST = new List<WorkflowEn>();
+
+            if (stats=="FacultyGL")
+            {
+                SOURCE = "Faculty";
+
+                SqlStatement = "SELECT SA.CreditRef AS id,SS.SASI_Name AS name,FGL.GL_Account AS glcode " +
+                   "FROM SAS_Accounts SA " +
+                   "INNER JOIN SAS_AccountsDetails SAD ON SA.TransId=SAD.TransID " +
+                   "INNER JOIN SAS_Student SS ON SA.CreditRef = SS.SASI_MatricNo " +
+                   "INNER JOIN SAS_Faculty_GLaccount FGL ON FGL.SAFC_Code = SS.SASI_Faculty AND FGL.SAFT_Code  = SAD.RefCode " +
+                   "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " " +
+                   "GROUP BY id,name,FGL.GL_Account ";
+            }
+
+            if (stats=="KolejGL")
+            {
+                SOURCE = "College";
+
+                SqlStatement = "SELECT SA.CreditRef AS id,SS.SASI_Name AS name,KGL.GL_Account AS glcode " +
+                    "FROM SAS_Accounts SA " +
+                    "INNER JOIN SAS_AccountsDetails SAD ON SA.TransId=SAD.TransID " +
+                    "INNER JOIN SAS_Student SS ON SA.CreditRef = SS.SASI_MatricNo " +
+                    "INNER JOIN SAS_Kolej_GLaccount KGL ON KGL.SAKO_Code = SS.SAKO_Code AND KGL.SAFT_Code = SAD.RefCode " +
+                    "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " " +
+                    "GROUP BY id,name,KGL.GL_Account ";
+            }
+           
+            if (!FormHelp.IsBlank(SqlStatement))
+            {
+                using (IDataReader loReader = _DatabaseFactory.ExecuteReader(Helper.GetDataBaseType,
+                    DataBaseConnectionString, SqlStatement).CreateDataReader())
+                {
+                    while (loReader.Read())
+                    {
+                        WorkflowEn _WorkflowEn = new WorkflowEn();
+                        _WorkflowEn.ID = GetValue<string>(loReader, "id");
+                        _WorkflowEn.NAME = GetValue<string>(loReader, "name");
+                        _WorkflowEn.GLCODE = clsGeneric.NullToString(GetValue<string>(loReader, "glcode"));
+                        _WorkflowEn.SOURCE = SOURCE;
+
+                        LIST.Add(_WorkflowEn);
+                    }
+                    loReader.Close();
+                }
+            }
+
+            return LIST;
         }
 
         #endregion

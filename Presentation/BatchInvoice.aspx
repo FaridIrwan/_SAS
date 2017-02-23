@@ -328,20 +328,42 @@
                 alert("Record already Posted");
                 return false;
             }
-            if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?")) {
-                if (document.getElementById("<%=txtBatchNo.ClientID%>").value == "") {
-                     alert("Error - Batch number not found or empty.");
-                     return false;
-                 }
-                 else {
-                     new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value + '',
-                                        'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
-                    return true;
-                }
-            }
-            else {
-                return false;
-            }
+
+            //modified by Hafiz @ 19/02/2017
+            document.getElementById("<%=GLflagTrigger.ClientID%>").value = "ON";
+
+            PageMethods.CheckGL(document.getElementById("<%=txtBatchNo.ClientID%>").value, document.getElementById("<%= btnBatchInvoice.ClientID%>").value,
+                function (response) {
+                    onSuccess(response);
+
+                    if (response == true) {
+                            if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?")) {
+                                if (document.getElementById("<%=txtBatchNo.ClientID%>").value == "") {
+                                                        alert("Error - Batch number not found or empty.");
+                                                        return false;
+                                                    }
+                                                    else {
+                                                        new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value + '',
+                                   'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
+                                return true;
+                            }
+                        }
+                    }
+                    else {
+                        alert("Posting Failed. NO GL FOUND.")
+
+                        new_window = window.open('GLFailedList.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value,'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
+                        return false;
+                    }
+                }, onFailure);
+        }
+
+        function onSuccess(response) {
+            return response;
+        }
+
+        function onFailure(response) {
+            alert("Posted Record Fail.");
         }
 
         function Validate() {
@@ -1818,7 +1840,7 @@
                                 </tr>
                                 <tr>
                                     <td style="width: 100%; vertical-align: top;">
-                                        <asp:DataGrid ID="dgUploadFile" runat="server" AllowSorting="True" OnSortCommand="Sort_Grid" 
+                                        <asp:DataGrid ID="dgUploadFile" runat="server" AllowSorting="True" OnSortCommand="Sort_Grid"  
                                             AutoGenerateColumns="False" Width="100%">
                                             <FooterStyle CssClass="dgFooterStyle" Height="20px" />
                                             <SelectedItemStyle CssClass="dgSelectedItemStyle" />
@@ -1848,6 +1870,7 @@
     <asp:Button ID="btnHidden" runat="Server" OnClick="btnHidden_Click" Style="display: none" />
 
     <asp:HiddenField ID="MenuId" runat="server" />
+    <asp:HiddenField ID="GLflagTrigger" runat="server" />
     <asp:Button ID="btnHiddenApp" runat="Server" OnClick="btnHiddenApp_Click" Style="display: none" />
 </asp:Content>
 

@@ -23,6 +23,13 @@ namespace HTS.SAS.Entities
         private WorkflowSetupEn xWorkflowSetupEn;
         private WorkflowApproverEn xWorkflowApproverEn;
 
+        //added by Hafiz @ 21/02/2017
+        //used by GL Flag Checker
+        private string xID;
+        private string xNAME;
+        private string xGLCODE;
+        private string xSOURCE;
+
             [System.Xml.Serialization.XmlElement]
             ////[DataMember]
             public int WorkflowId
@@ -119,6 +126,37 @@ namespace HTS.SAS.Entities
                 set { xWorkflowApproverEn = value; }
             }
 
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string ID
+            {
+                get { return xID; }
+                set { xID = value; }
+            }
+
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string NAME
+            {
+                get { return xNAME; }
+                set { xNAME = value; }
+            }
+
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string GLCODE
+            {
+                get { return xGLCODE; }
+                set { xGLCODE = value; }
+            }
+
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string SOURCE
+            {
+                get { return xSOURCE; }
+                set { xSOURCE = value; }
+            }
            
      }
 }

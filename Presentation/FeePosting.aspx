@@ -333,7 +333,11 @@
             if (ans == false) {
                 return false;
             }
-            else {
+            else
+            {
+                PageMethods.CheckGL(onSuccess, onFailure);
+
+
                 if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?"))
                 {
                     if (document.getElementById("<%=txtBatchNo.ClientID%>").value == "")
@@ -354,6 +358,12 @@
                 }
             }
         }
+
+        function onSuccess(result)
+        {
+            alert(result);
+        }
+
         function validate() {
             var re = /\s*((\S+\s*)*)/;
             if (document.getElementById("<%=lblStatus.ClientID%>").value == "Posted") {

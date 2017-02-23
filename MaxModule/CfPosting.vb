@@ -193,6 +193,11 @@ Public Class CfPosting
 
                         'Build Cash Book Payment Header - Start
                         If CashBookPaymentHeader(BatchCode, CompanyCode, CashBookNo, BatchDetails(Helper.CategorySubTypeCol)) Then
+
+                            'CBP Interface WF - Start
+                            Call CBPinterfaceWorkFlow(CompanyCode, CashBookNo)
+                            'CBP Interface WF - End
+
                             result = True
                         End If
                         'Build Cash Book Payment Header - Stop
@@ -426,6 +431,32 @@ Public Class CfPosting
         End Try
 
     End Sub
+
+#End Region
+
+#Region "CBPinterfaceWorkFlow"
+
+    'added by Hafiz @ 22/02/2017
+    'CBP interface workflow
+
+    Protected Function CBPinterfaceWorkFlow(ByVal CompanyCode As String, ByVal CashBookNo As String) As Boolean
+
+        Dim _CfCbPayFlowEn As New CfCbPayFlowEn(), CfCbPayFlowSql As String = Nothing
+
+        Try
+            _CfCbPayFlowEn.mypf_company = CompanyCode
+            _CfCbPayFlowEn.mypf_batchid = CashBookNo
+
+            If _CfGeneric.BuildSqlStatement(_CfCbPayFlowEn, CfCbPayFlowSql, CfGeneric.CfCbPayFlowTbl) Then
+                Return ExecuteSqlStatement(CfCbPayFlowSql)
+            End If
+
+        Catch ex As Exception
+            Call Helper.LogError(ex.Message)
+            Return False
+        End Try
+
+    End Function
 
 #End Region
 
