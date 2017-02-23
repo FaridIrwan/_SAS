@@ -165,6 +165,7 @@ Partial Class BatchInvoice
             ddlsemyear.Visible = False
             lblTransstatus.Visible = False
             ddltransstatus.Visible = False
+
         ElseIf Request.QueryString("Formid") = "DN" Then
             btnBatchInvoice.Text = "Debit Note"
             Page.Title = String.Format("Student Debit Note")
@@ -176,6 +177,7 @@ Partial Class BatchInvoice
             ddlsemyear.Visible = False
             lblTransstatus.Visible = False
             ddltransstatus.Visible = False
+
             'check the session("module") to enable/disable View Student tab - start
             If Session("Module") Is Nothing Then
                 btnViewStu.Enabled = True
@@ -244,6 +246,9 @@ Partial Class BatchInvoice
             If Not Request.QueryString("BatchCode") Is Nothing Then
                 Dim str As String = Request.QueryString("BatchCode")
                 Dim constr As String() = str.Split(";")
+                Dim total As Double = 0
+                Dim matric As String = Request.QueryString("MatricNo")
+                Dim sumamountstudent As Double = 0
                 txtBatchNo.Text = constr(0)
 
                 'added by Hafiz @ 22/3/2016
@@ -264,7 +269,8 @@ Partial Class BatchInvoice
                 If CInt(Request.QueryString("IsView")).Equals(1) Then
                     OnSearchView()
                 End If
-
+                dgView.Columns(0).Visible = False
+                chkSelectedView.Visible = False
             End If
         End If
 
@@ -576,6 +582,29 @@ Partial Class BatchInvoice
                         End If
                     Next
                 End If
+                Dim link As HyperLink
+                Dim cat As String
+                Dim batch As String
+                Dim matric As String
+                Dim docno As String
+                For Each dgitem1 In dgView.Items
+                    link = dgitem1.Cells(20).Controls(1)
+                    cat = dgitem1.Cells(18).Text
+                    batch = dgitem1.Cells(17).Text
+                    matric = dgitem1.Cells(1).Text
+                    docno = dgitem1.Cells(19).Text
+                    link.Attributes.Add("onClick", "OpenWindow('about:blank')")
+                    If cat = "Invoice" Then
+                        link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                        link.Target = "MyPopup"
+                    ElseIf cat = "AFC" Then
+                        link.NavigateUrl = "~/AFCDetails.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                        link.Target = "MyPopup"
+                    ElseIf cat = "Debit Note" Then
+                        link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                        link.Target = "MyPopup"
+                    End If
+                Next
             End If
             'If Not Session("Mode") Is Nothing Then
             '    dgFeeType.DataSource = Session(ReceiptsClass.SessionStuChange)
@@ -1178,14 +1207,6 @@ Partial Class BatchInvoice
 
         End Select
 
-        'If chkSelectedView.Checked = True Then
-        '    Select Case e.Item.ItemType
-        '        Case ListItemType.Item, ListItemType.AlternatingItem
-        '            chk = CType(e.Item.FindControl("chkview"), CheckBox)
-        '            chk.Checked = True
-        '    End Select
-        '    'End If
-        'End If
 
     End Sub
 
@@ -1659,11 +1680,11 @@ Partial Class BatchInvoice
                 End If
 
                 If currListSt.Count > 0 Then
-                    chkSelectedView.Checked = True
+                    'chkSelectedView.Checked = True
                     Dim chk As CheckBox
                     For Each dgitem In dgView.Items
-                        chk = dgitem.Cells(0).Controls(1)
-                        chk.Checked = True
+                        'chk = dgitem.Cells(0).Controls(1)
+                        'chk.Checked = True
                     Next
                 Else
                     chkSelectedView.Checked = False
@@ -1688,47 +1709,31 @@ Partial Class BatchInvoice
             'End If
         End If
 
-        'If Request.QueryString("Formid") = "CN" Or Request.QueryString("Formid") = "DN" Then
-        '    If Not Session(ReceiptsClass.SessionStuChange) Is Nothing Then
-        '        currListSt = Session(ReceiptsClass.SessionStuChange)
-        '    End If
-        '    If Not currListSt Is Nothing Then
-        '        Try
-        '            currListSt.RemoveAt(dgView.SelectedIndex)
-        '        Catch ex As Exception
-        '            LogError.Log("BatchInvoice", "ibtnRemoveFee_Click", ex.Message)
-        '        End Try
-        '        dgView.DataSource = currListSt
-        '        dgView.DataBind()
-        '        Session(ReceiptsClass.SessionStuChange) = currListSt
-        '        dgView.SelectedIndex = -1
-        '    End If
-        'Else
-        '    For Each dgitem In dgView.Items
-        '        dgitem.Cells(dgViewCell.Priority).Text = i
-        '        i = i + 1
-        '    Next
-
-        '    If Not ListTRD Is Nothing Then
-        '        If dgView.SelectedIndex <> -1 Then
-
-        '            Try
-        '                ListTRD.RemoveAt(CInt(dgView.SelectedItem.Cells(dgViewCell.Priority).Text))
-        '            Catch ex As Exception
-        '                LogError.Log("BatchInvoice", "ibtnRemoveFee_Click", ex.Message)
-        '            End Try
-        '            dgView.DataSource = ListTRD
-        '            dgView.DataBind()
-        '            If ListTRD.Count <> 0 Then
-        '                Session("AddFee") = ListTRD
-        '            Else
-        '                Session("AddFee") = Nothing
-        '            End If
-        '            dgView.SelectedIndex = -1
-        '        End If
-        '    End If
-        'End If
-
+        If dgView.Items.Count > 0 Then
+            Dim link As HyperLink
+            Dim cat As String
+            Dim batch As String
+            Dim matric As String
+            Dim docno As String
+            For Each dgItem1 As DataGridItem In dgView.Items
+                link = dgItem1.Cells(20).Controls(1)
+                cat = dgItem1.Cells(18).Text
+                batch = dgItem1.Cells(17).Text
+                matric = dgItem1.Cells(1).Text
+                docno = dgItem1.Cells(19).Text
+                link.Attributes.Add("onClick", "OpenWindow('about:blank')")
+                If cat = "Invoice" Then
+                    link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                ElseIf cat = "AFC" Then
+                    link.NavigateUrl = "~/AFCDetails.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                ElseIf cat = "Debit Note" Then
+                    link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                End If
+            Next
+        End If
     End Sub
 
     Protected Sub ibtnOthers_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs)
@@ -2262,7 +2267,7 @@ Partial Class BatchInvoice
                         For Each stu In StuChgMatricNo
                             If Not currListSt.Any(Function(x) x.ReferenceCode = eobjFt.FeeTypeCode And x.MatricNo = stu.MatricNo) Then
 
-                               'modified by Hafiz @ 17/02/2017
+                                'modified by Hafiz @ 17/02/2017
                                 If CheckHostelFlag(stu, eobjFt) = True Then
                                     objStu = New StudentEn
                                     objStu.MatricNo = stu.MatricNo
@@ -2926,7 +2931,8 @@ Partial Class BatchInvoice
                                                                                                                .TaxAmount = x.TaxAmount, .GSTAmount = x.GSTAmount,
                                                                                                               .TaxId = x.TaxId, .ReferenceCode = x.ReferenceCode,
                                                                                                               .Description = x.Description, .Priority = x.Priority, .Internal_Use = x.Internal_Use,
-                                                                                                              .TransactionID = x.TransactionID, .TransStatus = x.TransStatus, .TempPaidAmount = x.TempPaidAmount}).Distinct().ToList())
+                                                                                                              .TransactionID = x.TransactionID, .TransStatus = x.TransStatus, .TempPaidAmount = x.TempPaidAmount,
+                                                                                                              .batchno = x.batchno, .cat = x.cat, .Inv_no = x.Inv_no}).Distinct().ToList())
                             'If ListStuChange.Count <> 0 Then
                             '    Dim i As Integer = 0
                             '    While i < ListStuChange.Count
@@ -2950,7 +2956,7 @@ Partial Class BatchInvoice
                                     If Not listNewStu.Any(Function(x) x.MatricNo = i.MatricNo) Then
                                         'Dim getinternal_use As String() = i.Internal_Use.Split(";")
                                         listNewStu.Add(New StudentEn With {.MatricNo = i.MatricNo, .StudentName = i.StudentName, .ProgramID = i.ProgramID,
-                                                                                                         .TaxId = i.TaxId})
+                                                                                                         .TaxId = i.TaxId, .batchno = i.batchno, .cat = i.cat, .Inv_no = i.Inv_no})
                                     End If
                                 Next
                             Else
@@ -3138,14 +3144,14 @@ Partial Class BatchInvoice
                         dgView.DataSource = ListTranctionDetails
                         dgView.DataBind()
 
-                        If txtMode.Text = "UpdatePaidAmount" Then
-                            For Each items As DataGridItem In dgView.Items
-                                items.Cells(15).Visible = True
-                                items.Cells(16).Visible = True
-                            Next
-                        Else
+                        'If txtMode.Text = "UpdatePaidAmount" Then
+                        '    For Each items As DataGridItem In dgView.Items
+                        '        items.Cells(15).Visible = True
+                        '        items.Cells(16).Visible = True
+                        '    Next
+                        'Else
 
-                        End If
+                        'End If
                         Dim mylst As New List(Of StudentEn)
                         Dim bsobj As New AccountsBAL
                         Dim loen As New StudentEn
@@ -3194,16 +3200,38 @@ Partial Class BatchInvoice
         End If
 
         'If Not Session("Module") Is Nothing Then
+        Dim link As HyperLink
         If dgView.Items.Count > 0 Then
             Dim chk As CheckBox
             Dim dgitem As DataGridItem
             chkSelectedView.Checked = True
-            If chkSelectedView.Checked = True Then
-                For Each dgitem In dgView.Items
-                    chk = dgitem.Cells(0).Controls(1)
+
+            Dim cat As String
+            Dim batch As String
+            Dim matric As String
+            Dim docno As String
+            For Each dgItem1 As DataGridItem In dgView.Items
+                If chkSelectedView.Checked = True Then
+                    chk = dgItem1.Cells(0).Controls(1)
                     chk.Checked = True
-                Next
-            End If
+                End If
+                link = dgItem1.Cells(20).Controls(1)
+                cat = dgItem1.Cells(18).Text
+                batch = dgItem1.Cells(17).Text
+                matric = dgItem1.Cells(1).Text
+                docno = dgItem1.Cells(19).Text
+                link.Attributes.Add("onClick", "OpenWindow('about:blank')")
+                If cat = "Invoice" Then
+                    link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                ElseIf cat = "AFC" Then
+                    link.NavigateUrl = "~/AFCDetails.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                ElseIf cat = "Debit Note" Then
+                    link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                End If
+            Next
         End If
         'End If
         If dgFeeType.Items.Count > 0 Then
@@ -3254,9 +3282,24 @@ Partial Class BatchInvoice
         End If
         If txtMode.Text = "UpdatePaidAmount" Then
             dgView.Columns(15).Visible = True
-            'dgView.Columns(16).Visible = True
+            'dgView.Columns(15).Visible = True
+            dgView.Columns(18).Visible = True
+            dgView.Columns(19).Visible = True
+            dgView.Columns(20).Visible = True
         Else
+            dgView.Columns(15).Visible = False
+            'dgView.Columns(15).Visible = True
+            dgView.Columns(18).Visible = False
+            dgView.Columns(19).Visible = False
+            dgView.Columns(20).Visible = False
+        End If
 
+        If Request.QueryString("Formid") = "CN" Then
+            dgView.Columns(14).Visible = True
+        ElseIf Request.QueryString("Formid") = "DN" Then
+            dgView.Columns(14).Visible = False
+        ElseIf Request.QueryString("Formid") = "Inv" Then
+            dgView.Columns(14).Visible = False
         End If
         setDateFormat()
         Session("MatricNo") = Nothing
@@ -4893,6 +4936,7 @@ Partial Class BatchInvoice
         Dim Addfee As New List(Of StudentEn)
         Dim stud As New StudentDAL
         Dim Matricno As String
+        Dim j As Integer = 0
         Session("AddFee") = New List(Of AccountsDetailsEn)
         Dim totalTransAmount As Double = 0
         Dim totalGSTAmount As Double = 0
@@ -4967,7 +5011,8 @@ Partial Class BatchInvoice
                     totalActualFeeAmount = totalTransAmount - totalGSTAmount
                     ListTRD.Add(New AccountsDetailsEn With {.ReferenceCode = stu.ReferenceCode, .Description = stu.Description, .TransactionAmount = totalTransAmount,
                                                               .GSTAmount = totalGSTAmount, .TaxAmount = stu.GSTAmount, .TempAmount = totalActualFeeAmount,
-                                                            .TempPaidAmount = stu.TransactionAmount, .TaxId = stu.TaxId, .StudentQty = 1})
+                                                            .TempPaidAmount = stu.TransactionAmount, .TaxId = stu.TaxId, .StudentQty = 1,
+                                                           .Inv_no = stu.Inv_no, .batchno = stu.batchno, .cat = stu.cat})
                 Else
                     Dim assignNewTotal As AccountsDetailsEn = ListTRD.Where(Function(x) x.ReferenceCode = stu.ReferenceCode).FirstOrDefault()
                     'Change 27/4/2016 -Start                            
@@ -4994,11 +5039,26 @@ Partial Class BatchInvoice
             StuChgMatricNo.AddRange(getStudentDetailsChange.Where(Function(x) Not StuChgMatricNo.Any(Function(y) y.MatricNo = x.MatricNo)).Select(Function(x) New StudentEn With {.MatricNo = x.MatricNo, .StudentName = x.StudentName, .ProgramID = x.ProgramID, .CurrentSemester = x.CurrentSemester, .CrditHrDiff = x.CrditHrDiff}))
             Session(ReceiptsClass.SessionStuChgMatricNo) = StuChgMatricNo
             hfStudentCount.Value = StuChgMatricNo.Count
+
+            'While j < Addfee.Count
+            '    For Each Item As DataGridItem In dgView.Items
+            '        If Item.Cells(1).Text = Addfee(j).MatricNo And Item.Cells(3).Text = Addfee(j).ReferenceCode And Item.Cells(16).Text = Addfee(j).Internal_Use Then
+            '            Item.Cells(17).Text = Addfee(j).Inv_no
+            '            Item.Cells(18).Text = Addfee(j).cat
+            '            Item.Cells(19).Text = Addfee(j).batchno
+            '            Exit For
+            '        End If
+            '    Next
+            '    j = j + 1
+            'End While
             If Addfee.Count > 0 Then
                 dgView.DataSource = newStuList
                 dgView.DataBind()
                 If txtMode.Text = "UpdatePaidAmount" Then
                     dgView.Columns(15).Visible = True
+                    dgView.Columns(18).Visible = True
+                    dgView.Columns(19).Visible = True
+                    dgView.Columns(20).Visible = True
                     'dgView.Columns(16).Visible = True
                 Else
 
@@ -5021,6 +5081,30 @@ Partial Class BatchInvoice
                 End If
                 Session("CBSelected") = CBSelected
                 pnlDgView.Visible = True
+                Dim link As HyperLink
+                Dim cat As String
+                Dim batch As String
+                Dim matric As String
+                Dim docno As String
+                For Each dgItem1 As DataGridItem In dgView.Items
+                    link = dgItem1.Cells(20).Controls(1)
+                    cat = dgItem1.Cells(18).Text
+                    batch = dgItem1.Cells(17).Text
+                    matric = dgItem1.Cells(1).Text
+                    docno = dgItem1.Cells(19).Text
+                    link.Attributes.Add("onClick", "OpenWindow('about:blank')")
+                    If cat = "Invoice" Then
+                        link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                        link.Target = "MyPopup"
+                    ElseIf cat = "AFC" Then
+                        link.NavigateUrl = "~/AFCDetails.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                        link.Target = "MyPopup"
+                    ElseIf cat = "Debit Note" Then
+                        link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                        link.Target = "MyPopup"
+                    End If
+                Next
+
             Else
                 dgView.DataSource = Nothing
                 dgView.DataBind()
@@ -5047,10 +5131,13 @@ Partial Class BatchInvoice
             Exit Sub
         End If
         Session("Mode") = "LoadView"
-        'Label26.Visible = False
-        'ibtnAddFeeType.Visible = False
-        'Label27.Visible = False
-        'ibtnRemoveFee.Visible = False
+        If Request.QueryString("Formid") = "CN" Then
+            dgView.Columns(14).Visible = True
+        ElseIf Request.QueryString("Formid") = "DN" Then
+            dgView.Columns(14).Visible = False
+        ElseIf Request.QueryString("Formid") = "Inv" Then
+            dgView.Columns(14).Visible = False
+        End If
     End Sub
 
     Private Sub ClearAllStudentChange()
@@ -5238,7 +5325,11 @@ Partial Class BatchInvoice
         Dim chk As CheckBox
         Dim dgitem As DataGridItem
         Dim CBSelected As New List(Of Integer)
-
+        Dim link As HyperLink
+        Dim cat As String
+        Dim batch As String
+        Dim matric As String
+        Dim docno As String
         If chkSelectedView.Checked = True Then
             Dim eobjstu As New StudentEn
             For Each dgitem In dgView.Items
@@ -5260,7 +5351,6 @@ Partial Class BatchInvoice
                 StuToSave = New List(Of StudentEn)
             Next
         End If
-
         Session("SelectAll") = True
         Session("CBSelected") = CBSelected
         RebindDGView()
@@ -5540,7 +5630,11 @@ Partial Class BatchInvoice
         Dim dgitem As DataGridItem
         Dim eobjstu As New StudentEn
         Dim CBSelected As New List(Of Integer)
-
+        Dim link As HyperLink
+        Dim cat As String
+        Dim batch As String
+        Dim matric As String
+        Dim docno As String
         For Each dgitem In dgView.Items
 
             chk = dgitem.Cells(dgViewCell.CheckBox).Controls(1)
@@ -5554,7 +5648,22 @@ Partial Class BatchInvoice
                 chk.Checked = False
                 CBSelected.Remove(dgitem.ItemIndex)
             End If
-
+            'link = dgitem.Cells(20).Controls(1)
+            'cat = dgitem.Cells(18).Text
+            'batch = dgitem.Cells(17).Text
+            'matric = dgitem.Cells(1).Text
+            'docno = dgitem.Cells(19).Text
+            'link.Attributes.Add("onClick", "OpenWindow('about:blank')")
+            'If cat = "Invoice" Then
+            '    link.NavigateUrl = "../CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+            '    link.Target = "MyPopup"
+            'ElseIf cat = "AFC" Then
+            '    link.NavigateUrl = "../AFCDetails.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+            '    link.Target = "MyPopup"
+            'ElseIf cat = "Debit Note" Then
+            '    link.NavigateUrl = "../CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+            '    link.Target = "MyPopup"
+            'End If
         Next
 
         Session("lstStu") = listStu
@@ -5586,6 +5695,30 @@ Partial Class BatchInvoice
 
             dgView.DataBind()
 
+            ''added by farid 20022017
+            Dim link As HyperLink
+            Dim cat As String
+            Dim batch As String
+            Dim matric As String
+            Dim docno As String
+            For Each dgItem1 As DataGridItem In dgView.Items
+                link = dgItem1.Cells(20).Controls(1)
+                cat = dgItem1.Cells(18).Text
+                batch = dgItem1.Cells(17).Text
+                matric = dgItem1.Cells(1).Text
+                docno = dgItem1.Cells(19).Text
+                link.Attributes.Add("onClick", "OpenWindow('about:blank')")
+                If cat = "Invoice" Then
+                    link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                ElseIf cat = "AFC" Then
+                    link.NavigateUrl = "~/AFCDetails.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                ElseIf cat = "Debit Note" Then
+                    link.NavigateUrl = "~/CreditNoteView.aspx?docno=" + docno + "&BatchCode=" + batch + ""
+                    link.Target = "MyPopup"
+                End If
+            Next
         End If
 
     End Sub

@@ -3812,6 +3812,23 @@ namespace HTS.SAS.DataAccessObjects
                                 }
                             //}
                         }
+                        else if (argEn.Category == "Credit Note" && argEn.SubType == "Student" || argEn.Category == "Invoice" && argEn.SubType == "Student" || argEn.Category == "Debit Note" && argEn.SubType == "Student")
+                        {
+                            //for (int i = 0; i < argEn.AccountDetailsList.Count; i++)
+                            //{
+                                string sqlget1 = "update sas_accounts set transamount = (select sum(transamount) as transamount from sas_accountsdetails where transtempcode = '" + argEn.TempTransCode + "') where transtempcode = '" + argEn.TempTransCode + "';";
+                                if (!FormHelp.IsBlank(sqlget1))
+                                {
+                                    int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                         DataBaseConnectionString, sqlget1);
+
+                                    if (liRowAffected > -1)
+                                    { }
+                                    else
+                                        throw new Exception("Update Failed! No Row has been updated...");
+                                }
+                            //}
+                        }
 
                         #endregion
 
@@ -6358,18 +6375,21 @@ public double GetSponserStuAllocateAmount(string BatchId)
                             }
                         }
                     }
-                    //if (lb > 0)
-                    //{
-                    //    if (argEn.Category == "Invoice" && argEn.SubType == "Sponsor")
-                    //    {
-                    //        //updating sponsor invoice
-                    //        UpdateSponsorInvoice(argEn);
-                    //    }
-                    //    else
-                    //    {
-                    //        throw new Exception("Insertion Failed! No Row has been inserted...");
-                    //    }
-                    //}
+                    if (argEn.Category == "Invoice" && argEn.SubType == "Sponsor")
+                    {
+                        string sqlget1 = "update SAS_SponsorInvoice set temppaidamount = (select sum(transamount) as temppaidamount from SAS_SponsorInvoicedetails where transtempcode = '" + argEn.TempTransCode + "') where transtempcode = '" + argEn.TempTransCode + "';";
+                        if (!FormHelp.IsBlank(sqlget1))
+                        {
+                            int liRowAffected = _DatabaseFactory.ExecuteSqlStatement(Helper.GetDataBaseType,
+                                 DataBaseConnectionString, sqlget1);
+
+                            if (liRowAffected > -1)
+                            { }
+                            else
+                                throw new Exception("Update Failed! No Row has been updated...");
+                        }
+                        //}
+                    }
 
                 }
 
@@ -11267,7 +11287,6 @@ public double GetSponserStuAllocateAmount(string BatchId)
         }
 
         #endregion
-
 
     }
 

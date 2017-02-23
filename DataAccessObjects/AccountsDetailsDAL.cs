@@ -563,7 +563,11 @@ namespace HTS.SAS.DataAccessObjects
                             " SAS_FeeTypes.SAFT_Priority, SAS_FeeTypes.SAFT_Remarks, SAS_FeeTypes.SAFT_GLCode, SAS_FeeTypes.SAFT_Status,SAS_AccountsDetails.TransAmount," +
                             " SAS_AccountsDetails.RefCode, SAS_AccountsDetails.TransID, SAS_AccountsDetails.TransTempCode,SAS_AccountsDetails.TransCode," +
                             " SAS_FeeTypes.saft_taxmode, SAS_AccountsDetails.TaxAmount, SAS_AccountsDetails.Tax, SAS_AccountsDetails.internal_use::int,SAS_AccountsDetails.temppaidamount " +
-                            " ,SAS_AccountsDetails.transstatus,SAS_AccountsDetails.internal_use as use FROM sas_accounts inner join SAS_AccountsDetails  on " +
+                            " ,SAS_AccountsDetails.transstatus,SAS_AccountsDetails.internal_use as use, "+
+                            " (select batchcode from sas_accounts where cast(transid as varchar) =  SAS_AccountsDetails.internal_use) as batchno, " +
+                            " (select transcode from sas_accounts where cast(transid as varchar) =  SAS_AccountsDetails.internal_use) as docno, " +
+                            " (select category from sas_accounts where cast(transid as varchar) =  SAS_AccountsDetails.internal_use) as category " +
+                            " FROM sas_accounts inner join SAS_AccountsDetails  on " +
                             " sas_accounts.transid = SAS_AccountsDetails.transid " +
                             " INNER JOIN SAS_FeeTypes ON SAS_AccountsDetails.RefCode = SAS_FeeTypes.SAFT_Code " +
                             " inner join sas_student on sas_student.sasi_matricno = sas_accounts.creditref" +
@@ -575,7 +579,8 @@ namespace HTS.SAS.DataAccessObjects
                 sqlCmd = "SELECT sas_student.sasi_matricno, sas_student.sasi_name, sas_student.sasi_cursemyr, SAS_FeeTypes.SAFT_Code, SAS_FeeTypes.SAFT_Desc, SAS_FeeTypes.SAFT_FeeType, SAS_FeeTypes.SAFT_Hostel," +
                             " SAS_FeeTypes.SAFT_Priority, SAS_FeeTypes.SAFT_Remarks, SAS_FeeTypes.SAFT_GLCode, SAS_FeeTypes.SAFT_Status,SAS_AccountsDetails.TransAmount," +
                             " SAS_AccountsDetails.RefCode, SAS_AccountsDetails.TransID, SAS_AccountsDetails.TransTempCode,SAS_AccountsDetails.TransCode," +
-                            " SAS_FeeTypes.saft_taxmode, SAS_AccountsDetails.TaxAmount, SAS_AccountsDetails.Tax, SAS_AccountsDetails.internal_use " +
+                            " SAS_FeeTypes.saft_taxmode, SAS_AccountsDetails.TaxAmount, SAS_AccountsDetails.Tax, SAS_AccountsDetails.internal_use, " +
+                            " sas_accounts.paidamount,sas_accounts.transstatus " +
                             " FROM sas_accounts inner join SAS_AccountsDetails  on " +
                             " sas_accounts.transid = SAS_AccountsDetails.transid " +
                             " INNER JOIN SAS_FeeTypes ON SAS_AccountsDetails.RefCode = SAS_FeeTypes.SAFT_Code " +
@@ -634,9 +639,14 @@ namespace HTS.SAS.DataAccessObjects
                                 loItem.TempPaidAmount = GetValue<double>(loReader, "temppaidamount");
                                 loItem.TransStatus = GetValue<string>(loReader, "transstatus");
                                 loItem.Internal_Use = GetValue<string>(loReader, "use");
+                                loItem.Inv_no = GetValue<string>(loReader, "docno");
+                                loItem.batchno = GetValue<string>(loReader, "batchno");
+                                loItem.cat = GetValue<string>(loReader, "category");
                             }
                             else
                             {
+                                loItem.TransStatus = GetValue<string>(loReader, "transstatus");
+                                loItem.PaidAmount = GetValue<double>(loReader, "paidamount");
                                 loItem.Internal_Use = GetValue<string>(loReader, "internal_use");
                                 loItem.TransactionID = GetValue<int>(loReader, "TransID");
                             }
