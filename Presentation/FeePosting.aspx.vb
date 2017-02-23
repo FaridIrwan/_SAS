@@ -84,7 +84,13 @@ Partial Class FeePosting
 
             DirectCast(Master.FindControl("Panel1"), System.Web.UI.WebControls.Panel).Visible = False
             DirectCast(Master.FindControl("td"), System.Web.UI.HtmlControls.HtmlTableCell).Visible = False
-            Panel1.Visible = False
+            Panel1.Visible = True
+            ibtnPosting.Visible = False
+            Label6.Visible = False
+            ibtnCancel.Visible = False
+            Label18.Visible = False
+            ibtnSave.Visible = False
+            Label14.Visible = False
 
             GetData(ddlFaculty.SelectedValue, ddlSemester.SelectedValue, "", txtBatchNo.Text, ddlCurrSem.SelectedValue)
 

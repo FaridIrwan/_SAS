@@ -590,12 +590,61 @@ Partial Class SponsorAllocation
             allocated = MaxGeneric.clsGeneric.NullToDecimal(txtallocated.Text)
             txtamt.Text = String.Format("{0:F}", amount)
             outstanding = dgitem.Cells(7).Text
-            If amount > allocated Then
+            If amount >= allocated And amount <= outstanding Then
+                If outstanding <= 0 Then
+                    allocated = 0
+                Else
+                    allocated = amount
+                End If
+
                 credit = amount - allocated
                 txtcredit = dgitem.FindControl("txtcreditamt")
                 txtcredit.Text = String.Format("{0:F}", credit)
-                dgitem.Cells(10).Enabled = True
-                dgitem.Cells(11).Enabled = True
+                txtallocated.Text = String.Format("{0:F}", allocated)
+                If credit = 0 Then
+                    dgitem.Cells(10).Enabled = False
+                    dgitem.Cells(11).Enabled = False
+                Else
+                    dgitem.Cells(10).Enabled = True
+                    dgitem.Cells(11).Enabled = True
+                End If
+            ElseIf amount > allocated And amount > outstanding Then
+                If outstanding <= 0 Then
+                    allocated = 0
+                Else
+                    allocated = outstanding
+                End If
+
+                credit = amount - allocated
+                txtcredit = dgitem.FindControl("txtcreditamt")
+                txtcredit.Text = String.Format("{0:F}", credit)
+                txtallocated.Text = String.Format("{0:F}", allocated)
+                If credit = 0 Then
+                    dgitem.Cells(10).Enabled = False
+                    dgitem.Cells(11).Enabled = False
+                Else
+                    dgitem.Cells(10).Enabled = True
+                    dgitem.Cells(11).Enabled = True
+                End If
+            ElseIf amount < allocated And amount <= outstanding Then
+                If outstanding <= 0 Then
+                    allocated = 0
+                Else
+                    allocated = amount
+                End If
+
+                credit = amount - allocated
+                txtcredit = dgitem.FindControl("txtcreditamt")
+                txtcredit.Text = String.Format("{0:F}", credit)
+                txtallocated.Text = String.Format("{0:F}", allocated)
+                If credit = 0 Then
+                    dgitem.Cells(10).Enabled = False
+                    dgitem.Cells(11).Enabled = False
+                Else
+                    dgitem.Cells(10).Enabled = True
+                    dgitem.Cells(11).Enabled = True
+                End If
+
             End If
 
         Next
@@ -607,12 +656,61 @@ Partial Class SponsorAllocation
             allocated = MaxGeneric.clsGeneric.NullToDecimal(txtallocated.Text)
             txtamt.Text = String.Format("{0:F}", amount)
             outstanding = dgitem.Cells(7).Text
-            If amount > allocated Then
+            If amount >= allocated And amount <= outstanding Then
+                If outstanding <= 0 Then
+                    allocated = 0
+                Else
+                    allocated = amount
+                End If
+
                 credit = amount - allocated
                 txtcredit = dgitem.FindControl("txtcreditamt")
                 txtcredit.Text = String.Format("{0:F}", credit)
-                dgitem.Cells(10).Enabled = True
-                dgitem.Cells(11).Enabled = True
+                txtallocated.Text = String.Format("{0:F}", allocated)
+                If credit = 0 Then
+                    dgitem.Cells(10).Enabled = False
+                    dgitem.Cells(11).Enabled = False
+                Else
+                    dgitem.Cells(10).Enabled = True
+                    dgitem.Cells(11).Enabled = True
+                End If
+            ElseIf amount > allocated And amount > outstanding Then
+                If outstanding <= 0 Then
+                    allocated = 0
+                Else
+                    allocated = outstanding
+                End If
+
+                credit = amount - allocated
+                txtcredit = dgitem.FindControl("txtcreditamt")
+                txtcredit.Text = String.Format("{0:F}", credit)
+                txtallocated.Text = String.Format("{0:F}", allocated)
+                If credit = 0 Then
+                    dgitem.Cells(10).Enabled = False
+                    dgitem.Cells(11).Enabled = False
+                Else
+                    dgitem.Cells(10).Enabled = True
+                    dgitem.Cells(11).Enabled = True
+                End If
+            ElseIf amount < allocated And amount <= outstanding Then
+                If outstanding <= 0 Then
+                    allocated = 0
+                Else
+                    allocated = amount
+                End If
+
+                credit = amount - allocated
+                txtcredit = dgitem.FindControl("txtcreditamt")
+                txtcredit.Text = String.Format("{0:F}", credit)
+                txtallocated.Text = String.Format("{0:F}", allocated)
+                If credit = 0 Then
+                    dgitem.Cells(10).Enabled = False
+                    dgitem.Cells(11).Enabled = False
+                Else
+                    dgitem.Cells(10).Enabled = True
+                    dgitem.Cells(11).Enabled = True
+                End If
+
             End If
 
         Next
@@ -695,7 +793,7 @@ Partial Class SponsorAllocation
             ElseIf amount = 0 And pocket = 0 Then
                 Dim previousamt As Double = 0
                 previousamt = spon - allocate
-                txtpaamount.Text = previousamt
+                txtpaamount.Text = String.Format("{0:F}", previousamt)
                 dgitem.Cells(13).Text = String.Format("{0:F}", txtpaamount.Text)
             ElseIf amount = 0 And amount < dgitem.Cells(14).Text Then
                 'tamt = dgitem.Cells(14).Text - amount
@@ -765,7 +863,7 @@ Partial Class SponsorAllocation
             ElseIf amount = 0 And pocket = 0 Then
                 Dim previousamt As Double = 0
                 previousamt = spon - allocate
-                txtpaamount.Text = previousamt
+                txtpaamount.Text = String.Format("{0:F}", previousamt)
                 dgitem.Cells(13).Text = String.Format("{0:F}", txtpaamount.Text)
             ElseIf amount = 0 And amount < dgitem.Cells(14).Text Then
                 'tamt = dgitem.Cells(14).Text - amount
@@ -1608,7 +1706,7 @@ Partial Class SponsorAllocation
                         LogError.Log("SponsorAllocation", "FillData", ex.Message)
                     End Try
 
-                    txtAllAmount.Text = String.Format("{0:F}", espn0)
+                    txtAllAmount.Text = String.Format("{0:F}", obj.PaidAmount)
                     lblStatus.Value = "Posted"
                     ibtnStatus.ImageUrl = "images/Posted.gif"
                     trFileGen.Visible = True
@@ -2379,6 +2477,19 @@ Partial Class SponsorAllocation
 
         splist.Add(eospn)
         lblMsg.Visible = True
+
+        'Sponsor Insert Inactive
+        eobj2.BankCode = ddlBankCode.SelectedValue
+        eobj2.TransDate = Convert.ToDateTime(txtPaymentDate.Text)
+        eobj2.BatchDate = Trim(txtBDate.Text)
+        eobj2.ChequeDate = Trim(txtchequeDate.Text)
+        eobj2.PostedDateTime = DateTime.Now
+        eobj2.UpdatedTime = DateTime.Now
+        eobj2.UpdatedBy = Session("User")
+        eobj2.DueDate = DateTime.Now
+        eobj2.CreatedBy = Session("User")
+        eobj2.CreatedDateTime = DateTime.Now
+        eobj2.KodBank = txtKodBank.Value.Trim()
 
         Dim dgItem2 As DataGridItem
         Dim amount2 As TextBox
@@ -3890,6 +4001,8 @@ Partial Class SponsorAllocation
         Next
         eobj.AccountDetailsList = list
 
+
+
         Dim dgItem2 As DataGridItem
         Dim amount2 As TextBox
         Dim tempAmount2 As TextBox
@@ -3903,6 +4016,19 @@ Partial Class SponsorAllocation
         Dim credit2 As Double = 0
         Dim eobj2 As New AccountsEn
         Dim list2 As New List(Of AccountsDetailsEn)
+
+        'Sponsor Insert Inactive
+        eobj2.BankCode = ddlBankCode.SelectedValue
+        eobj2.TransDate = Convert.ToDateTime(txtPaymentDate.Text)
+        eobj2.BatchDate = Trim(txtBDate.Text)
+        eobj2.ChequeDate = Trim(txtchequeDate.Text)
+        eobj2.PostedDateTime = DateTime.Now
+        eobj2.UpdatedTime = DateTime.Now
+        eobj2.UpdatedBy = Session("User")
+        eobj2.DueDate = DateTime.Now
+        eobj2.CreatedBy = Session("User")
+        eobj2.CreatedDateTime = DateTime.Now
+        eobj2.KodBank = txtKodBank.Value.Trim()
         For Each dgItem2 In dgUnView.Items
             chkselect2 = dgItem2.Cells(0).Controls(1)
             If chkselect2.Checked = True Then

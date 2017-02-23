@@ -747,7 +747,9 @@
                                 </td>                                
                             </tr>
                             <tr>
-                                <td style="height: 13px; width: 3px;"></td>
+                                <td style="height: 13px; width: 3px;">
+                                    <span style="color: #ff0000">*</span>
+                                </td>
                                 <td style="width: 11%; height: 13px">
                                     <asp:Label ID="Label26" runat="server" Text="Posting For" Width="79px"></asp:Label>
                                 </td>

@@ -28,7 +28,7 @@ Partial Class FileSponsor
                 fileExtension = System.IO.Path. _
                     GetExtension(File1.FileName).ToLower()
                 Dim allowedExtensions As String() = _
-                    {".xls", ".txt"}
+                    {".xls", ".txt", ".xlsx"}
 
                 For i As Integer = 0 To allowedExtensions.Length - 1
                     If fileExtension = allowedExtensions(i) Then
@@ -39,7 +39,7 @@ Partial Class FileSponsor
                     Try
                         File1.PostedFile.SaveAs(SaveLocation)
                         Response.Write("File has been Uploaded.")
-                        If fileExtension = ".xls" Then
+                        If fileExtension = ".xls" Or fileExtension = ".xlsx" Then
                             fileType = "excel"
                         ElseIf fileExtension = ".txt" Then
                             fileType = "text"
