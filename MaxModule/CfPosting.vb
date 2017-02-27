@@ -929,7 +929,7 @@ Public Class CfPosting
             'Set Header Description
             If CategoryType = CfGeneric.CategoryTypeAfc Then
                 'HeaderDescription = CategoryType & " For Sem " & Description.Substring(12) & "-" & Description.Substring(4, 4) & "/" & Description.Substring(8, 4)
-                HeaderDescription = CategoryType & " For Sem " & Description.Substring(4)
+                HeaderDescription = CategoryType & " " & Description.Substring(13)
             ElseIf CategoryType = CfGeneric.CategoryTypeInvoice Or CategoryType = CfGeneric.CategoryTypeDebitNote Or CategoryType = CfGeneric.CategoryTypeCreditNote Then
                 HeaderDescription = Trim(Description)
             ElseIf CategoryType = CfGeneric.CategoryTypeAllocation Then
