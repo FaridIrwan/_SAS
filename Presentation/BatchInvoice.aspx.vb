@@ -283,8 +283,10 @@ Partial Class BatchInvoice
         End If
 
         If GLflagTrigger.Value = "ON" Then
-            If List_Failed.Count > 0 Then
-                Session("List_Failed") = List_Failed
+            If Not List_Failed Is Nothing Then
+                If List_Failed.Count > 0 Then
+                    Session("List_Failed") = List_Failed
+                End If
             End If
         End If
     End Sub
@@ -6017,10 +6019,12 @@ Partial Class BatchInvoice
                 sumGST = sumGST + CDbl(lblGst.Text)
 
             Case DataControlRowType.Footer
+                e.Row.Cells(7).Text = String.Format("{0:F}", sumAmt)
+                e.Row.Cells(6).Text = String.Format("{0:F}", sumGST)
+
                 gvFileUploadGrid.Columns(7).FooterText = String.Format("{0:F}", sumAmt)
                 gvFileUploadGrid.Columns(6).FooterText = String.Format("{0:F}", sumGST)
                 txtUFtotamt.Text = String.Format("{0:F}", sumAmt)
-
         End Select
 
     End Sub

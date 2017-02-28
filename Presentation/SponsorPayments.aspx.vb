@@ -17,6 +17,7 @@ Partial Class SponsorPayments
     Dim PAidAmount As Double
     Private ErrorDescription As String
     Dim _AccDal As New HTS.SAS.DataAccessObjects.AccountsDAL
+    Shared List_Failed As List(Of WorkflowEn) = Nothing
     'Global Declaration - Ended
 #End Region
 
@@ -52,6 +53,7 @@ Partial Class SponsorPayments
             MenuId.Value = GetMenuId()
             ibtnBDate.Attributes.Add("onClick", "return BDate()")
             'Loading User Rights
+            Session("List_Failed") = Nothing
             Session("PageMode") = ""
             Session("AddBank") = Nothing
             Session("ReceiptFrom") = "SP"
@@ -85,12 +87,21 @@ Partial Class SponsorPayments
                 'txtvoucherno.Text = "Auto Number"
             End If
         End If
+
         If Not Request.QueryString("BatchCode") Is Nothing Then
             txtReceipNo.Text = Request.QueryString("BatchCode")
             DirectCast(Master.FindControl("Panel1"), System.Web.UI.WebControls.Panel).Visible = False
             DirectCast(Master.FindControl("td"), System.Web.UI.HtmlControls.HtmlTableCell).Visible = False
             Panel1.Visible = False
             OnSearchOthers()
+        End If
+
+        If GLflagTrigger.Value = "ON" Then
+            If Not List_Failed Is Nothing Then
+                If List_Failed.Count > 0 Then
+                    Session("List_Failed") = List_Failed
+                End If
+            End If
         End If
 
     End Sub
@@ -941,7 +952,7 @@ Partial Class SponsorPayments
         eobj.ChequeNo = Trim(txtCheque.Text)
         eobj.CreditRef = Trim(txtCreditref.Text)
         'eobj.PaidAmount = (txtAmountPaid.Text)
-        eobj.PaidAmount = CDbl(txtAvailable.Text)
+        eobj.PaidAmount = Double.TryParse(txtAvailable.Text, eobj.PaidAmount)
         eobj.TransType = "Debit"
         eobj.Category = "Payment"
         eobj.TransStatus = "Open"
@@ -1455,6 +1466,18 @@ Partial Class SponsorPayments
         End If
 
     End Sub
+
+#End Region
+
+#Region "CheckGL"
+    'added by Hafiz @ 27/02/2017
+
+    <System.Web.Services.WebMethod()> _
+    Public Shared Function CheckGL(ByVal BatchNo As String, ByVal Category As String) As Boolean
+
+        Return New WorkflowDAL().CheckGL("CBP", BatchNo, "Sponsor", List_Failed, Category)
+
+    End Function
 
 #End Region
 

@@ -35,6 +35,7 @@ Partial Class SponsorAllocation
     Private SaveLocation As String = Server.MapPath("data")
     Private FILE_NAME As String = "\BIMB_" + Format(Date.Today.ToLocalTime, "dd_MM_yyyy") + ".txt"
     Private ErrorDescription As String
+    Shared List_Failed As List(Of WorkflowEn) = Nothing
     'Global Declaration - Ended
 
 #End Region
@@ -75,6 +76,7 @@ Partial Class SponsorAllocation
             LoadUserRights()
             'Clear all Sessions
             Session("PageMode") = ""
+            Session("List_Failed") = Nothing
             Session("AddBank") = Nothing
             Session("liststu") = Nothing
             Session("spnObj") = Nothing
@@ -197,6 +199,15 @@ Partial Class SponsorAllocation
             End If
            
         End If
+
+        If GLflagTrigger.Value = "ON" Then
+            If Not List_Failed Is Nothing Then
+                If List_Failed.Count > 0 Then
+                    Session("List_Failed") = List_Failed
+                End If
+            End If
+        End If
+
     End Sub
 
     Protected Sub ibtnSave_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs) Handles ibtnSave.Click
@@ -4941,6 +4952,16 @@ Partial Class SponsorAllocation
         End If
 
     End Sub
+
+#End Region
+
+#Region "CheckGL"
+    'added by Hafiz @ 27/02/2017
+
+    <System.Web.Services.WebMethod()> _
+    Public Shared Function CheckGL(ByVal BatchNo As String, ByVal Category As String) As Boolean
+        Return New WorkflowDAL().CheckGL("MJ", BatchNo, "Sponsor", List_Failed, Category)
+    End Function
 
 #End Region
 

@@ -29,6 +29,10 @@ namespace HTS.SAS.Entities
         private string xNAME;
         private string xGLCODE;
         private string xSOURCE;
+        private string xSUBTYPE;
+        private string xFAC;
+        private string xPROG;
+        private string xKOL;
 
             [System.Xml.Serialization.XmlElement]
             ////[DataMember]
@@ -157,6 +161,37 @@ namespace HTS.SAS.Entities
                 get { return xSOURCE; }
                 set { xSOURCE = value; }
             }
-           
+
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string SUBTYPE
+            {
+                get { return xSUBTYPE; }
+                set { xSUBTYPE = value; }
+            }
+
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string FAC
+            {
+                get { return xFAC; }
+                set { xFAC = value; }
+            }
+
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string PROG
+            {
+                get { return xPROG; }
+                set { xPROG = value; }
+            }
+
+            [System.Xml.Serialization.XmlElement]
+            ////[DataMember]
+            public string KOL
+            {
+                get { return xKOL; }
+                set { xKOL = value; }
+            }
      }
 }

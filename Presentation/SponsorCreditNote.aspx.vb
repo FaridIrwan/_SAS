@@ -18,6 +18,7 @@ Partial Class SponsorCreditNote
     Dim AutoNo As Boolean
     Dim DFlag As String
     Dim GBFormat As System.Globalization.CultureInfo
+    Shared List_Failed As List(Of WorkflowEn) = Nothing
     Private _Helper As New Helper
     ''Private LogErrors As LogError
 
@@ -175,6 +176,7 @@ Partial Class SponsorCreditNote
             lblWarn.Visible = False
             txtCreditAmt.Visible = False
             txtDebitAmt.Visible = False
+            Session("List_Failed") = Nothing
             Session("ReceiptFrom") = Nothing
             Session("ReceiptFrom") = "SP"
             Session("ReceiptFor") = Nothing
@@ -222,6 +224,14 @@ Partial Class SponsorCreditNote
 
                 OnSearchOthers()
 
+            End If
+        End If
+
+        If GLflagTrigger.Value = "ON" Then
+            If Not List_Failed Is Nothing Then
+                If List_Failed.Count > 0 Then
+                    Session("List_Failed") = List_Failed
+                End If
             End If
         End If
 
@@ -2197,6 +2207,16 @@ Partial Class SponsorCreditNote
         End If
 
     End Sub
+
+#End Region
+
+#Region "CheckGL"
+    'added by Hafiz @ 27/02/2017
+
+    <System.Web.Services.WebMethod()> _
+    Public Shared Function CheckGL(ByVal BatchNo As String, ByVal Category As String) As Boolean
+        Return New WorkflowDAL().CheckGL("MJ", BatchNo, "Sponsor", List_Failed, Category)
+    End Function
 
 #End Region
 

@@ -18,11 +18,11 @@
     <style type="text/css">
         .auto-style6 {
             height: 21px;
-            width: 60%;
+            width: 100%;
         }
         .auto-style7 {
-            height: 30px;
-            width: 20px;
+            height: 20px;
+            width: 10px;
         }
     </style>
 </head>
@@ -36,7 +36,7 @@
         </script>
 
     <h4 id="h4" runat="server">GL Failed List</h4>
-    <asp:Panel ID="PnlApprover" runat="server" Height="50px" Width="400px">
+    <asp:Panel ID="PnlApprover" runat="server" Width="800px">
         <table>
             <tr>
                 <td style="width: 6px; height: 21px"></td>
@@ -59,40 +59,20 @@
                 </td>
                 <td style="width: 100px; height: 21px"></td>
             </tr>
-        </table>
-        <table style="width: 100%;">
-             <tr>
-                <td style="width: 6px; height: 21px">
+            <tr>
+                <td colspan="4" style="height: 21px">
                     <asp:Label ID="lblMsg" runat="server" CssClass="lblError" Visible="false"></asp:Label>
                 </td>
             </tr>
-            <tr>
-                <td class="auto-style6">
-
-                    <asp:GridView ID="gvUser" runat="server" AutoGenerateColumns="false" Width="80%" Style="vertical-align: text-top">
-                        
-                        <FooterStyle CssClass="dgFooterStyle" Height="20px" />
-                        <SelectedRowStyle CssClass="dgSelectedItemStyle" />
-                        <AlternatingRowStyle BackColor="Beige" CssClass="dgAlternatingItemStyle" Font-Bold="False"
-                            Font-Italic="False" Font-Overline="False" Font-Strikeout="False" Font-Underline="False" />
-                        <RowStyle CssClass="dgItemStyle" HorizontalAlign="Center" />
-                        <HeaderStyle BackColor="#00699b" CssClass="dgHeaderStyle" ForeColor="#ffffff" Font-Bold="False" Font-Italic="False"
-                            Font-Overline="False" Font-Size="8pt" Font-Strikeout="False" Font-Underline="False" />
-                        <Columns>
-                            <asp:BoundField DataField="ID" HeaderText="ID" />
-                            <asp:BoundField DataField="NAME" HeaderText="Name" />
-                            <asp:BoundField DataField="SOURCE" HeaderText="Source" />
-                        </Columns>
-                    </asp:GridView>
-                </td>
-            </tr>
         </table>
-
-        <table style="width: 100%; height: 100%">
+                
+        <asp:PlaceHolder ID="PlaceHolder1" runat="server"></asp:PlaceHolder>
+        
+        <table style="width: 100%; height: 100%; padding-top:20px">
             <tr>
-                <td style="text-align: left" class="auto-style7">
-                    <asp:ImageButton ID="ibtnClose" runat="server" Height="24px" ImageUrl="~/images/ok_cancel.jpg"
-                        Width="24px" />
+                <td align="center" class="auto-style7">
+                    <asp:ImageButton ID="ibtnClose" runat="server" Height="18px" ImageUrl="~/images/ok_cancel.jpg"
+                        Width="18px" />
                 </td>
                 <td style="width: 158px; height: 30px; text-align: left">
                     <asp:Label ID="Label4" runat="server" Text="Close" Width="21px"></asp:Label>
@@ -103,6 +83,7 @@
                 </td>
             </tr>
         </table>
+        <asp:HiddenField ID="hdnPageName" runat="server" />
     </asp:Panel>
     </form>
 </body>
