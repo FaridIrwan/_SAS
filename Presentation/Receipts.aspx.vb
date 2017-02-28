@@ -45,6 +45,8 @@ Partial Class Receipts
     Dim column As String() = {"matricNo", "StudentName", "ICNo", "Faculty", "ProgramID", "CurrentSemester", "TransactionAmount",
                               "StuIndex", "PaidAmount", "StManual", "SubReferenceTwo", "noAkaun", "Outstanding_Amount"}
 
+    Shared List_Failed As List(Of WorkflowEn) = Nothing
+
 #End Region
 
 #Region "Set Message "
@@ -140,6 +142,7 @@ Partial Class Receipts
                 'Set Session Values - Start
                 Session("Menuid") = MenuId
                 Session("PageMode") = "Add"
+                Session("List_Failed") = Nothing
                 Session("AddBank") = Nothing
                 Session("ListObj") = Nothing
                 Session("stualloc") = Nothing
@@ -253,6 +256,14 @@ Partial Class Receipts
                 System.IO.File.Delete(Session("fileSponsor"))
                 Session("fileSponsor") = Nothing
                 Session("fileType") = Nothing
+            End If
+
+            If GLflagTrigger.Value = "ON" Then
+                If Not List_Failed Is Nothing Then
+                    If List_Failed.Count > 0 Then
+                        Session("List_Failed") = List_Failed
+                    End If
+                End If
             End If
 
         Catch ex As Exception
@@ -5398,6 +5409,19 @@ Partial Class Receipts
         End If
 
     End Sub
+
+#End Region
+
+#Region "CheckGL"
+    'added by Hafiz @ 24/02/2017
+
+    <System.Web.Services.WebMethod()> _
+    Public Shared Function CheckGL(ByVal BatchNo As String, ByVal Category As String) As Boolean
+
+        Dim SubType As String = IIf((HttpContext.Current.Session("ReceiptFor") = "St"), "Student", "Sponsor")
+        Return New WorkflowDAL().CheckGL("CBR", BatchNo, SubType, List_Failed, Category)
+
+    End Function
 
 #End Region
 

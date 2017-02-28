@@ -1431,7 +1431,7 @@
                                                         </asp:TemplateField>
                                                          <asp:TemplateField HeaderText="GST Amount" ItemStyle-HorizontalAlign="Right" >
                                                             <ItemTemplate>
-                                                                <asp:Label ID="Llabel6" runat="server" Text='<%# Eval("GSTAmount")%>' />
+                                                                <asp:Label ID="Llabel6" runat="server" Text='<%# Eval("GSTAmount", "{0:F}")%>' />
                                                             </ItemTemplate>
                                                              <FooterStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
 				                                                Font-Underline="False" HorizontalAlign="Right" />
@@ -1450,7 +1450,7 @@
                                             </td>
                                         </tr>
                                     </table>
-                                    <table style="width: 100%; text-align: right;">
+                                    <table style="width: 100%; text-align: right; visibility:hidden ">
                                         <tr>
                                             <td style="width: 76%">
                                                 <asp:Label ID="Label16" runat="server" Text="Total Amount" Width="65px" ></asp:Label>

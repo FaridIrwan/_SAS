@@ -17,6 +17,7 @@ Partial Class StudentLoan
     Dim AutoNo As Boolean
     Dim DFlag As String
     Dim eflag As String
+    Shared List_Failed As List(Of WorkflowEn) = Nothing
     'Global Declaration - Ended
 #End Region
 
@@ -54,6 +55,7 @@ Partial Class StudentLoan
             txtRecNo.Attributes.Add("OnKeyup", "return geterr()")
             txtBatchid.Text = "Auto Number"
             'while loading list object make it nothing
+            Session("List_Failed") = Nothing
             Session("ListObj") = Nothing
             Session("liststu") = Nothing
             Session("stu") = Nothing
@@ -95,10 +97,20 @@ Partial Class StudentLoan
             Panel1.Visible = False
             OnSearchOthers()
         End If
-    End Sub
-    Protected Overloads Sub Page_LoadComplete(ByVal sender As Object, ByVal e As EventArgs) Handles Me.LoadComplete
+
+        If GLflagTrigger.Value = "ON" Then
+            If Not List_Failed Is Nothing Then
+                If List_Failed.Count > 0 Then
+                    Session("List_Failed") = List_Failed
+                End If
+            End If
+        End If
 
     End Sub
+
+    Protected Overloads Sub Page_LoadComplete(ByVal sender As Object, ByVal e As EventArgs) Handles Me.LoadComplete
+    End Sub
+
 #Region "Methods"
 
     ''' <summary>
@@ -1243,6 +1255,18 @@ Partial Class StudentLoan
         End If
 
     End Sub
+
+#End Region
+
+#Region "CheckGL"
+    'added by Hafiz @ 27/02/2017
+
+    <System.Web.Services.WebMethod()> _
+    Public Shared Function CheckGL(ByVal BatchNo As String, ByVal Category As String) As Boolean
+
+        Return New WorkflowDAL().CheckGL("MJ", BatchNo, "Student", List_Failed, Category)
+
+    End Function
 
 #End Region
 

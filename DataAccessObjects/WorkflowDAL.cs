@@ -1065,9 +1065,12 @@ namespace HTS.SAS.DataAccessObjects
                     {
                         if (Category == MaxModule.CfGeneric.CategoryTypeLoan)
                         {
-                            SOURCE = "University Funds";
+                            SOURCE = "University Fund";
 
-                            SqlStatement ="SELECT SA.CreditRef AS id,SS.SASI_Name AS name,SU.SAUF_Glcode AS glcode " +
+                            SqlStatement ="SELECT SS.SASI_Faculty||' - '||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," +
+                                "SS.SASI_PGid||' - '||(SELECT SAPG_Program FROM SAS_Program WHERE SAPG_Code=SS.SASI_PGid) AS prog," +
+                                "SS.SAKO_Code||' - '||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol," +
+                                "SA.CreditRef AS id,SS.SASI_Name AS name,SU.SAUF_Glcode AS glcode " +
                                 "FROM SAS_Accounts SA " +
                                 "INNER JOIN SAS_StudentLoan SL ON SA.Batchcode=SL.Batchcode " +
                                 "INNER JOIN SAS_Universityfund SU ON SA.SubRef1=SU.SAUF_Code " +
@@ -1126,7 +1129,10 @@ namespace HTS.SAS.DataAccessObjects
                         {
                             SOURCE = "Program";
 
-                             SqlStatement = "SELECT SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
+                             SqlStatement = "SELECT SS.SASI_Faculty||' - '||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," +
+                                "SP.SAPG_Code||' - '||SP.SAPG_Program AS prog," +
+                                "SS.SAKO_Code||' - '||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol," +
+                                "SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
                                 "FROM SAS_Student SS " +
                                 "INNER JOIN SAS_Accounts SA ON SA.CreditRef = SS.SASI_MatricNo " +
                                 "INNER JOIN SAS_Program SP ON SP.SAPG_Code = SS.SASI_PgId " +
@@ -1148,6 +1154,14 @@ namespace HTS.SAS.DataAccessObjects
                                     _WorkflowEn.NAME = GetValue<string>(loReader, "name");
                                     _WorkflowEn.GLCODE = clsGeneric.NullToString(GetValue<string>(loReader, "glcode"));
                                     _WorkflowEn.SOURCE = SOURCE;
+                                    _WorkflowEn.SUBTYPE = (SubType == "Student") ? "Student" : "Sponsor";
+
+                                    if (SubType == "Student")
+                                    { 
+                                        _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                                        _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                                        _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
+                                    }
 
                                     if (!string.IsNullOrEmpty(_WorkflowEn.GLCODE))
                                     {
@@ -1193,13 +1207,16 @@ namespace HTS.SAS.DataAccessObjects
                         {
                             SOURCE1 = "Program";
 
-                            SqlStatement1 = "SELECT SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
-                                "FROM SAS_Accounts SA " +
-                                "INNER JOIN SAS_Student SS ON SS.SASI_MatricNo=SA.CreditRef " +
-                                "INNER JOIN SAS_Program SP ON SP.SAPG_Code=SS.SASI_PgId " +
-                                "WHERE SA.BatchCode = " + clsGeneric.AddQuotes(BatchCode) + " " +
+                            SqlStatement1 = "SELECT SS.SASI_Faculty||' - '||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," +
+                                "SP.SAPG_Code||' - '||SP.SAPG_Program AS prog," +
+                                "SS.SAKO_Code||' - '||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol," +
+                                "SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
+                                "FROM SAS_Student SS " +
+                                "INNER JOIN SAS_Accounts SA ON SA.CreditRef = SS.SASI_MatricNo " +
+                                "INNER JOIN SAS_Program SP ON SP.SAPG_Code = SS.SASI_PgId " +
+                                "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " " +
                                 "AND SA.Category='SPA' " +
-                                "GROUP BY id,name,SP.SAPG_TI";
+                                "GROUP BY fac,prog,kol,id,name,SP.SAPG_TI";
                         }
                         else
                         {
@@ -1215,9 +1232,12 @@ namespace HTS.SAS.DataAccessObjects
                     {
                         if (Category == MaxModule.CfGeneric.CategoryTypeLoan)
                         {
-                            SOURCE1 = "University Funds";
+                            SOURCE1 = "University Fund";
 
-                            SqlStatement1 = "SELECT SA.CreditRef AS id,SS.SASI_Name AS name,SU.SAUF_Glcode AS glcode " +
+                            SqlStatement1 = "SELECT SS.SASI_Faculty||' - '||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," +
+                                "SS.SASI_PGid||' - '||(SELECT SAPG_Program FROM SAS_Program WHERE SAPG_Code=SS.SASI_PGid) AS prog," +
+                                "SS.SAKO_Code||' - '||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol," +
+                                "SA.CreditRef AS id,SS.SASI_Name AS name,SU.SAUF_Glcode AS glcode " +
                                 "FROM SAS_Accounts SA " +
                                 "INNER JOIN SAS_StudentLoan SL ON SA.Batchcode=SL.Batchcode " +
                                 "INNER JOIN SAS_Universityfund SU ON SA.SubRef1=SU.SAUF_Code " +
@@ -1228,7 +1248,10 @@ namespace HTS.SAS.DataAccessObjects
                         {
                             SOURCE1 = "Program";
 
-                            SqlStatement1 = "SELECT SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
+                            SqlStatement1 = "SELECT SS.SASI_Faculty||' - '||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," +
+                                "SP.SAPG_Code||' - '||SP.SAPG_Program AS prog," +
+                                "SS.SAKO_Code||' - '||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol," +
+                                "SS.SASI_MatricNo AS id,SS.SASI_Name AS name,SP.SAPG_TI AS glcode " +
                                 "FROM SAS_Student SS " +
                                 "INNER JOIN SAS_Accounts SA ON SA.CreditRef = SS.SASI_MatricNo " +
                                 "INNER JOIN SAS_Program SP ON SP.SAPG_Code = SS.SASI_PgId " +
@@ -1298,6 +1321,23 @@ namespace HTS.SAS.DataAccessObjects
                                     _WorkflowEn.NAME = GetValue<string>(loReader, "name");
                                     _WorkflowEn.GLCODE = clsGeneric.NullToString(GetValue<string>(loReader, "glcode"));
                                     _WorkflowEn.SOURCE = SOURCE1;
+                                    _WorkflowEn.SUBTYPE = (SubType == "Student") ? "Student" : "Sponsor";
+
+                                    if (SubType == "Student")
+                                    {
+                                        _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                                        _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                                        _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
+                                    }
+                                    else
+                                    {
+                                        if (Category == MaxModule.CfGeneric.CategoryTypeAllocation)
+                                        {
+                                            _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                                            _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                                            _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
+                                        }
+                                    }
 
                                     if (!string.IsNullOrEmpty(_WorkflowEn.GLCODE))
                                     {
@@ -1334,7 +1374,7 @@ namespace HTS.SAS.DataAccessObjects
             else if (Type == "CBR")
             {
                 bool debit_flag = false, credit_flag = false;
-                String Payee_Name = "", InnerJoin = "", GL_CODE = "";
+                String str = "", InnerJoin = "", GL_CODE = "";
 
                 String SqlStatement = null;
 
@@ -1342,30 +1382,26 @@ namespace HTS.SAS.DataAccessObjects
                 {
                     if (SubType == "Sponsor")
                     {
-                        Payee_Name = "SAS_Sponsor.SASR_Name AS Payee_Name,";
-                        InnerJoin = "INNER JOIN SAS_Sponsor ON SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code ";
+                        str = "SELECT SAS_Sponsor.SASR_Name AS Payee_Name,";
+
+                        InnerJoin = "INNER JOIN SAS_Sponsor ON SA.CreditRef = SAS_Sponsor.SASR_Code ";
                     }
                     else
                     {
-                        Payee_Name = "SAS_Student.SASI_Name AS Payee_Name,";
-                        InnerJoin = "INNER JOIN SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo ";
+                        str = "SELECT SS.SASI_Faculty||'-'||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," + 
+                        "SS.SASI_PGid||'-'||(SELECT SAPG_Program FROM SAS_Program WHERE SAPG_Code=SS.SASI_PGid) AS prog," +
+                        "SS.SAKO_Code||'-'||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol,"+
+                        "SS.SASI_Name AS Payee_Name,";
+
+                        InnerJoin = "INNER JOIN SAS_Student SS ON SA.CreditRef = SS.SASI_MatricNo ";
                     }
 
-                    SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY SAS_Accounts.TransID) AS Row_No,";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Description LIKE 'CIMB CLICKS%' THEN SAS_Accounts.SubRef1 ";
-                    SqlStatement += "ELSE SAS_Accounts.BankRecNo END AS Bank_Slip_No,";
-                    SqlStatement += "SAS_Accounts.BatchCode As Batch_Code,";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Description LIKE 'CIMB CLICKS%' THEN 'CIMB Clicks Upload' ";
-                    SqlStatement += "ELSE 'Bank Receipt Manual' END AS Description,";
-                    SqlStatement += Payee_Name;
-                    SqlStatement += "SAS_Accounts.TransAmount AS Trans_Amount,";
-                    SqlStatement += "SAS_Accounts.BankCode AS Bank_Code,";
-                    SqlStatement += "SUBSTRING(SAS_Accounts.PaymentMode,1,3) AS Payment_Mode,";
-                    SqlStatement += "SAS_Accounts.CreditRef AS Matric_No ";
-                    SqlStatement += "FROM SAS_Accounts ";
-                    SqlStatement += "LEFT JOIN SAS_AccountsDetails ON SAS_Accounts.TransID = SAS_AccountsDetails.TransID ";
+                    SqlStatement = str;
+                    SqlStatement += "SA.CreditRef AS Matric_No,";
+                    SqlStatement += "SA.BankCode AS Bank_Code ";
+                    SqlStatement += "FROM SAS_Accounts SA ";
                     SqlStatement += InnerJoin;
-                    SqlStatement += "WHERE SAS_Accounts.BatchCode = " + clsGeneric.AddQuotes(BatchCode);
+                    SqlStatement += "WHERE SA.BatchCode = " + clsGeneric.AddQuotes(BatchCode);
 
                     if (!FormHelp.IsBlank(SqlStatement))
                     {
@@ -1381,6 +1417,14 @@ namespace HTS.SAS.DataAccessObjects
                                 _WorkflowEn.ID = Matric_No;
                                 _WorkflowEn.NAME = GetValue<string>(loReader, "Payee_Name");
                                 _WorkflowEn.SOURCE = "Bank Details";
+                                _WorkflowEn.SUBTYPE = (SubType == "Student") ? "Student" : "Sponsor";
+
+                                if (SubType == "Student")
+                                {
+                                    _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                                    _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                                    _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
+                                }
 
                                 GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.BankCode, Type, SubType);
                                 if (!string.IsNullOrEmpty(GL_CODE))
@@ -1392,9 +1436,18 @@ namespace HTS.SAS.DataAccessObjects
                                     List_Failed.Add(_WorkflowEn);
                                 }
 
-                                GL_CODE = string.Empty;
-                                _WorkflowEn.SOURCE = string.Empty;
+                                _WorkflowEn = new WorkflowEn();
+                                _WorkflowEn.ID = Matric_No;
+                                _WorkflowEn.NAME = GetValue<string>(loReader, "Payee_Name");
                                 _WorkflowEn.SOURCE = (SubType == "Sponsor") ? "Sponsor" : "Program";
+                                _WorkflowEn.SUBTYPE = (SubType == "Student") ? "Student" : "Sponsor";
+
+                                if (SubType == "Student")
+                                {
+                                    _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                                    _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                                    _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
+                                }
 
                                 GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.StudentProgram, Type, SubType);
                                 if (!string.IsNullOrEmpty(GL_CODE))
@@ -1428,7 +1481,7 @@ namespace HTS.SAS.DataAccessObjects
             else if (Type == "CBP")
             {
                 bool debit_flag = false, credit_flag = false;
-                String Payee_Name = "", InnerJoin = "", GroupBy = "", GL_CODE = "";
+                String str = "", InnerJoin = "", GL_CODE = "";
 
                 String SqlStatement = null;
 
@@ -1436,46 +1489,29 @@ namespace HTS.SAS.DataAccessObjects
                 {
                     if (SubType == "Sponsor")
                     {
-                        Payee_Name = "SAS_Sponsor.SASR_Name AS Payee_Name,";
+                        str = "SELECT SAS_Sponsor.SASR_Name AS Payee_Name,";
+                        
                         InnerJoin = "INNER JOIN SAS_Sponsor ON SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code ";
-                        GroupBy = "SAS_Sponsor.SASR_Name";
                     }
                     else
                     {
-                        Payee_Name = "SAS_Student.SASI_Name AS Payee_Name,";
-                        InnerJoin = "INNER JOIN SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo ";
-                        GroupBy = "SAS_Student.SASI_name";
+                        str = "SELECT SS.SASI_Faculty||'-'||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," +
+                        "SS.SASI_PGid||'-'||(SELECT SAPG_Program FROM SAS_Program WHERE SAPG_Code=SS.SASI_PGid) AS prog," +
+                        "SS.SAKO_Code||'-'||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol," +
+                        "SS.SASI_Name AS Payee_Name,";
+                        
+                        InnerJoin = "INNER JOIN SAS_Student SS ON SAS_Accounts.CreditRef = SS.SASI_MatricNo ";
                     }
 
-                    SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY SAS_Accounts.Paymentmode) AS Row_No, ";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Category='Payment' THEN SAS_Accounts.Transamount ";
-                    SqlStatement += "ELSE SUM(SAS_Accounts.Transamount) END AS Trans_Amount,";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Voucherno = '' THEN CASE WHEN SAS_Accounts.Transcode = '' THEN ";
-                    SqlStatement += "SUBSTRING(SAS_Accounts.Transtempcode FROM 2 FOR Length(SAS_Accounts.Transtempcode)) ELSE ";
-                    SqlStatement += "SAS_Accounts.Transcode END ELSE SAS_Accounts.Voucherno END AS Trans_Code,";
-                    SqlStatement += "SAS_Accounts.Paymentmode AS Payment_Mode,";
-                    SqlStatement += Payee_Name;
-                    SqlStatement += "SAS_Workflow.Date_Time AS Posted_Date,";
+                    SqlStatement = str;
                     SqlStatement += "SAS_Accounts.CreditRef AS Matric_No,";
                     SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN ";
                     SqlStatement += "CASE WHEN SAS_Accounts.Subtype = 'Student' THEN (SELECT SASI_Bank FROM SAS_Student WHERE SASI_MatricNo = SAS_Accounts.CreditRef) ";
                     SqlStatement += "ELSE SAS_Accounts.Bankcode END ";
-                    SqlStatement += "ELSE SAS_Accounts.Bankcode END AS Bank_Code,";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN ";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Subtype = 'Student' THEN (SELECT SASB_Desc FROM SAS_Studentbank WHERE SASB_Code = (SELECT SASI_Bank FROM SAS_Student WHERE ";
-                    SqlStatement += "SASI_MatricNo = SAS_Accounts.CreditRef )) ";
-                    SqlStatement += "ELSE '' END ";
-                    SqlStatement += "ELSE '' END AS Bank_Name,";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN ";
-                    SqlStatement += "CASE WHEN SAS_Accounts.Paymentmode = 'EFT' THEN (SELECT SASI_Accno FROM SAS_Student WHERE SASI_MatricNo = SAS_Accounts.CreditRef ) ";
-                    SqlStatement += "ELSE '' END ";
-                    SqlStatement += "ELSE '' END AS Bank_Acct ";
+                    SqlStatement += "ELSE SAS_Accounts.Bankcode END AS Bank_Code ";
                     SqlStatement += "FROM  SAS_Accounts ";
                     SqlStatement += InnerJoin;
-                    SqlStatement += "INNER JOIN SAS_Workflow ON SAS_Accounts.Batchcode = SAS_Workflow.Batch_Code ";
-                    SqlStatement += "WHERE SAS_Accounts.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " ";
-                    SqlStatement += "GROUP BY SAS_Accounts.Category,SAS_Accounts.Transamount,SAS_Accounts.TransId,SAS_Accounts.Voucherno,SAS_Accounts.Paymentmode,";
-                    SqlStatement += "SAS_Accounts.PayeeName,SAS_Accounts.Bankcode,SAS_Accounts.CreditRef,SAS_Workflow.Date_Time," + GroupBy;
+                    SqlStatement += "WHERE SAS_Accounts.Batchcode = " + clsGeneric.AddQuotes(BatchCode);
 
                     if (!FormHelp.IsBlank(SqlStatement))
                     {
@@ -1491,6 +1527,14 @@ namespace HTS.SAS.DataAccessObjects
                                 _WorkflowEn.ID = Matric_No;
                                 _WorkflowEn.NAME = GetValue<string>(loReader, "Payee_Name");
                                 _WorkflowEn.SOURCE = (SubType == "Sponsor") ? "Sponsor" : "Bank Details";
+                                _WorkflowEn.SUBTYPE = (SubType == "Student") ? "Student" : "Sponsor";
+
+                                if (SubType == "Student")
+                                {
+                                    _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                                    _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                                    _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
+                                }
 
                                 GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.BankCode, Type, SubType);
                                 if (!string.IsNullOrEmpty(GL_CODE))
@@ -1502,9 +1546,18 @@ namespace HTS.SAS.DataAccessObjects
                                     List_Failed.Add(_WorkflowEn);
                                 }
 
-                                GL_CODE = string.Empty;
-                                _WorkflowEn.SOURCE = string.Empty;
+                                _WorkflowEn = new WorkflowEn();
+                                _WorkflowEn.ID = Matric_No;
+                                _WorkflowEn.NAME = GetValue<string>(loReader, "Payee_Name");
                                 _WorkflowEn.SOURCE = (SubType == "Sponsor") ? "Bank Details" : "Program";
+                                _WorkflowEn.SUBTYPE = (SubType == "Student") ? "Student" : "Sponsor";
+
+                                if (SubType == "Student")
+                                {
+                                    _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                                    _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                                    _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
+                                }
 
                                 GL_CODE = _CfCommon.GetGlCode(Bank_Code, Matric_No, MaxModule.CfGeneric.GlType.StudentProgram, Type, SubType);
                                 if (!string.IsNullOrEmpty(GL_CODE))
@@ -1547,26 +1600,32 @@ namespace HTS.SAS.DataAccessObjects
             {
                 SOURCE = "Faculty";
 
-                SqlStatement = "SELECT SA.CreditRef AS id,SS.SASI_Name AS name,FGL.GL_Account AS glcode " +
-                   "FROM SAS_Accounts SA " +
-                   "INNER JOIN SAS_AccountsDetails SAD ON SA.TransId=SAD.TransID " +
-                   "INNER JOIN SAS_Student SS ON SA.CreditRef = SS.SASI_MatricNo " +
-                   "INNER JOIN SAS_Faculty_GLaccount FGL ON FGL.SAFC_Code = SS.SASI_Faculty AND FGL.SAFT_Code  = SAD.RefCode " +
-                   "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " " +
-                   "GROUP BY id,name,FGL.GL_Account ";
+                SqlStatement = "SELECT FGL.SAFC_Code||' - '||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=FGL.SAFC_Code) AS fac," +
+                    "SS.SASI_PGid||' - '||(SELECT SAPG_Program FROM SAS_Program WHERE SAPG_Code=SS.SASI_PGid) AS prog," +
+                    "SS.SAKO_Code||' - '||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=SS.SAKO_Code) AS kol," +
+                    "SA.CreditRef AS id,SS.SASI_Name AS name,FGL.GL_Account AS glcode " +
+                    "FROM SAS_Accounts SA " +
+                    "INNER JOIN SAS_AccountsDetails SAD ON SA.TransId=SAD.TransID " +
+                    "INNER JOIN SAS_Student SS ON SA.CreditRef = SS.SASI_MatricNo " +
+                    "INNER JOIN SAS_Faculty_GLaccount FGL ON FGL.SAFC_Code = SS.SASI_Faculty AND FGL.SAFT_Code  = SAD.RefCode " +
+                    "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " " +
+                    "GROUP BY id,name,FGL.GL_Account,fac,prog,kol ";
             }
 
             if (stats=="KolejGL")
             {
                 SOURCE = "College";
 
-                SqlStatement = "SELECT SA.CreditRef AS id,SS.SASI_Name AS name,KGL.GL_Account AS glcode " +
+                SqlStatement = "SELECT SS.SASI_Faculty||' - '||(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code=SS.SASI_Faculty) AS fac," +
+                    "SS.SASI_PGid||' - '||(SELECT SAPG_Program FROM SAS_Program WHERE SAPG_Code=SS.SASI_PGid) AS prog," +
+                    "KGL.SAKO_Code||' - '||(SELECT SAKO_Description FROM SAS_Kolej WHERE SAKO_Code=KGL.SAKO_Code) AS kol," +
+                    "SA.CreditRef AS id,SS.SASI_Name AS name,KGL.GL_Account AS glcode " +
                     "FROM SAS_Accounts SA " +
                     "INNER JOIN SAS_AccountsDetails SAD ON SA.TransId=SAD.TransID " +
                     "INNER JOIN SAS_Student SS ON SA.CreditRef = SS.SASI_MatricNo " +
                     "INNER JOIN SAS_Kolej_GLaccount KGL ON KGL.SAKO_Code = SS.SAKO_Code AND KGL.SAFT_Code = SAD.RefCode " +
                     "WHERE SA.Batchcode = " + clsGeneric.AddQuotes(BatchCode) + " " +
-                    "GROUP BY id,name,KGL.GL_Account ";
+                    "GROUP BY id,name,KGL.GL_Account,fac,prog,kol ";
             }
            
             if (!FormHelp.IsBlank(SqlStatement))
@@ -1581,6 +1640,10 @@ namespace HTS.SAS.DataAccessObjects
                         _WorkflowEn.NAME = GetValue<string>(loReader, "name");
                         _WorkflowEn.GLCODE = clsGeneric.NullToString(GetValue<string>(loReader, "glcode"));
                         _WorkflowEn.SOURCE = SOURCE;
+                        _WorkflowEn.SUBTYPE = "Student";
+                        _WorkflowEn.FAC = clsGeneric.NullToString(GetValue<string>(loReader, "fac"));
+                        _WorkflowEn.PROG = clsGeneric.NullToString(GetValue<string>(loReader, "prog"));
+                        _WorkflowEn.KOL = clsGeneric.NullToString(GetValue<string>(loReader, "kol"));
 
                         LIST.Add(_WorkflowEn);
                     }

@@ -30,6 +30,8 @@ Partial Class FeePosting
     Dim MJ_JnlLineEn As New BusinessEntities.MJ_JnlLine
     Dim dsReturn As New DataSet
 
+    Shared List_Failed As List(Of WorkflowEn) = Nothing
+
 #End Region
 
 #Region "Page Load "
@@ -44,6 +46,7 @@ Partial Class FeePosting
             Menuname(CInt(Request.QueryString("Menuid")))
             MenuId.Value = GetMenuId()
             lblStatus.Value = "New"
+            Session("List_Failed") = Nothing
             LoadUserRights()
             Session("ListObj") = Nothing
             Session("listWF") = Nothing
@@ -103,6 +106,14 @@ Partial Class FeePosting
 
         If Session("User") Is Nothing Then
             Response.Redirect("~/login.aspx")
+        End If
+
+        If GLflagTrigger.Value = "ON" Then
+            If Not List_Failed Is Nothing Then
+                If List_Failed.Count > 0 Then
+                    Session("List_Failed") = List_Failed
+                End If
+            End If
         End If
     End Sub
 
@@ -2006,6 +2017,16 @@ Partial Class FeePosting
         End If
 
     End Sub
+
+#End Region
+
+#Region "CheckGL"
+    'added by Hafiz @ 23/02/2017
+
+    <System.Web.Services.WebMethod()> _
+    Public Shared Function CheckGL(ByVal BatchNo As String, ByVal Category As String) As Boolean
+        Return New WorkflowDAL().CheckGL("MJ", BatchNo, "Student", List_Failed, Category)
+    End Function
 
 #End Region
 

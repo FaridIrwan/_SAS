@@ -37,21 +37,44 @@
                 alert("Record Already Posted");
                 return false;
             }
-            if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?")) {
-                if (document.getElementById("<%=txtBatchNo.ClientID%>").value == "") {
-                    alert("Error - Batch number not found or empty.");
-                    return false;
-                }
-                else {
-                    new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value + '',
-                                       'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
-                        return true;
+
+            //modified by Hafiz @ 27/02/2017
+            document.getElementById("<%=GLflagTrigger.ClientID%>").value = "ON";
+
+            PageMethods.CheckGL(document.getElementById("<%=txtBatchNo.ClientID%>").value, document.getElementById("<%= btnBatchInvoice.ClientID%>").value,
+                function (response) {
+                    onSuccess(response);
+
+                    if (response == true) {
+                        if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?")) {
+                            if (document.getElementById("<%=txtBatchNo.ClientID%>").value == "") {
+                                    alert("Error - Batch number not found or empty.");
+                                    return false;
+                                }
+                                else {
+                                    new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value + '',
+                                                        'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
+                                    return true;
+                                }
+                            }
+                        }
+                        else {
+                            alert("Posting Failed. NO GL FOUND.")
+
+                            new_window = window.open('GLFailedList.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchNo.ClientID%>").value, 'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
+                        return false;
                     }
-                }
-                else {
-                    return false;
-                }
+                }, onFailure);
         }
+
+        function onSuccess(response) {
+            return response;
+        }
+
+        function onFailure(response) {
+            alert("Posted Record Fail.");
+        }
+
         function Validate() {
             if (document.getElementById("<%=ddlNoteType.ClientID%>").value == "-1") {
                 alert("NoteType Cannot Be Blank");
@@ -1139,6 +1162,7 @@
     <asp:Button ID="btnHidden" runat="Server" OnClick="btnHidden_Click" Style="display: none" />
 
     <asp:HiddenField ID="MenuId" runat="server" />
+    <asp:HiddenField ID="GLflagTrigger" runat="server" />
     <asp:Button ID="btnHiddenApp" runat="Server" OnClick="btnHiddenApp_Click" Style="display: none" />
     <%--  </ContentTemplate>     
 </atlas:UpdatePanel>--%>
