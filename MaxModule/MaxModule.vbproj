@@ -161,6 +161,7 @@
     <Compile Include="CfCbPayDetailsEn.vb" />
     <Compile Include="CfCbPayFlowEn.vb" />
     <Compile Include="CfCbPayHeaderEn.vb" />
+    <Compile Include="CfCbPayMyCbDetails.vb" />
     <Compile Include="CfCbRecBatchEn.vb" />
     <Compile Include="CfCbRecHeaderEn.vb" />
     <Compile Include="CfMjHeaderEn.vb" />

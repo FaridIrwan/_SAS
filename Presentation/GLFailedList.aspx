@@ -7,12 +7,9 @@
     <title></title>
     <link href="style.css" rel="stylesheet" type="text/css" />
     <script language="javascript" type="text/javascript">
-        //var textFieldInFocus;
-        //function handleOnFocus(form_element) {
-        //    textFieldInFocus = form_element;
-        //}
-        //function handleOnBlur() {
-        //    textFieldInFocus = null;
+        //window.onbeforeunload = confirmExit;
+        //function confirmExit() {
+        //    return "You have attempted to leave this page.  If you have made any changes to the fields without clicking the Save button, your changes will be lost.  Are you sure you want to exit this page?";
         //}
     </script>
     <style type="text/css">

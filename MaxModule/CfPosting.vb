@@ -192,12 +192,7 @@ Public Class CfPosting
                         CfCbPayBatchSql = String.Empty
 
                         'Build Cash Book Payment Header - Start
-                        If CashBookPaymentHeader(BatchCode, CompanyCode, CashBookNo, BatchDetails(Helper.CategorySubTypeCol)) Then
-
-                            'CBP Interface WF - Start
-                            Call CBPinterfaceWorkFlow(CompanyCode, CashBookNo)
-                            'CBP Interface WF - End
-
+                        If CashBookPaymentHeader(BatchCode, CompanyCode, CashBookNo, _CfCbPayBatchEn.cbpb_type, BatchDetails(Helper.CategorySubTypeCol)) Then
                             result = True
                         End If
                         'Build Cash Book Payment Header - Stop
@@ -235,7 +230,7 @@ Public Class CfPosting
     'Modified by Hafiz @ 30/11/2016
 
     Private Function CashBookPaymentHeader(ByVal BatchCode As String, ByVal CompanyCode As String, ByVal CashBookNo As String,
-                                           ByVal SubType As String) As Boolean
+                                           ByVal PayMode As String, ByVal SubType As String) As Boolean
 
         Dim LineNo As Integer = 0, MagicNo As Integer = 0, TransDate As String = Nothing
         Dim SqlStatement As String = Nothing, CfCbPayHeaderSql As String = Nothing, result As Boolean = False
@@ -243,19 +238,26 @@ Public Class CfPosting
 
         Try
             If SubType = "Sponsor" Then
-                Payee_Name = "SAS_Sponsor.SASR_Name AS Payee_Name,"
+
+                Payee_Name = "CASE WHEN SAS_Accounts.Paymentmode='CHQ' THEN COALESCE(SAS_Accounts.PayeeName,'') "
+                Payee_Name += "ELSE COALESCE(SAS_Sponsor.SASR_Name,'') END AS Payee_Name,"
+
                 InnerJoin = "INNER JOIN SAS_Sponsor ON SAS_Accounts.CreditRef = SAS_Sponsor.SASR_Code "
                 GroupBy = "SAS_Sponsor.SASR_Name"
             Else
-                Payee_Name = "SAS_Student.SASI_Name AS Payee_Name,"
+
+                Payee_Name = "CASE WHEN SAS_Accounts.Paymentmode='CHQ' THEN COALESCE(SAS_Accounts.PayeeName,'') "
+                Payee_Name += "ELSE COALESCE(SAS_Student.SASI_Name,'') END AS Payee_Name,"
+
                 InnerJoin = "INNER JOIN SAS_Student ON SAS_Accounts.CreditRef = SAS_Student.SASI_MatricNo "
                 GroupBy = "SAS_Student.SASI_name"
             End If
 
             'Buils Sql Statement - Start
             SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY SAS_Accounts.Paymentmode) AS Row_No, "
-            SqlStatement &= "CASE WHEN SAS_Accounts.Category='Payment' THEN SAS_Accounts.Transamount "
-            SqlStatement &= "ELSE SUM(SAS_Accounts.Transamount) END AS Trans_Amount,"
+            SqlStatement &= "CASE WHEN SAS_Accounts.Paymentmode='CHQ' THEN SAS_Accounts.Transamount "
+            SqlStatement &= "ELSE CASE WHEN SAS_Accounts.Category='Payment' THEN SAS_Accounts.Transamount "
+            SqlStatement &= "ELSE SUM(SAS_Accounts.Transamount) END END AS Trans_Amount,"
             SqlStatement &= "CASE WHEN SAS_Accounts.Voucherno = '' THEN CASE WHEN SAS_Accounts.Transcode = '' THEN "
             SqlStatement &= "SUBSTRING(SAS_Accounts.Transtempcode FROM 2 FOR Length(SAS_Accounts.Transtempcode)) ELSE "
             SqlStatement &= "SAS_Accounts.Transcode END ELSE SAS_Accounts.Voucherno END AS Trans_Code,"
@@ -317,6 +319,15 @@ Public Class CfPosting
 
                             'Post Cash Book Payment Details - Start
                             If CashBookPaymentDetail(MagicNo, LineNo, TransDate, HeaderDetails(Helper.TransCodeCol), HeaderDetails(Helper.TransAmountCol)) Then
+
+                                'modified by Hafiz @ 20&28/02/2017
+                                'CBP WF - Start
+                                Call CBPinterfaceWorkFlow(CompanyCode, CashBookNo)
+
+                                If PayMode.Contains("DDR") Then
+                                    Call CBPaymentModeMY(_CfCbPayHeaderEn, HeaderDetails(Helper.MatricNoCol), BatchCode)
+                                End If
+                                'CBP WF - End
 
                                 'Cash Book Payment Gl Distribution - Start
                                 If CashBookGlDist("CBP", BatchCode, LineNo, CashBookNo, CompanyCode, HeaderDetails(Helper.TransAmountCol), clsGeneric.NullToString(HeaderDetails(Helper.BankCodeCol)),
@@ -431,6 +442,90 @@ Public Class CfPosting
         End Try
 
     End Sub
+
+#End Region
+
+#Region "CBPaymentModeMY"
+    'added by Hafiz @ 28/02/2017
+    'Payment Mode DDR(EFT)
+
+    Public Function CBPaymentModeMY(ByVal CbPayHeader As Object, ByVal MatricNo As String, ByVal BatchCode As String) As Boolean
+
+        Dim _CfCbPayMyCbDetSql As String = Nothing
+        Dim _CfCbPayMyCbDetails As New CfCbPayMyCbDetails(), CbPayEn As New CfCbPayMyCbDetails()
+
+        Try
+
+            For Each prop As PropertyInfo In CbPayHeader.GetType().GetProperties()
+                If prop.CanRead Then
+                    Select Case prop.Name
+                        Case "cbph_company"
+                            _CfCbPayMyCbDetails.cbph_company = prop.GetValue(CbPayHeader, Nothing)
+                        Case "cbph_batchid"
+                            _CfCbPayMyCbDetails.cbph_batchid = prop.GetValue(CbPayHeader, Nothing)
+                        Case "cbph_lineno"
+                            _CfCbPayMyCbDetails.cbph_lineno = prop.GetValue(CbPayHeader, Nothing)
+                    End Select
+                End If
+            Next
+
+            If GetMyCbDetails(MatricNo, BatchCode, CbPayEn) Then
+                _CfCbPayMyCbDetails.cbph_icno = CbPayEn.cbph_icno
+                _CfCbPayMyCbDetails.cbph_acctno = CbPayEn.cbph_acctno
+                _CfCbPayMyCbDetails.cbph_recvbank = CbPayEn.cbph_recvbank
+                _CfCbPayMyCbDetails.cbph_email = CbPayEn.cbph_email
+                _CfCbPayMyCbDetails.cbph_mobile = CbPayEn.cbph_mobile
+                _CfCbPayMyCbDetails.cbph_comment = CbPayEn.cbph_comment
+            End If
+
+            If _CfGeneric.BuildSqlStatement(_CfCbPayMyCbDetails, _CfCbPayMyCbDetSql, CfGeneric.CfCbPayMyCbDetTbl) Then
+                Return ExecuteSqlStatement(_CfCbPayMyCbDetSql)
+            End If
+
+        Catch ex As Exception
+
+            Call Helper.LogError("Entity Class: " & CbPayHeader.ToString() & vbCrLf & ex.Message)
+            Return False
+
+        End Try
+
+    End Function
+
+    'construct query for CBP Details
+    Public Function GetMyCbDetails(ByVal MatricNo As String, ByVal BatchCode As String, ByRef CbPayEn As CfCbPayMyCbDetails) As Boolean
+
+        Dim SqlStatement As String = Nothing
+
+        Try
+            SqlStatement = "SELECT COALESCE(SS.SASI_IcNo,'') AS IC_NO, COALESCE(SS.SASI_AccNo,'')AS ACC_NO, COALESCE(SS.SASI_Bank,'') AS BANK,"
+            SqlStatement &= "COALESCE(SS.SASI_Email,'') AS EMAIL,COALESCE(SS.SASI_Hp,'') AS MOBILE, COALESCE(SA.Description,'') AS DESC "
+            SqlStatement &= "FROM SAS_Accounts SA "
+            SqlStatement &= "INNER JOIN SAS_Student SS ON SS.SASI_MatricNo=SA.CreditRef "
+            SqlStatement &= "WHERE SA.CreditRef = " & clsGeneric.AddQuotes(MatricNo) & " "
+            SqlStatement &= "AND SA.BatchCode=" & clsGeneric.AddQuotes(BatchCode) & " "
+
+            Using _DataReader As IDataReader = _DataBaseProvider.ExecuteReader(Helper.GetDataBaseType, Helper.GetConnectionString, SqlStatement).CreateDataReader()
+
+                While _DataReader.Read
+                    CbPayEn.cbph_icno = _DataReader("IC_NO")
+                    CbPayEn.cbph_acctno = _DataReader("ACC_NO")
+                    CbPayEn.cbph_recvbank = _DataReader("BANK")
+                    CbPayEn.cbph_email = _DataReader("EMAIL")
+                    CbPayEn.cbph_mobile = _DataReader("MOBILE")
+                    CbPayEn.cbph_comment = _DataReader("DESC")
+                End While
+
+                _DataReader.Close()
+
+            End Using
+
+            Return True
+
+        Catch ex As Exception
+            Return False
+        End Try
+
+    End Function
 
 #End Region
 
