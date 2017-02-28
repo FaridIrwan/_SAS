@@ -1172,12 +1172,14 @@ namespace HTS.SAS.DataAccessObjects
                                         List_Failed.Add(_WorkflowEn);
                                     }
                                 }
+
+                                if (((System.Data.DataTableReader)(loReader)).HasRows == false)
+                                {
+                                    debit_flag = true;
+                                }
+
                                 loReader.Close();
                             }
-                        }
-                        else
-                        {
-                            debit_flag = true;
                         }
                     }
                 }
@@ -1348,12 +1350,14 @@ namespace HTS.SAS.DataAccessObjects
                                         List_Failed.Add(_WorkflowEn);
                                     }
                                 }
+
+                                if (((System.Data.DataTableReader)(loReader)).HasRows == false)
+                                {
+                                    credit_flag = true;
+                                }
+
                                 loReader.Close();
                             }
-                        }
-                        else
-                        {
-                            credit_flag = true;
                         }
                     }
                 }
@@ -1460,6 +1464,13 @@ namespace HTS.SAS.DataAccessObjects
                                 }
 
                             }
+
+                            if (((System.Data.DataTableReader)(loReader)).HasRows == false)
+                            {
+                                debit_flag = true;
+                                credit_flag = true;
+                            }
+
                             loReader.Close();
                         }
                     }
@@ -1570,6 +1581,13 @@ namespace HTS.SAS.DataAccessObjects
                                 }
 
                             }
+
+                            if (((System.Data.DataTableReader)(loReader)).HasRows == false)
+                            {
+                                debit_flag = true;
+                                credit_flag = true;
+                            }
+
                             loReader.Close();
                         }
                     }
