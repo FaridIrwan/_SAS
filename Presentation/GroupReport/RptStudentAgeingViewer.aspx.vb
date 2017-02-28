@@ -159,6 +159,7 @@ Partial Class RptStudentAgeingViewer
                         str += "GROUP BY SA.TransId,REC.RefCode ) a "
                         str += "INNER JOIN SAS_Accounts SA ON SA.TransCode=a.TransCode AND SA.CreditRef=a.CreditRef "
                         str += "INNER JOIN SAS_AccountsDetails SAD ON SAD.TransCode=a.TransCode "
+                        str += " WHERE SA.TransDate <= '" + DateTo + "'"
                         str += "GROUP BY a.CreditRef,SA.TransDate,SAD.RefCode,SAD.TransAmount "
                         str += ") ageing "
                         str += FT_join
@@ -205,6 +206,7 @@ Partial Class RptStudentAgeingViewer
                         str += "AND SA.PostStatus = 'Posted' "
                         str += "GROUP BY SA.TransId) a "
                         str += "INNER JOIN SAS_Accounts SA ON SA.TransCode=a.TransCode AND SA.CreditRef=a.CreditRef "
+                        str += " WHERE SA.TransDate <= '" + DateTo + "'"
                         str += "GROUP BY a.CreditRef,a.TransCode,SA.TransDate,SA.TransAmount,SA.PaidAmount,a.PAID_AMT"
                         str += ") ageing "
                         str += StudentStatus
