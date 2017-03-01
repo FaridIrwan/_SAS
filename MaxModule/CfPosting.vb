@@ -191,6 +191,11 @@ Public Class CfPosting
                         'Clear Sql Statement
                         CfCbPayBatchSql = String.Empty
 
+                        'modified by Hafiz @ 20/02/2017
+                        'CBP Interface WF - Start
+                        Call CBPinterfaceWorkFlow(CompanyCode, CashBookNo)
+                        'CBP Interface WF - End
+
                         'Build Cash Book Payment Header - Start
                         If CashBookPaymentHeader(BatchCode, CompanyCode, CashBookNo, _CfCbPayBatchEn.cbpb_type, BatchDetails(Helper.CategorySubTypeCol)) Then
                             result = True
@@ -320,14 +325,12 @@ Public Class CfPosting
                             'Post Cash Book Payment Details - Start
                             If CashBookPaymentDetail(MagicNo, LineNo, TransDate, HeaderDetails(Helper.TransCodeCol), HeaderDetails(Helper.TransAmountCol)) Then
 
-                                'modified by Hafiz @ 20&28/02/2017
-                                'CBP WF - Start
-                                Call CBPinterfaceWorkFlow(CompanyCode, CashBookNo)
-
+                                'modified by Hafiz @ 28/02/2017
+                                'CBP Insert Into MY_CBDetails - Start
                                 If PayMode.Contains("DDR") Then
                                     Call CBPaymentModeMY(_CfCbPayHeaderEn, HeaderDetails(Helper.MatricNoCol), BatchCode)
                                 End If
-                                'CBP WF - End
+                                'CBP Insert Into MY_CBDetails - End
 
                                 'Cash Book Payment Gl Distribution - Start
                                 If CashBookGlDist("CBP", BatchCode, LineNo, CashBookNo, CompanyCode, HeaderDetails(Helper.TransAmountCol), clsGeneric.NullToString(HeaderDetails(Helper.BankCodeCol)),

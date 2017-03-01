@@ -1511,7 +1511,8 @@ Partial Class Payments
             End If
 
             Try
-                ListObjects = bobj.GetSPAllocationTransactions(eob)
+                'ListObjects = bobj.GetSPAllocationTransactions(eob)
+                ListObjects = bobj.GetTransactions(eob)
             Catch ex As Exception
                 lblMsg.Text = ex.Message
                 LogError.Log("Payments", "LoadListObjects", ex.Message)
