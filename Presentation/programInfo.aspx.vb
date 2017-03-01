@@ -738,10 +738,16 @@ Partial Class programinfo
                 Else
                     ddlStatus.SelectedValue = 0
                 End If
-                ddlBidang.SelectedValue = obj.BidangCode
+
+                If Not String.IsNullOrWhiteSpace(obj.BidangCode) Then
+                    ddlBidang.SelectedValue = obj.BidangCode
+                Else
+                    ddlBidang.SelectedValue = -1
+                End If
+
                 loadddlFaculty(obj.Code)
 
-            End If
+                End If
         End If
 
     End Sub
