@@ -216,15 +216,23 @@
                 return false;
             }
 
-
-
-
-
+            //modified by Hafiz @ 01/03/2017
+            //Paymode=CHQ Mandatory-PayeeName
             if (document.getElementById("<%=ddlPayment.ClientID%>").value == "-1") {
                 alert("Select a Payment Mode");
                 document.getElementById("<%=ddlPayment.ClientID%>").focus();
                 return false;
             }
+            else {
+                if (document.getElementById("<%=ddlPayment.ClientID%>").value == "CHQ") {
+                    if (document.getElementById("<%=txtPayeeName.ClientID%>").value.replace(re, "$1").length == 0) {
+                        alert("Payee Name is Mandatory For Payment Mode 'CHQ'");
+                        document.getElementById("<%=txtPayeeName.ClientID%>").focus();
+                        return false;
+                    }
+                }
+            }
+
             if (document.getElementById("<%=ddlBankCode.ClientID%>").value == "-1") {
                 alert("Select a Bank Code");
                 document.getElementById("<%=ddlBankCode.ClientID%>").focus();

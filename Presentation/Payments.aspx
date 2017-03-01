@@ -174,11 +174,25 @@
                 return false;
             }--%>
 
+            //modified by Hafiz @ 01/03/2017
+            //Paymode=CHQ Mandatory-PayeeName
             if (document.getElementById("<%=ddlPaymentMode.ClientID%>").value == "-1") {
                 alert("Select a Payment Mode");
                 document.getElementById("<%=ddlPaymentMode.ClientID%>").focus();
                 return false;
             }
+            else {
+                if (document.getElementById("<%=ddlPaymentMode.ClientID%>").value == "CHQ")
+                {
+                    if (document.getElementById("<%=txtpayee.ClientID%>").value.replace(re, "$1").length == 0)
+                    {
+                        alert("Payee Name is Mandatory For Payment Mode \"CHQ\"");
+                        document.getElementById("<%=txtpayee.ClientID%>").focus();
+                        return false;
+                    }
+                }
+            }
+
             if (document.getElementById("<%=ddlBankCode.ClientID%>").value == "-1") {
                 alert("Select a Bank Code");
                 document.getElementById("<%=ddlBankCode.ClientID%>").focus();
@@ -925,8 +939,7 @@
                                 </td>
                                 <td style="width: 156px; height: 25px">
                                     <%--<asp:Button ID="btnUpload" runat="server" Text="Upload" />--%>
-                                    <asp:TextBox ID="txtpayee" runat="server" MaxLength="20" Width="160px" 
-                                       ></asp:TextBox>
+                                    <asp:TextBox ID="txtpayee" runat="server" MaxLength="20" Width="160px"></asp:TextBox>
                                 </td>
                                 <td style="width: 15%; height: 25px">
                                     &nbsp;</td>

@@ -1048,7 +1048,7 @@ Partial Class Feetype
             Dim _lblDesc As Label = CType(e.Item.FindControl("lblDesc"), Label)
 
             If Not _TextBox.Text = "" Then
-                result = _MaxModule.GLCodeValidR(_TextBox.Text)
+                result = _MaxModule.GLCodeValid(_TextBox.Text)
 
                 If result Then
                     'Check GLLedgerType in CF
@@ -1102,7 +1102,7 @@ Partial Class Feetype
                 Dim _GLDescription As String = Nothing
 
                 If Not tbGL.Text = "" Then
-                    result = _MaxModule.GLCodeValidR(tbGL.Text)
+                    result = _MaxModule.GLCodeValid(tbGL.Text)
 
                     If result Then
                         'Check GLLedgerType in CF
@@ -1210,7 +1210,7 @@ Partial Class Feetype
             Dim _lblDesc As Label = dgKolej.Items(e.Item.ItemIndex).FindControl("lblDesc")
 
             If Not _TextBox.Text = "" Then
-                result = _MaxModule.GLCodeValidR(_TextBox.Text)
+                result = _MaxModule.GLCodeValid(_TextBox.Text)
 
                 If result Then
                     'Check GLLedgerType in CF
@@ -1264,7 +1264,7 @@ Partial Class Feetype
                 Dim _GLDescription As String = Nothing
 
                 If Not tbGL.Text = "" Then
-                    result = _MaxModule.GLCodeValidR(tbGL.Text)
+                    result = _MaxModule.GLCodeValid(tbGL.Text)
 
                     If result Then
                         'Check GLLedgerType in CF
