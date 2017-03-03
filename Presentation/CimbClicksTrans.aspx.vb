@@ -71,6 +71,7 @@ Partial Class CimbClicksTrans
                 MenuId.Value = GetMenuId()
                 ibtnSave.Attributes.Add("onclick", "return validate()")
                 ibtnPosting.Attributes.Add("onClick", "return getpostconfirm()")
+                btnFailedList.Attributes.Add("onclick", "new_window=window.open('CimbClicksFailedList.aspx','Hanodale','width=500,height=400,resizable=0');new_window.focus();")
                 LoadUserRights()
                 DisableRecordNavigator()
                 ClearControls()
@@ -336,15 +337,24 @@ Partial Class CimbClicksTrans
 
                 'Added By Zoya @7/03/2016
                 'Dispaly a Message if the student Name Does not Exist
-                Dim StudentName As String
+                'Dim StudentName As String
+
+                'For Each dgitem In dgClicksTransactions.Items
+                '    StudentName = dgitem.Cells(0).Text
+                '    If StudentName = "&nbsp;" Then
+                '        StudentNameMsg.Text = "Some of The Student Records not Exist"
+                '    End If
+                'Next
+                'End Added By Zoya @7/03/2016
 
                 For Each dgitem In dgClicksTransactions.Items
-                    StudentName = dgitem.Cells(0).Text
-                    If StudentName = "&nbsp;" Then
-                        StudentNameMsg.Text = "Some of The Student Records not Exist"
+                    If Session("NotFoundFlag") = True Then
+                        StudentNameMsg.Text = "Some of The Student Records not Exist and will be Exclude."
+                        failed_list.Visible = True
+                    Else
+                        failed_list.Visible = False
                     End If
                 Next
-                'End Added By Zoya @7/03/2016
 
                 'Added by Hafiz Roslan @ 12/01/2016
                 'For the File Upload related matters
@@ -400,6 +410,7 @@ Partial Class CimbClicksTrans
         lblFileName.Text = UploadedClicksFile
         lblTotalStudent.Text = TotalRecords
         lblTotalAmount.Text = clsGeneric.SetCurrencyFormat(TotalAmount)
+
         'Added by Hafiz Roslan @ 12/01/2016
         hidHeaderNo.Value = HeaderNo
         'Assign header no
@@ -440,8 +451,13 @@ Partial Class CimbClicksTrans
 
                 Call DisplayMessage("Records Saved Successfully")
 
-                batch_code.Visible = True
+                If Session("NotFoundFlag") = True Then
+                    failed_list.Visible = True
+                Else
+                    failed_list.Visible = False
+                End If
 
+                batch_code.Visible = True
                 lblBatchCode.ForeColor = Drawing.Color.Red
                 lblBatchCode.Text = BatchCode
                 lblFileUpload.Text = UploadedClicksFile
@@ -551,6 +567,10 @@ Partial Class CimbClicksTrans
 
 #Region "Clear Controls"
     Public Sub ClearControls()
+
+        Session("ListNotFoundStud") = Nothing
+        Session("NotFoundFlag") = False
+
         Call BindBankCode()
         Call BindCimbList()
     End Sub
@@ -590,6 +610,7 @@ Partial Class CimbClicksTrans
         _summry.Visible = False
         pnlDisplay.Visible = False
         PnlAdd.Visible = True
+        failed_list.Visible = False
         batch_code.Visible = False
         lblMsg.Text = ""
         lblFileName.Text = ""

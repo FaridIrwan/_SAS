@@ -62,7 +62,7 @@ namespace HTS.SAS.Entities
         private string csbatchno;
         private string cscat;
         private double cdoutamount;
-
+        private double cdcreditamt;
         [System.Xml.Serialization.XmlElement]
         ////[DataMember]
         public string NoPelajar
@@ -477,6 +477,13 @@ namespace HTS.SAS.Entities
         {
             get { return cscat; }
             set { cscat = value; }
+        }
+        [System.Xml.Serialization.XmlElement]
+        ////[DataMember]
+        public double creditamt
+        {
+            get { return cdcreditamt; }
+            set { cdcreditamt = value; }
         }
     }
 }

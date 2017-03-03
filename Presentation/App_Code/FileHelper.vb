@@ -22,7 +22,7 @@ Public Class FileHelper
 
 #Region "Cimb Clicks Entity "
 
-    Private Class CimbClicksEntity
+    Public Class CimbClicksEntity
 
         Private _STUDENT_IC_NO As String
         Public Property IC_NO() As String
@@ -1314,7 +1314,7 @@ Public Class FileHelper
         'Create Instances - Start
         Dim _StreamReader As StreamReader = Nothing
         Dim _CimbClicksEntity As CimbClicksEntity = Nothing
-        Dim ListCimbClicksEntity As List(Of CimbClicksEntity)
+        Dim ListCimbClicksEntity As List(Of CimbClicksEntity), ListNotFoundStud As List(Of CimbClicksEntity)
         'Create Instances - Stop
 
         'Variable Declarations - Start
@@ -1330,6 +1330,7 @@ Public Class FileHelper
 
             'Initialize
             ListCimbClicksEntity = New List(Of CimbClicksEntity)
+            ListNotFoundStud = New List(Of CimbClicksEntity)
 
             'Open File in Default Format
             _StreamReader = New StreamReader(CimbClicksFile, Encoding.Default)
@@ -1397,56 +1398,73 @@ Public Class FileHelper
                         ReceiptDate.Substring(2, 2) & "/" & Right(ReceiptDate, 4)
                     'Set Date Format - Stop
 
+                    Session("NotFoundFlag") = False
+
                     'Get Student Name
                     StudentName = GetStudentName(MatricNo)
 
-                    'Set Entity Values - Start
-                    _CimbClicksEntity = New CimbClicksEntity()
-                    _CimbClicksEntity.IC_NO = IdentityNo
-                    _CimbClicksEntity.MATRIC_NO = MatricNo
-                    _CimbClicksEntity.RECEIPT_NO = ReceiptNo
-                    _CimbClicksEntity.PAID_AMOUNT = PaidAmount
-                    _CimbClicksEntity.STUDENT_NAME = StudentName
-                    _CimbClicksEntity.RECEIPT_DATE = ReceiptDate
-                    'Set Entity Values - Stop
+                    If Not String.IsNullOrEmpty(StudentName) Then
+                        'Set Entity Values - Start
+                        _CimbClicksEntity = New CimbClicksEntity()
+                        _CimbClicksEntity.IC_NO = IdentityNo
+                        _CimbClicksEntity.MATRIC_NO = MatricNo
+                        _CimbClicksEntity.RECEIPT_NO = ReceiptNo
+                        _CimbClicksEntity.PAID_AMOUNT = PaidAmount
+                        _CimbClicksEntity.STUDENT_NAME = StudentName
+                        _CimbClicksEntity.RECEIPT_DATE = ReceiptDate
+                        'Set Entity Values - Stop
 
-                    'Check Receipt No - Start
-                    'Variable Declarations
-                    Dim SqlStatement As String = Nothing, ReceiptCounter As Short = 0
+                        'Check Receipt No - Start
+                        'Variable Declarations
+                        Dim SqlStatement As String = Nothing, ReceiptCounter As Short = 0
 
-                    Try
+                        Try
 
-                        'Build Sql Statement - Start
-                        SqlStatement = "SELECT COUNT(*) AS Total_Files FROM sas_clicks_receiptdetails WHERE "
-                        SqlStatement &= " receipt_no = " & clsGeneric.AddQuotes(ReceiptNo)
-                        'Build Sql Statement - Stop
+                            'Build Sql Statement - Start
+                            SqlStatement = "SELECT COUNT(*) AS Total_Files FROM sas_clicks_receiptdetails WHERE "
+                            SqlStatement &= " receipt_no = " & clsGeneric.AddQuotes(ReceiptNo)
+                            'Build Sql Statement - Stop
 
-                        'get file counter - Start
-                        ReceiptCounter = clsGeneric.NullToShort(_DatabaseFactory.ExecuteScalar(DataBaseType,
-                            DataBaseConnectionString, SqlStatement))
-                        'get file counter - Stop
+                            'get file counter - Start
+                            ReceiptCounter = clsGeneric.NullToShort(_DatabaseFactory.ExecuteScalar(DataBaseType,
+                                DataBaseConnectionString, SqlStatement))
+                            'get file counter - Stop
 
-                        'comment by Hafiz @ 06/6/2016
-                        'Allow duplicate Receipt No
-                        'If ReceiptCounter > 0 Then
-                        '    Return False
-                        'End If
+                            'comment by Hafiz @ 06/6/2016
+                            'Allow duplicate Receipt No
+                            'If ReceiptCounter > 0 Then
+                            '    Return False
+                            'End If
 
-                    Catch ex As Exception
+                        Catch ex As Exception
 
-                        'Log Error 
-                        Call MaxModule.Helper.LogError(ex.Message)
+                            'Log Error 
+                            Call MaxModule.Helper.LogError(ex.Message)
 
-                        Return False
+                            Return False
 
-                    End Try
-                    'Check Receipt No - Stop
+                        End Try
+                        'Check Receipt No - Stop
 
-                    'Add Total Amount
-                    TotalAmount = TotalAmount + PaidAmount
+                        'Add Total Amount
+                        TotalAmount = TotalAmount + PaidAmount
 
-                    'Add to List 
-                    ListCimbClicksEntity.Add(_CimbClicksEntity)
+                        'Add to List 
+                        ListCimbClicksEntity.Add(_CimbClicksEntity)
+
+                    Else
+                        _CimbClicksEntity = New CimbClicksEntity()
+                        _CimbClicksEntity.IC_NO = IdentityNo
+                        _CimbClicksEntity.MATRIC_NO = MatricNo
+                        _CimbClicksEntity.RECEIPT_NO = ReceiptNo
+                        _CimbClicksEntity.PAID_AMOUNT = PaidAmount
+                        _CimbClicksEntity.STUDENT_NAME = StudentName
+                        _CimbClicksEntity.RECEIPT_DATE = ReceiptDate
+                        ListNotFoundStud.Add(_CimbClicksEntity)
+
+                        Session("ListNotFoundStud") = ListNotFoundStud
+                        Session("NotFoundFlag") = True
+                    End If
 
                 End If
                 'Check Line Type - Stop
