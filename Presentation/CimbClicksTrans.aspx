@@ -261,6 +261,14 @@
                         <asp:Label ID="lblTotalStudent" runat="server"></asp:Label>
                     </td>
                 </tr>
+                <tr id="failed_list" runat="server" visible="false">
+                    <td style="width: 10%;">
+                        <asp:Label ID="Label7" runat="server" Text="Excluded Student" Font-Bold="true"></asp:Label>
+                    </td>
+                    <td>
+                        <asp:Button ID="btnFailedList" runat="server" Text="View Excluded Student" />
+                    </td>
+                </tr>
                 <tr id="batch_code" runat="server" visible="false">
                     <td style="width: 10%;">
                         <asp:Label ID="Label4" runat="server" Text="Batch Code" Font-Bold="true"></asp:Label>
@@ -280,6 +288,7 @@
          <td style="width: 43px; height: 17px">
             <asp:Label ID="StudentNameMsg" runat="server" CssClass="lblError" Style="text-align: right"
                 Width="348px"></asp:Label>
+             <asp:Literal ID="linkView" runat="server"></asp:Literal>
          </td>
         </tr>
         <%--End Added By Zoya @8/03/2016--%>
