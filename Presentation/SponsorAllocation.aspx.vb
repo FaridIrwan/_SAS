@@ -197,7 +197,7 @@ Partial Class SponsorAllocation
                     End If
                 Next
             End If
-           
+
         End If
 
         If GLflagTrigger.Value = "ON" Then
@@ -1583,7 +1583,7 @@ Partial Class SponsorAllocation
 
                                 Try
 
-                                    ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                                    ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                                 Catch ex As Exception
                                     LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -1659,7 +1659,7 @@ Partial Class SponsorAllocation
 
                                 Try
 
-                                    ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                                    ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                                 Catch ex As Exception
                                     LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -1784,7 +1784,7 @@ Partial Class SponsorAllocation
 
                                 Try
 
-                                    ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                                    ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                                 Catch ex As Exception
                                     LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -1862,7 +1862,7 @@ Partial Class SponsorAllocation
 
                                 Try
 
-                                    ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                                    ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                                 Catch ex As Exception
                                     LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -2114,7 +2114,7 @@ Partial Class SponsorAllocation
     ''' Method to Load Totals in the Grid
     ''' </summary>
     ''' <remarks></remarks>
-     Private Sub LoadTotal()
+    Private Sub LoadTotal()
 
         'varaible declaration
         Dim ActSpAmount As Double = 0.0, SpStuAllAmount As Double = 0.0, RspStuAllAmount As Double = 0.0, StAllAmount = 0.0, AvalAllAmount As Double = 0.0
@@ -2428,7 +2428,7 @@ Partial Class SponsorAllocation
                 credit = txtCreditamt.Text
                 eobjDetails = New AccountsDetailsEn
                 eobjDetails.ReferenceCode = dgItem1.Cells(1).Text.Trim
-                eobjDetails.PaidAmount = CDbl(txtCreditamt.Text.Trim)
+                eobjDetails.creditamt = CDbl(txtCreditamt.Text.Trim)
                 total = credit + allocated
                 eobjDetails.TransactionAmount = CDbl(total)
                 eobjDetails.DiscountAmount = CDbl(allocated)
@@ -2529,7 +2529,7 @@ Partial Class SponsorAllocation
                 credit2 = txtCreditamt2.Text
                 eobjDetails = New AccountsDetailsEn
                 eobjDetails.ReferenceCode = dgItem2.Cells(1).Text.Trim
-                eobjDetails.PaidAmount = CDbl(txtCreditamt2.Text.Trim)
+                eobjDetails.creditamt = CDbl(txtCreditamt2.Text.Trim)
                 total2 = credit2 + allocated2
                 eobjDetails.TransactionAmount = CDbl(total2)
                 eobjDetails.DiscountAmount = CDbl(allocated2)
@@ -3008,7 +3008,7 @@ Partial Class SponsorAllocation
                         obj.MatricNo = dgItem1.Cells(1).Text
                         'outamt = liststuAll(j).PaidAmount
                         stuen.MatricNo = liststuAll(j).MatricNo
-                       
+
                         stuen.BatchCode = eobstu.TransTempCode
                         stuen.SASI_Add3 = txtspcode.Text
                         sponamt = bsstu.GetStudentSponsorAmtInSponsorAllocation(stuen)
@@ -3075,7 +3075,7 @@ Partial Class SponsorAllocation
 
                         Try
 
-                            ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                            ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                         Catch ex As Exception
                             LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -3126,7 +3126,7 @@ Partial Class SponsorAllocation
             End While
 
         End If
-       
+
         Session("SPncode") = eobj.CreditRef
         Session("PAidAmount") = amount
         Session("Scode") = eobj.CreditRef
@@ -3166,7 +3166,7 @@ Partial Class SponsorAllocation
                 cr = cr + amount
                 txtCreditAmount.Text = String.Format("{0:N}", cr)
 
-              
+
 
             Else
                 'If rdbStudentLeddger.Checked = True Then
@@ -3374,7 +3374,7 @@ Partial Class SponsorAllocation
 
                     Try
 
-                        ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                        ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                     Catch ex As Exception
                         LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -3560,7 +3560,7 @@ Partial Class SponsorAllocation
 
                     Try
 
-                        ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                        ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                     Catch ex As Exception
                         LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -3969,7 +3969,7 @@ Partial Class SponsorAllocation
         For Each dgItem1 In dgView.Items
             chkselect = dgItem1.Cells(0).Controls(1)
             If chkselect.Checked = True Then
-               Dim NoKelompok As String = ""
+                Dim NoKelompok As String = ""
                 Dim NoWarran As String = ""
                 Dim AmaunWarran As Double = 0.0
                 Dim noAkaun As String = ""
@@ -3981,7 +3981,7 @@ Partial Class SponsorAllocation
                 credit = txtCreditamt.Text
                 eobjDetails = New AccountsDetailsEn
                 eobjDetails.ReferenceCode = dgItem1.Cells(1).Text.Trim
-                eobjDetails.PaidAmount = CDbl(txtCreditamt.Text.Trim)
+                eobjDetails.creditamt = CDbl(txtCreditamt.Text.Trim)
                 total = credit + allocated
                 eobjDetails.TransactionAmount = CDbl(total)
                 eobjDetails.DiscountAmount = CDbl(allocated)
@@ -4055,7 +4055,7 @@ Partial Class SponsorAllocation
                 credit2 = txtCreditamt2.Text
                 eobjDetails = New AccountsDetailsEn
                 eobjDetails.ReferenceCode = dgItem2.Cells(1).Text.Trim
-                eobjDetails.PaidAmount = CDbl(txtCreditamt2.Text.Trim)
+                eobjDetails.creditamt = CDbl(txtCreditamt2.Text.Trim)
                 total2 = credit2 + allocated2
                 eobjDetails.TransactionAmount = CDbl(total2)
                 eobjDetails.DiscountAmount = CDbl(allocated2)
@@ -4378,7 +4378,7 @@ Partial Class SponsorAllocation
 
                 Try
 
-                    ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                    ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                 Catch ex As Exception
                     LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -4660,7 +4660,7 @@ Partial Class SponsorAllocation
 
                     Try
 
-                        ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                        ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
                     Catch ex As Exception
                         LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
@@ -4773,7 +4773,7 @@ Partial Class SponsorAllocation
 
             Try
 
-                ListInvObjects1 = obj3.GetStudentLedgerDetailList(eob3)
+                ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
 
             Catch ex As Exception
                 LogError.Log("SponsorAllocation", "addSpnCode", ex.Message)
