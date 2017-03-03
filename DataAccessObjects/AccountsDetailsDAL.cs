@@ -1565,9 +1565,9 @@ namespace HTS.SAS.DataAccessObjects
             List<AccountsDetailsEn> loEnList = new List<AccountsDetailsEn>();
           
             string sqlCmd = " select distinct ss.SASI_MatricNo,ss.SASI_Name,ss.SASI_PgId,ss.SASI_ICNo,ss.SASI_CurSem,sa.NoKelompok,sa.NoWarran," +
-                            " sa.AmaunWarran,allocated.allocateamount as allocateamount, allocated.paidamount as creditamount, allocated.temppaidamount as sponamt, pocket.transamount as pocket" +
+                            " sa.AmaunWarran,allocated.allocateamount as allocateamount, allocated.discountamount as creditamount, allocated.temppaidamount as sponamt, pocket.transamount as pocket" +
                             " ,pocket.tempamount as outstandingamt from  sas_accounts sa inner join sas_student ss on ss.SASI_MatricNo = sa.creditref left join" +
-                            " (select creditref,batchcode,allocateamount, paidamount, temppaidamount from sas_accounts where description = 'Sponsor Allocation Amount'  ) " +
+                            " (select creditref,batchcode,allocateamount, discountamount, temppaidamount from sas_accounts where description = 'Sponsor Allocation Amount'  ) " +
                             " as allocated on allocated.batchcode = sa.batchcode and allocated.creditref = ss.sasi_matricno left join" +
                             " (select creditref,batchcode,transamount,temppaidamount ,tempamount from sas_accounts where  " +
                             " description = 'Sponsor Pocket Amount')  as pocket on pocket.batchcode = sa.batchcode and pocket.creditref = ss.sasi_matricno" +
@@ -1631,9 +1631,9 @@ namespace HTS.SAS.DataAccessObjects
             List<AccountsDetailsEn> loEnList = new List<AccountsDetailsEn>();
 
             string sqlCmd = " select distinct ss.SASI_MatricNo,ss.SASI_Name,ss.SASI_PgId,ss.SASI_ICNo,ss.SASI_CurSem,sa.NoKelompok,sa.NoWarran," +
-                            " sa.AmaunWarran,allocated.allocateamount as allocateamount, allocated.paidamount as creditamount, allocated.temppaidamount as sponamt, pocket.transamount as pocket" +
+                            " sa.AmaunWarran,allocated.allocateamount as allocateamount, allocated.discountamount as creditamount, allocated.temppaidamount as sponamt, pocket.transamount as pocket" +
                             " ,pocket.tempamount as outstandingamt from  sas_accounts_inactive sa inner join sas_student ss on ss.SASI_MatricNo = sa.creditref left join" +
-                            " (select creditref,batchcode,allocateamount, paidamount, temppaidamount from sas_accounts_inactive where description = 'Sponsor Allocation Amount'  ) " +
+                            " (select creditref,batchcode,allocateamount, discountamount, temppaidamount from sas_accounts_inactive where description = 'Sponsor Allocation Amount'  ) " +
                             " as allocated on allocated.batchcode = sa.batchcode and allocated.creditref = ss.sasi_matricno left join" +
                             " (select creditref,batchcode,transamount,temppaidamount ,tempamount from sas_accounts_inactive where  " +
                             " description = 'Sponsor Pocket Amount')  as pocket on pocket.batchcode = sa.batchcode and pocket.creditref = ss.sasi_matricno" +
