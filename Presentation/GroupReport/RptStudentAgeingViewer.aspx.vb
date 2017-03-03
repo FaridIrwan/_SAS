@@ -46,7 +46,7 @@ Partial Class RptStudentAgeingViewer
 
                     Dim StudentStatus As String = Nothing, FilterStatus As String = Nothing, SumQuery As String = Nothing
                     If Status <> "-1" Then
-                        StudentStatus = "WHERE EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef AND SASS_Code = '" + Status + "') "
+                        StudentStatus = "AND EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef AND SASS_Code = '" + Status + "') "
                         'FilterStatus = "AND SS.SASS_Code = '" + Status + "' "
                         'StatusQuery = "LEFT JOIN SAS_Studentstatus SS ON SS.SASS_Code IN (SELECT SASS_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) "
                     End If
@@ -149,7 +149,7 @@ Partial Class RptStudentAgeingViewer
                         str += "SELECT DISTINCT SA.CreditRef,SA.TransCode,SA.TransDate,REC.RefCode,"
                         str += "COALESCE(SUM(REC.PAID_AMT),0) AS PAID_AMT "
                         str += "FROM SAS_Accounts SA "
-                        str += "INNER JOIN REC ON REC.INV_NO=SA.TransCode "
+                        str += "LEFT JOIN REC ON REC.INV_NO=SA.TransCode "
                         str += "WHERE SA.TransAmount > 0"
                         str += "AND SA.SubType <> 'Sponsor' "
                         str += "AND SA.Category <> 'Payment' "
@@ -163,6 +163,7 @@ Partial Class RptStudentAgeingViewer
                         str += "GROUP BY a.CreditRef,SA.TransDate,SAD.RefCode,SAD.TransAmount "
                         str += ") ageing "
                         str += FT_join
+                        str += "WHERE ageing.CreditRef <> '' "
                         str += StudentStatus
                         str += FT_filter
                         str += "GROUP BY ageing.CreditRef,SFGL.GL_account,SKGL.GL_account "
@@ -209,6 +210,7 @@ Partial Class RptStudentAgeingViewer
                         str += " WHERE SA.TransDate <= '" + DateTo + "'"
                         str += "GROUP BY a.CreditRef,a.TransCode,SA.TransDate,SA.TransAmount,SA.PaidAmount,a.PAID_AMT"
                         str += ") ageing "
+                        str += "WHERE ageing.CreditRef <> '' "
                         str += StudentStatus
                         str += "GROUP BY ageing.CreditRef "
                         str += "ORDER BY ageing.CreditRef "
