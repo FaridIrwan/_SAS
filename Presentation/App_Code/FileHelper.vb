@@ -934,7 +934,7 @@ Public Class FileHelper
             'Concate Header/Details/Footer Contents - Stop
 
             'Create File - Start
-            If TotalRecords > 0 Then
+            If TotalRecords >= 0 Then
                 Call clsGeneric.CreateFile(DirectDebitFileName, False, _StringBuilder.ToString())
             End If
             'Create File - Stop
