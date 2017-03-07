@@ -7925,21 +7925,26 @@ public double GetSponserStuAllocateAmount(string BatchId)
             double OutAmt = 0.0;
             double debit = 0.0;
             double credit = 0.0;
-            string sqlCmd1 = "Select Sum(Debit) As DebitAmount From(" +
-            " SELECT CASE WHEN SAS_Accounts.category = 'Credit Note' or  SAS_Accounts.category = 'Debit Note' or SAS_Accounts.category = 'Invoice'" +
-            " then case when SAS_Accounts.transtype = 'Debit' then SUM(de.TransAmount) Else 0 End Else SAS_Accounts.TransAmount END Debit " +
-            " FROM SAS_Accounts left join sas_accountsdetails de on SAS_Accounts.transid = de.transid where " +
-            " (SAS_Accounts.poststatus = 'Posted') and  (sas_accounts.subtype = 'Student') and sas_accounts.subcategory NOT IN ('Loan') and (SAS_Accounts.TransType = 'Debit')  and  " +
-            " (sas_accounts.CreditRef =  '" + argEn.MatricNo + "')" +
-            " group by SAS_Accounts.TransAmount,SAS_Accounts.category,SAS_Accounts.transtype ) Result ";
-            string sqlCmd2 = "Select Sum(credit) As CreditAmount From(" +
-          " SELECT CASE WHEN SAS_Accounts.category = 'Credit Note' or  SAS_Accounts.category = 'Debit Note' or SAS_Accounts.category = 'Invoice'" +
-          //" then case when SAS_Accounts.transtype = 'Credit' then SUM(de.TransAmount) Else 0 End Else SUM(SAS_Accounts.TransAmount) END credit " +
-          " then case when SAS_Accounts.transtype = 'Credit' then SUM(de.TransAmount) Else 0 End Else SAS_Accounts.TransAmount END credit " +
-          " FROM SAS_Accounts left join sas_accountsdetails de on SAS_Accounts.transid = de.transid where " +
-          " (SAS_Accounts.poststatus = 'Posted') and  (sas_accounts.subtype = 'Student') and sas_accounts.subcategory NOT IN ('Loan') and (SAS_Accounts.TransType = 'Credit')  and  " +
-          " (sas_accounts.CreditRef =  '" + argEn.MatricNo + "')" +
-          " group by SAS_Accounts.TransAmount,SAS_Accounts.category,SAS_Accounts.transtype ) Result ";
+            
+            string sqlCmd1 = "SELECT COALESCE(Sum(Debit),0) AS DebitAmount FROM(" +
+            "SELECT CASE WHEN SAS_Accounts.category = 'Credit Note' or  SAS_Accounts.category = 'Debit Note' or SAS_Accounts.category = 'Invoice' " +
+            "THEN CASE WHEN SAS_Accounts.transtype = 'Debit' then SUM(de.TransAmount) Else 0 End Else SAS_Accounts.TransAmount END Debit " +
+            "FROM SAS_Accounts left join sas_accountsdetails de on SAS_Accounts.transid = de.transid where " +
+            "(SAS_Accounts.poststatus = 'Posted') and  (sas_accounts.subtype = 'Student') " +
+            //" and sas_accounts.subcategory NOT IN ('Loan') " + modified by Hafiz @ 07/03/2017 
+            "AND (SAS_Accounts.TransType = 'Debit') AND " +
+            "(sas_accounts.CreditRef =  '" + argEn.MatricNo + "') " +
+            "GROUP BY SAS_Accounts.TransAmount,SAS_Accounts.category,SAS_Accounts.transtype ) Result ";
+
+            string sqlCmd2 = "SELECT COALESCE(Sum(credit),0) AS CreditAmount FROM(" +
+            "SELECT CASE WHEN SAS_Accounts.category = 'Credit Note' or  SAS_Accounts.category = 'Debit Note' or SAS_Accounts.category = 'Invoice' " +
+            "THEN CASE WHEN SAS_Accounts.transtype = 'Credit' then SUM(de.TransAmount) Else 0 End Else SAS_Accounts.TransAmount END credit " +
+            "FROM SAS_Accounts left join sas_accountsdetails de on SAS_Accounts.transid = de.transid where " +
+            "(SAS_Accounts.poststatus = 'Posted') and  (sas_accounts.subtype = 'Student') " +
+            //"and sas_accounts.subcategory NOT IN ('Loan') "+ modified by Hafiz @ 07/03/2017 
+            "AND (SAS_Accounts.TransType = 'Credit') AND " +
+            "(sas_accounts.CreditRef =  '" + argEn.MatricNo + "') " +
+            "GROUP BY SAS_Accounts.TransAmount,SAS_Accounts.category,SAS_Accounts.transtype ) Result ";
 
             try
             {
@@ -11284,6 +11289,33 @@ public double GetSponserStuAllocateAmount(string BatchId)
                 //}
             }
             return true;
+        }
+
+        #endregion
+
+        #region GetOutstandingAmount()
+        //added by Hafiz @ 07/03/2017
+        //Get Oustanding Amount Direct From Student Ledger
+
+        public Double GetOutstandingAmount(String CreditRef,String SubType)
+        {
+            double OUTSTANDING_AMOUNT = 0.0;
+
+            List<AccountsEn> ListStud = new List<AccountsEn>();
+            ListStud = new AccountsDAL().GetStudentLedgerCombine(new AccountsEn
+                {
+                    CreditRef = CreditRef,
+                    TransType = "",
+                    SubType = SubType,
+                    PostStatus = "Posted"
+                });
+
+            if (ListStud.Count() > 0)
+            {
+                OUTSTANDING_AMOUNT = (ListStud.Sum(x => x.Debit)) - (ListStud.Sum(x => x.Credit));
+            }
+
+            return OUTSTANDING_AMOUNT;
         }
 
         #endregion

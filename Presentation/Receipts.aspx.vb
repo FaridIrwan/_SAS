@@ -62,7 +62,7 @@ Partial Class Receipts
 
 #Region "Get Sub Type "
 
-    Private Function GetSubType() As String
+    Public Function GetSubType() As String
 
         Dim SubType As String = ddlReceiptFor.SelectedValue
 
@@ -621,6 +621,8 @@ Partial Class Receipts
             dgStudentView.DataBind()
         End If
         'End Data Grid Item Bind
+
+        Session("SUBTYPE") = GetSubType()
 
     End Sub
 
@@ -2576,7 +2578,7 @@ Partial Class Receipts
                 'get amount
                 txt_Amount.Text = String.Format("{0:F}", CDec(str_Amount))
                 'get outstanding amount
-                DirectCast(dgItem1.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", CDec(list(index).Outstanding_Amount))
+                DirectCast(dgItem1.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", New AccountsDAL().GetOutstandingAmount(txt_matricno.Text, GetSubType()))
                 'get bank slip no
                 DirectCast(dgItem1.FindControl("BankSlipID"), TextBox).Text = list(index).BankSlipID
                 'updated by Hafiz Roslan @ 27/01/2016
@@ -3172,12 +3174,7 @@ Partial Class Receipts
                                     'Modified by Hafiz @ 23/3/2016
                                     'modified by Hafiz @ 25/4/2016
                                     'Outstanding amount fixes - start
-                                    Dim _stud As New StudentEn
-                                    _stud = _AccountsDal.GetStudentOutstanding(ListStudentEn(Index_2).CreditRef)
-
-                                    GetStudOutstndAmt = (_stud.OutstandingAmount) + (_stud.LoanAmount)
-
-                                    DirectCast(_DataGridItem.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", CDbl(GetStudOutstndAmt))
+                                    DirectCast(_DataGridItem.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", New AccountsDAL().GetOutstandingAmount(txt_matricno.Text, GetSubType()))
                                     'Outstanding amount fixes - end
 
                                     _DataGridItem.Cells(11).Text = Index_2
