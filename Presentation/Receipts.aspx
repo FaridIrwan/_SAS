@@ -139,36 +139,36 @@
                     if (response == true) {
                         if (confirm("Posted Record Cannot Be Altered, Do You Want To Proceed?")) {
                             if (document.getElementById("<%=txtBatchId.ClientID%>").value == "") {
-                                    alert("Error - Batch number not found or empty.");
-                                    return false;
-                                }
-                                else {
-                                    new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchId.ClientID%>").value + '',
-               'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
-                                    return true;
-                                }
+                                alert("Error - Batch number not found or empty.");
+                                return false;
+                            }
+                            else {
+                                new_window = window.open('AddApprover.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchId.ClientID%>").value + '',
+           'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
+                                return true;
                             }
                         }
-                        else {
-                            alert("Posting Failed. NO GL FOUND.")
-
-                            new_window = window.open('GLFailedList.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchId.ClientID%>").value, 'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
-                        return false;
                     }
+                    else {
+                        alert("Posting Failed. NO GL FOUND.")
+
+                        new_window = window.open('GLFailedList.aspx?MenuId=' + document.getElementById("<%=MenuId.ClientID%>").value + '&Batchcode=' + document.getElementById("<%=txtBatchId.ClientID%>").value, 'Hanodale', 'width=500,height=400,resizable=0'); new_window.focus();
+                            return false;
+                        }
                 }, onFailure);
-        }
+                }
 
-        function onSuccess(response) {
-            return response;
-        }
+                function onSuccess(response) {
+                    return response;
+                }
 
-        function onFailure(response) {
-            alert("Posted Record Fail.");
-        }
+                function onFailure(response) {
+                    alert("Posted Record Fail.");
+                }
 
 
-        function CheckAllocate() {
-            if (document.getElementById("<%=txtAllocateAmount.ClientID%>").value == "") {
+                function CheckAllocate() {
+                    if (document.getElementById("<%=txtAllocateAmount.ClientID%>").value == "") {
                 alert("Allocated Amount Field Cannot Be Blank");
                 document.getElementById("<%=txtAllocateAmount.ClientID%>").focus();
                 return false;
@@ -277,8 +277,8 @@
             var dt2 = parseInt(str2.substring(0, 2), 10);
             var mon2 = parseInt(str2.substring(3, 5), 10);
             var yr2 = parseInt(str2.substring(6, 10), 10);
-            var date1 = new Date(yr1, mon1-1, dt1);
-            var date2 = new Date(yr2, mon2-1, dt2);
+            var date1 = new Date(yr1, mon1 - 1, dt1);
+            var date2 = new Date(yr2, mon2 - 1, dt2);
 
             if (date2 < date1) {
                 alert("Batch Date Cannot be Greater than Current Date");
@@ -319,8 +319,8 @@
             var dt2 = parseInt(str2.substring(0, 2), 10);
             var mon2 = parseInt(str2.substring(3, 5), 10);
             var yr2 = parseInt(str2.substring(6, 10), 10);
-            var date1 = new Date(yr1, mon1-1, dt1);
-            var date2 = new Date(yr2, mon2-1, dt2);
+            var date1 = new Date(yr1, mon1 - 1, dt1);
+            var date2 = new Date(yr2, mon2 - 1, dt2);
 
             if (date2 < date1) {
                 alert("Receipt Date Cannot be Greater than Current Date");
@@ -336,8 +336,8 @@
             var dt2 = parseInt(str2.substring(0, 2), 10);
             var mon2 = parseInt(str2.substring(3, 5), 10);
             var yr2 = parseInt(str2.substring(6, 10), 10);
-            var date1 = new Date(yr1, mon1-1, dt1);
-            var date2 = new Date(yr2, mon2-1, dt2);
+            var date1 = new Date(yr1, mon1 - 1, dt1);
+            var date2 = new Date(yr2, mon2 - 1, dt2);
 
             if (date2 > date1) {
                 alert("Transaction Date Cannot be Lesser than Batch Date");
@@ -388,11 +388,9 @@
 
         //added by Hafiz Roslan @ 21/01/2016
         //purpose: retrieved data from delete button - start
-        function Data4DeleteButton(matricNo)
-        {
+        function Data4DeleteButton(matricNo) {
             //set retrived data to hidden field
-            if (matricNo != null & matricNo != "")
-            {
+            if (matricNo != null & matricNo != "") {
                 document.getElementById("<%=data4delbutton.ClientID%>").value = matricNo
             }
         }
@@ -1499,6 +1497,73 @@
                                         </td>
                                         <td style="height: 6px">
                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height: 16px" width="1%"></td>
+                <td colspan="3" style="height: 16px">
+                    <asp:DataGrid ID="dgInvoices1" runat="server" AutoGenerateColumns="False" DataKeyField="TransactionCode"
+                        Width="100%" OnSelectedIndexChanged="dgInvoices_SelectedIndexChanged" Visible ="false">
+                        <FooterStyle CssClass="dgFooterStyle" Height="20px" />
+                        <SelectedItemStyle CssClass="dgSelectedItemStyle" />
+                        <AlternatingItemStyle BackColor="Beige" CssClass="dgAlternatingItemStyle" Font-Bold="False"
+                            Font-Italic="False" Font-Overline="False" Font-Strikeout="False" Font-Underline="False" />
+                        <ItemStyle CssClass="dgItemStyle" />
+                        <HeaderStyle BackColor="#CDD7EE" CssClass="dgHeaderStyle" Font-Bold="True" Font-Italic="False"
+                            Font-Overline="False" Font-Size="Medium" Font-Strikeout="False" Font-Underline="False" />
+                        <Columns>
+                            <asp:BoundColumn DataField="TransDate" HeaderText="Date" DataFormatString="{0:dd/MM/yyyy}"></asp:BoundColumn>
+                            <asp:BoundColumn DataField="TransactionCode" HeaderText="Document No"></asp:BoundColumn>
+                            <asp:BoundColumn HeaderText="Description" DataField="Description">
+                                <HeaderStyle Width="30%" />
+                            </asp:BoundColumn>
+                            <asp:BoundColumn DataField="Category" HeaderText="Category"></asp:BoundColumn>
+                            <%-- Editted by Zoya @13/04/2016--%>
+                            <asp:BoundColumn HeaderText="Debit" DataField="Debit" DataFormatString="{0:N}">
+                                <HeaderStyle HorizontalAlign="Right" />
+                                <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
+                                    Font-Underline="False" HorizontalAlign="Right" />
+                            </asp:BoundColumn>
+                            <asp:BoundColumn HeaderText="Credit" DataField="Credit" DataFormatString="{0:N}">
+                                <HeaderStyle HorizontalAlign="Right" />
+                                <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
+                                    Font-Underline="False" HorizontalAlign="Right" />
+                            </asp:BoundColumn>
+                            <%--Done Editted by Zoya @13/04/2016--%>
+                            <asp:BoundColumn DataField="TransType" HeaderText="TransType" Visible="False"></asp:BoundColumn>
+                            <asp:BoundColumn HeaderText="Transaction Amount" DataField="TransactionAmount" Visible="false">
+                                <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
+                                    Font-Underline="False" HorizontalAlign="Right" />
+                            </asp:BoundColumn>
+                            <asp:BoundColumn HeaderText="Statement Balance">
+                                <HeaderStyle HorizontalAlign="Right" />
+                                <ItemStyle Font-Bold="False" Font-Italic="False" Font-Overline="False" Font-Strikeout="False"
+                                    Font-Underline="False" HorizontalAlign="Right" />
+                            </asp:BoundColumn>
+                            <asp:TemplateColumn HeaderText="View">
+                                <HeaderStyle HorizontalAlign="Center" />
+                                <ItemTemplate>
+                                    <center>
+                                        <asp:HyperLink ID="View" runat="server">View</asp:HyperLink></center>
+                                </ItemTemplate>
+                            </asp:TemplateColumn>
+                            <asp:BoundColumn DataField="BatchCode" HeaderText="BatchCode" Visible="False"></asp:BoundColumn>
+                        </Columns>
+                    </asp:DataGrid>
+                </td>
+                <td style="height: 16px" width="1%"></td>
+                  <td style="text-align: right" width="30%" class="auto-style1">
+                    <asp:TextBox ID="txtDebitAmount" runat="server" Style="text-align: right" Width="102px"
+                        Visible="False" Font-Bold="True" ReadOnly="True"></asp:TextBox>
+
+                </td>
+                 <td style="height: 16px; text-align: right" width="30%">
+                    <asp:TextBox ID="txtCreditAmount" runat="server" Style="text-align: right" Width="101px"
+                        Visible="False" Font-Bold="True" ReadOnly="True"></asp:TextBox>
+                </td>
+                  <td style="height: 16px; text-align: right" width="30%">
+                    <asp:TextBox ID="txtoutamount" runat="server" Visible="False" Font-Bold="True" Style="text-align: right"
+                        Width="102px" ReadOnly="True"></asp:TextBox>
+                </td>
                                     </tr>
                                 </table>
                             </asp:View>
