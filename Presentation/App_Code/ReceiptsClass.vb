@@ -273,19 +273,12 @@ Public Class ReceiptsClass
                             '_DataGridItems.Cells(18).Text = clsGeneric.SetCurrencyFormat(_AccountsDal.GetStudentOutstandingAmount(StudentMatricNo))
                             'GetStudOutstndAmt = clsGeneric.SetCurrencyFormat(_AccountsDal.GetStudentOutstandingAmount(StudentMatricNo))
 
-                            'Modified by Hafiz @ 04/3/2016
-                            'Outstanding amount calculation to tally Student Ledger - start
-                            Dim _stud As New StudentEn
-                            _stud = _AccountsDal.GetStudentOutstanding(StudentMatricNo)
+                            Dim OUTSTANDING_AMOUNT As Double = New AccountsDAL().GetOutstandingAmount(StudentMatricNo, HttpContext.Current.Session("SUBTYPE"))
+                            DirectCast(_DataGridItems.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", OUTSTANDING_AMOUNT)
 
-                            GetStudOutstndAmt = (_stud.OutstandingAmount) + (_stud.LoanAmount)
-                            'Outstanding amount calculation to tally Student Ledger - end
-
-                            'cast
-                            DirectCast(_DataGridItems.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", CDbl(GetStudOutstndAmt))
                             'assign to list Outstanding_Amount
-                            _DataGridItems.Cells(19).Text = String.Format("{0:F}", CDbl(GetStudOutstndAmt))
-                            ListStudentView(Index).Outstanding_Amount = GetStudOutstndAmt
+                            _DataGridItems.Cells(19).Text = String.Format("{0:F}", OUTSTANDING_AMOUNT)
+                            ListStudentView(Index).Outstanding_Amount = OUTSTANDING_AMOUNT
                             'Set Outstanding Amount - Stop
 
                             DirectCast(_DataGridItems.FindControl("BankSlipID"), TextBox).Text = ListStudentView(Index).BankSlipID
@@ -597,7 +590,7 @@ Public Class ReceiptsClass
 
                     ListStudentEn.Add(_StudentEn)
 
-                    End If
+                End If
             Next
             'Loop thro the Data Grid Item - Stop
 

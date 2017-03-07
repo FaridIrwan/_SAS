@@ -622,6 +622,8 @@ Partial Class Receipts
         End If
         'End Data Grid Item Bind
 
+        Session("SUBTYPE") = GetSubType()
+
     End Sub
 
 #End Region
@@ -2576,7 +2578,7 @@ Partial Class Receipts
                 'get amount
                 txt_Amount.Text = String.Format("{0:F}", CDec(str_Amount))
                 'get outstanding amount
-                DirectCast(dgItem1.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", CDec(list(index).Outstanding_Amount))
+                DirectCast(dgItem1.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", New AccountsDAL().GetOutstandingAmount(txt_matricno.Text, GetSubType()))
                 'get bank slip no
                 DirectCast(dgItem1.FindControl("BankSlipID"), TextBox).Text = list(index).BankSlipID
                 'updated by Hafiz Roslan @ 27/01/2016
@@ -2999,7 +3001,7 @@ Partial Class Receipts
 
                         Dim _AccountsDal As New AccountsDAL
                         Dim GetStudOutstndAmt As String = Nothing
-
+                        Dim outamt As Double = 0
                         If ddlReceiptFor.SelectedValue = ReceiptsClass.StudentLoan Then
 
                             Try
@@ -3162,9 +3164,36 @@ Partial Class Receipts
                                     DirectCast(_DataGridItem.FindControl("txtTransDate"), TextBox).Text = ListStudentEn(_DataGridItem.ItemIndex).ReceiptDate.ToString("yyyy-MM-dd")
                                     'get & Set Grid Controls - Stop
                                     If String.IsNullOrEmpty(ListStudentEn(Index_2).SourceType) Then
-                                        DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).BankSlipID
+                                        If _AccountsEn.PostStatus = "Ready" Then
+                                            If ListStudentEn(Index_2).Description = "CIMB CLICKS" Then
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).TransTempCode
+                                            Else
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).BankSlipID
+                                            End If
+
+                                        ElseIf _AccountsEn.PostStatus = "Posted" Then
+                                            If ListStudentEn(Index_2).Description = "CIMB CLICKS" Then
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).TransactionCode
+                                            Else
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).BankSlipID
+                                            End If
+                                        End If
+
                                     Else
-                                        DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = String.Empty
+                                        If _AccountsEn.PostStatus = "Ready" Then
+                                            If ListStudentEn(Index_2).Description = "CIMB CLICKS" Then
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).TransTempCode
+                                            Else
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).BankSlipID
+                                            End If
+                                        ElseIf _AccountsEn.PostStatus = "Posted" Then
+                                            If ListStudentEn(Index_2).Description = "CIMB CLICKS" Then
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).TransactionCode
+                                            Else
+                                                DirectCast(_DataGridItem.FindControl("BankSlipID"), TextBox).Text = ListStudentEn(Index_2).BankSlipID
+                                            End If
+                                        End If
+
                                     End If
                                     '_DataGridItem.Cells(18).Text = ListStudentEn(Index_2).Outstanding_Amount
                                     'DirectCast(_DataGridItem.FindControl("Outstanding_Amount"), Label).Text = ListStudentEn(Index_2).Outstanding_Amount
@@ -3173,13 +3202,36 @@ Partial Class Receipts
                                     'modified by Hafiz @ 25/4/2016
                                     'Outstanding amount fixes - start
                                     Dim _stud As New StudentEn
-                                    _stud = _AccountsDal.GetStudentOutstanding(ListStudentEn(Index_2).CreditRef)
+                                    '_stud = _AccountsDal.GetStudentOutstanding(ListStudentEn(Index_2).CreditRef)
 
-                                    GetStudOutstndAmt = (_stud.OutstandingAmount) + (_stud.LoanAmount)
+                                    'GetStudOutstndAmt = (_stud.OutstandingAmount) + (_stud.LoanAmount)
 
-                                    DirectCast(_DataGridItem.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", CDbl(GetStudOutstndAmt))
+                                    'DirectCast(_DataGridItem.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", CDbl(GetStudOutstndAmt))
                                     'Outstanding amount fixes - end
+                                    Dim ListInvObjects1 As New List(Of AccountsEn)
+                                    Dim obj3 As New AccountsBAL
+                                    Dim eob3 As New AccountsEn
 
+                                    eob3.CreditRef = ListStudentEn(Index_2).CreditRef
+                                    eob3.PostStatus = "Posted"
+                                    eob3.SubType = "Student"
+                                    eob3.TransType = ""
+                                    eob3.TransStatus = "Closed"
+
+                                    Try
+
+                                        ListInvObjects1 = obj3.GetStudentLedgerCombine(eob3)
+
+                                    Catch ex As Exception
+                                        LogError.Log("Receipt", "FillData", ex.Message)
+                                    End Try
+
+                                    dgInvoices1.DataSource = ListInvObjects1
+                                    dgInvoices1.DataBind()
+                                    ledgerformat()
+                                    outamt = Trim(txtoutamount.Text)
+
+                                    DirectCast(_DataGridItem.FindControl("Outstanding_Amount"), Label).Text = String.Format("{0:F}", New AccountsDAL().GetOutstandingAmount(txt_matricno.Text, GetSubType()))
                                     _DataGridItem.Cells(11).Text = Index_2
 
                                     'Increment Index
@@ -3356,6 +3408,68 @@ Partial Class Receipts
         '    End If
         'End If
 
+    End Sub
+
+    Private Sub ledgerformat()
+        'Updated by Hafiz Roslan @ 10/2/2016
+        'Include the Category = "Receipt" logic
+
+        Dim TotalAmount As Double
+        Dim amount As Double
+        Dim dr As Double = 0
+        Dim cr As Double = 0
+        Dim dgItem1 As DataGridItem
+        'txtDebitAmount.Text = String.Format("{0:F}", 0)
+        'txtCreditAmount.Text = String.Format("{0:F}", 0)
+        'txtoutamount.Text = String.Format("{0:F}", 0)
+        txtDebitAmount.Text = String.Format("{0:N}", 0)
+        txtCreditAmount.Text = String.Format("{0:N}", 0)
+        txtoutamount.Text = String.Format("{0:N}", 0)
+
+        For Each dgItem1 In dgInvoices1.Items
+            If dgItem1.Cells(6).Text = "Credit" Then
+                'If rdbStudentLeddger.Checked = True Then
+                TotalAmount = TotalAmount - CDbl(dgItem1.Cells(7).Text)
+
+                dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
+                amount = dgItem1.Cells(7).Text
+                dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "-"
+                cr = cr + amount
+                txtCreditAmount.Text = String.Format("{0:N}", cr)
+
+
+
+            Else
+                'If rdbStudentLeddger.Checked = True Then
+                TotalAmount = TotalAmount + CDbl(dgItem1.Cells(7).Text)
+
+                dgItem1.Cells(8).Text = String.Format("{0:N}", TotalAmount)
+                amount = dgItem1.Cells(7).Text
+                dgItem1.Cells(7).Text = String.Format("{0:N}", amount) & "+"
+                dr = dr + amount
+                txtDebitAmount.Text = String.Format("{0:N}", dr)
+
+
+            End If
+
+        Next
+        ' txtoutamount.Text = String.Format("{0:F}", CDbl(txtDebitAmt.Text) - CDbl(txtCreditAmt.Text))
+
+        'Added by Hafiz Roslan
+        'Dated: 06/01/2015
+
+        'outstanding amount - Start
+        Dim debitAmount As Double = 0.0, creditAmount As Double = 0.0
+
+        debitAmount = CDbl(txtDebitAmount.Text)
+        creditAmount = CDbl(txtCreditAmount.Text)
+
+        'If debitAmount > creditAmount Then
+        '    txtoutamount.Text = String.Format("{0:F}", debitAmount - creditAmount)
+        'Else
+        '    txtoutamount.Text = String.Format("{0:F}", creditAmount - debitAmount)
+        'End If
+        txtoutamount.Text = String.Format("{0:N}", debitAmount - creditAmount)
     End Sub
 
 #End Region
