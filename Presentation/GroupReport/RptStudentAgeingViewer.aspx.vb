@@ -280,28 +280,26 @@ Partial Class RptStudentAgeingViewer
                     y2 = Mid(ByDate, 7, 4)
                     DateTo = y2 + "/" + m2 + "/" + d2
 
-                    Dim StatusStr As String = Nothing, NationalityStr As String = Nothing
-                    Dim FacultyStr As String = Nothing, SponsorStr As String = Nothing
-                    Dim SumQuery As String = Nothing
+                    Dim StatusStr As String = Nothing, NationalityStr As String = Nothing, FacultyStr As String = Nothing, SponsorStr As String = Nothing
 
                     'Status
                     If Status <> "-1" Then
-                        StatusStr = "AND SS.SASS_Code = '" + Status + "' "
+                        StatusStr = "AND EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef AND SASS_Code = '" + Status + "') "
                     End If
 
                     'Nationality
                     If Nationality <> "-1" Then
-                        NationalityStr = "AND (SELECT SASC_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) = '" + IIf(Nationality = "1", "W", "BW") + "' "
+                        NationalityStr = "AND EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef AND SASC_Code ='" + IIf(Nationality = "1", "W", "BW") + "') "
                     End If
 
                     'Faculty
                     If Faculty <> "-1" Then
-                        FacultyStr = "AND ageing.Faculty = (SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code = '" + Faculty + "') "
+                        FacultyStr = "AND EXISTS(SELECT 1 FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef AND SASI_Faculty='" + Faculty + "') "
                     End If
 
                     'Sponsor
                     If Sponsor <> "-1" Then
-                        SponsorStr = "AND ageing.Sponsor = (SELECT SASR_Name FROM SAS_Sponsor WHERE SASR_Code = '" + Sponsor + "') "
+                        SponsorStr = "AND STS.SASS_Sponsor = '" + Sponsor + "' "
                     End If
 
                     'QUERY BUILDER - START
@@ -311,87 +309,55 @@ Partial Class RptStudentAgeingViewer
                         ReportPath = "~/GroupReport/RptStudentAgeingType2.rpt"
                     End If
 
-                    str = "SELECT ageing.CreditRef AS MatricNo,ageing.Faculty AS Faculty,ageing.Sponsor AS Sponsor,SS.SASS_Description AS Status," +
-                            "CASE WHEN (SELECT SASC_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) = 'W' THEN 'LOCAL' " +
-                            "ELSE 'FOREIGNER' END AS Category,"
-                    str += QueryBuilderT2(AgeingBy, "ageing", "SuperHeader") +
-                            "TO_CHAR(DATE '" + DateTo + "', 'DD/MM/YYYY') AS DateTo " +
-                            "FROM ( "
-                    str += "(WITH PAID_AMT AS (SELECT CreditRef,SUM(TransAmount) AS PaidAmount " +
-                            "FROM SAS_Accounts " +
-                            "WHERE PostStatus='Posted' " +
-                            "AND TransType='Credit' " +
-                            "GROUP BY CreditRef) "
-                    str += "SELECT b.CreditRef,b.Faculty,b.Sponsor,"
-                    str += QueryBuilder(AgeingBy, "b", "Tail") + "," +
-                            "SUM(b.""TotalAmount"") AS ""TotalAmount"" "
-                    str += "FROM "
-                    str += "(SELECT a.CreditRef,(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code IN (SELECT SASI_Faculty FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef)) AS Faculty," +
-                            "(SELECT SASR_Name FROM SAS_Sponsor WHERE SASR_Code IN (SELECT CreditRef1 FROM SAS_SponsorInvoice WHERE CreditRef=a.CreditRef)) AS Sponsor,"
-                    str += QueryBuilder(AgeingBy, "a", "Header2") +
-                            "FROM ( " +
-                            "SELECT TransId,CreditRef," + LoadAgeingByQuery("nonFT", AgeingBy, DateTo) +
-                            "FROM SAS_Accounts SA " +
-                            "WHERE TransAmount > 0 " +
-                            "AND SubType <> 'Sponsor' AND Category <> 'Payment' AND TransType <> 'Credit' AND PostStatus = 'Posted' " +
-                            "GROUP BY TransId,CreditRef,TransDate,TransAmount ) a " +
-                            "WHERE a.CreditRef <> '' " +
-                            "GROUP BY a.CreditRef"
-                    str += " UNION "
-                    str += "SELECT a.CreditRef,(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code IN (SELECT SASI_Faculty FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef)) AS Faculty," +
-                            "SSP.SASR_Name AS Sponsor,"
-                    str += QueryBuilder(AgeingBy, "a", "Header2") +
-                            "FROM ( " +
-                            "SELECT SPI.TransId, SPI.CreditRef, SPI.CreditRef1," + LoadAgeingByQuery("SPNSR", AgeingBy, DateTo) +
-                            "FROM SAS_SponsorInvoice SPI " +
-                            "INNER JOIN SAS_SponsorInvoiceDetails SPID ON SPI.TransId=SPID.TransId " +
-                            "WHERE SPI.PostStatus = 'Posted' " +
-                            "GROUP BY SPI.TransId,SPI.CreditRef,SPI.CreditRef1,SPI.TransDate,SPID.TransAmount ) a " +
-                            "INNER JOIN SAS_Sponsor SSP ON SSP.SASR_Code=a.CreditRef1 " +
-                            "GROUP BY a.CreditRef,SSP.SASR_Name) b "
-                    str += "INNER JOIN PAID_AMT ON PAID_AMT.CreditRef=b.CreditRef " +
-                            "GROUP BY b.CreditRef,b.Faculty,b.Sponsor,PAID_AMT.PaidAmount " +
-                            "ORDER BY b.CreditRef )"
-
-                    str += " UNION "
-
-                    str += "SELECT b.CreditRef,b.Faculty,b.Sponsor,"
-                    str += QueryBuilderT2(AgeingBy, "b", "Header1")
-                    str += "FROM "
-                    str += "(SELECT a.CreditRef,(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code IN (SELECT SASI_Faculty FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef)) AS Faculty," +
-                            "(SELECT SASR_Name FROM SAS_Sponsor WHERE SASR_Code IN (SELECT CreditRef1 FROM SAS_SponsorInvoice WHERE CreditRef=a.CreditRef)) AS Sponsor,"
-                    str += QueryBuilder(AgeingBy, "a", "Header2") +
-                            "FROM ( " +
-                            "SELECT TransId,CreditRef," + LoadAgeingByQuery("nonFT", AgeingBy, DateTo) +
-                            "FROM SAS_Accounts SA " +
-                            "WHERE TransAmount > 0 " +
-                            "AND SubType <> 'Sponsor' AND Category <> 'Payment' AND TransType <> 'Credit' AND PostStatus = 'Posted' " +
-                            "GROUP BY TransId,CreditRef,TransDate,TransAmount ) a " +
-                            "WHERE a.CreditRef <> '' " +
-                            "GROUP BY a.CreditRef"
-                    str += " UNION "
-                    str += "SELECT a.CreditRef,(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code IN (SELECT SASI_Faculty FROM SAS_Student WHERE SASI_MatricNo=a.CreditRef)) AS Faculty," +
-                            "SSP.SASR_Name AS Sponsor,"
-                    str += QueryBuilder(AgeingBy, "a", "Header2") +
-                            "FROM ( " +
-                            "SELECT SPI.TransId, SPI.CreditRef, SPI.CreditRef1," + LoadAgeingByQuery("SPNSR", AgeingBy, DateTo) +
-                            "FROM SAS_SponsorInvoice SPI " +
-                            "INNER JOIN SAS_SponsorInvoiceDetails SPID ON SPI.TransId=SPID.TransId " +
-                            "WHERE SPI.PostStatus = 'Posted' " +
-                            "GROUP BY SPI.TransId,SPI.CreditRef,SPI.CreditRef1,SPI.TransDate,SPID.TransAmount ) a " +
-                            "INNER JOIN SAS_Sponsor SSP ON SSP.SASR_Code=a.CreditRef1 " +
-                            "GROUP BY a.CreditRef,SSP.SASR_Name) b "
-                    str += "WHERE b.CreditRef NOT IN (SELECT CreditRef FROM SAS_Accounts WHERE TransType='Credit') " +
-                            "GROUP BY b.CreditRef,b.Faculty,b.Sponsor "
+                    str = "SELECT ageing.CreditRef as MatricNo,"
+                    str += "(SELECT SAFC_Desc FROM SAS_Faculty WHERE SAFC_Code IN (SELECT SASI_Faculty FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef)) AS FACULTY,"
+                    str += "(SELECT SASR_Name FROM SAS_Sponsor WHERE SASR_Code=ageing.SASS_Sponsor) AS SPONSOR,"
+                    str += "(SELECT SASS_Description FROM SAS_StudentStatus WHERE SASS_Code=(SELECT SASS_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef)) AS STATUS,"
+                    str += "CASE WHEN (SELECT SASC_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) = 'W' THEN 'LOCAL' "
+                    str += "WHEN (SELECT SASC_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) = 'BW' THEN 'FOREIGNER' "
+                    str += "END AS CATEGORY,"
+                    str += QueryBuilder(AgeingBy, "ageing", "HEAD")
+                    str += "TO_CHAR(DATE '" + DateTo + "', 'DD/MM/YYYY') AS DateTo "
+                    str += "FROM ( "
+                    str += "SELECT a.CreditRef,STS.SASS_Sponsor,"
+                    str += LoadAgeingByQuery("nonFT", AgeingBy, DateTo)
+                    str += "FROM ( "
+                    str += "WITH REC AS (SELECT a.INV_NO,a.TransCode, "
+                    str += "CASE WHEN SAS_Accounts.TransDate > '" + DateTo + "'::date THEN "
+                    str += "CASE WHEN SUM(a.PaidAmount) < SAS_Accounts.TransAmount THEN SUM(a.PaidAmount) "
+                    str += "ELSE SAS_Accounts.TransAmount END "
+                    str += "ELSE 0 END AS PAID_AMT "
+                    str += "FROM ("
+                    str += "SELECT SA.CreditRef,SAD.INV_NO,SAD.TransCode,SAD.PaidAmount "
+                    str += "FROM SAS_Accounts SA "
+                    str += "INNER JOIN SAS_AccountsDetails SAD ON SAD.INV_NO=SA.TransCode "
+                    str += "WHERE SA.TransType='Debit' "
+                    str += "AND SA.PostStatus='Posted') a "
+                    str += "INNER JOIN SAS_Accounts ON SAS_Accounts.TransCode=a.TransCode AND SAS_Accounts.Creditref=a.CreditRef "
+                    str += "GROUP BY a.INV_NO,a.TransCode,a.PaidAmount,SAS_Accounts.TransAmount,SAS_Accounts.TransDate"
+                    str += ")"
+                    str += "SELECT DISTINCT SA.CreditRef,SA.TransCode,COALESCE(SUM(REC.PAID_AMT),0) AS PAID_AMT "
+                    str += "FROM SAS_Accounts SA "
+                    str += "LEFT JOIN REC ON REC.INV_NO=SA.TransCode "
+                    str += "WHERE SA.TransAmount > 0 "
+                    str += "AND SA.SubType <> 'Sponsor' "
+                    str += "AND SA.Category <> 'Payment' "
+                    str += "AND SA.TransType <> 'Credit' "
+                    str += "AND SA.TransStatus <> 'Closed' "
+                    str += "AND SA.PostStatus = 'Posted' "
+                    str += "GROUP BY SA.TransId) a "
+                    str += "INNER JOIN SAS_Accounts SA ON SA.TransCode=a.TransCode AND SA.CreditRef=a.CreditRef "
+                    str += "INNER JOIN SAS_StudentSpon STS ON STS.SASI_MatricNo=a.CreditRef "
+                    str += "WHERE SA.TransDate <= '" + DateTo + "' "
+                    str += SponsorStr
+                    str += "GROUP BY a.CreditRef,a.TransCode,SA.TransDate,SA.TransAmount,SA.PaidAmount,STS.SASS_Sponsor,a.PAID_AMT"
                     str += ") ageing "
-                    str += "LEFT JOIN SAS_Studentstatus SS ON SS.SASS_Code IN (SELECT SASS_Code FROM SAS_Student WHERE SASI_MatricNo=ageing.CreditRef) "
                     str += "WHERE ageing.CreditRef <> '' "
                     str += StatusStr
                     str += NationalityStr
                     str += FacultyStr
-                    str += SponsorStr
-                    str += "GROUP BY ageing.CreditRef,ageing.Faculty,ageing.Sponsor,SS.SASS_Description " +
-                            "ORDER BY ageing.Sponsor,ageing.CreditRef"
+                    str += "GROUP BY ageing.CreditRef,ageing.SASS_Sponsor "
+                    str += "ORDER BY ageing.CreditRef "
                     'QUERY BUILDER - END
 
                     Dim _DataSet As DataSet = _ReportHelper.GetDataSet(str)
@@ -556,40 +522,30 @@ Partial Class RptStudentAgeingViewer
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FirstX"","
                         ElseIf stats = "nonFT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FirstX"","
-                        ElseIf stats = "SPNSR" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
                         End If
                     Case -1
                         If stats = "FT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""SecondX"","
                         ElseIf stats = "nonFT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""SecondX"","
-                        ElseIf stats = "SPNSR" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 365 AND '" + DateTo + "'::date - SPI.TransDate::date <= 730 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
                         End If
                     Case -2
                         If stats = "FT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 AND '" + DateTo + "'::date - SA.TransDate::date <= 1095 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""ThirdX"","
                         ElseIf stats = "nonFT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 AND '" + DateTo + "'::date - SA.TransDate::date <= 1095 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirdX"","
-                        ElseIf stats = "SPNSR" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 730 AND '" + DateTo + "'::date - SPI.TransDate::date <= 1095 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Third"","
                         End If
                     Case -3
                         If stats = "FT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1095 AND '" + DateTo + "'::date - SA.TransDate::date <= 1460 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FourthX"","
                         ElseIf stats = "nonFT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1095 AND '" + DateTo + "'::date - SA.TransDate::date <= 1460 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FourthX"","
-                        ElseIf stats = "SPNSR" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 1095 AND '" + DateTo + "'::date - SPI.TransDate::date <= 1460 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fourth"","
                         End If
                     Case -4
                         If stats = "FT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1460 THEN " & GetPaidAmount("FT") & " ELSE '0.00' END AS ""FifthX"" "
                         ElseIf stats = "nonFT" Then
                             AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 1460 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FifthX"" "
-                        ElseIf stats = "SPNSR" Then
-                            AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 1460 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fifth"" "
                         End If
                 End Select
 
@@ -610,12 +566,6 @@ Partial Class RptStudentAgeingViewer
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 AND '" + DateTo + "'::date - SA.TransDate::date <= 547.5 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirdX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 547.5 AND '" + DateTo + "'::date - SA.TransDate::date <= 730 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FourthX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 730 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FifthX"" "
-            ElseIf stats = "SPNSR" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 182.5 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 182.5 AND '" + DateTo + "'::date - SPI.TransDate::date <= 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 365 AND '" + DateTo + "'::date - SPI.TransDate::date <= 547.5 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 547.5 AND '" + DateTo + "'::date - SPI.TransDate::date <= 730 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 730 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fifth"" "
             End If
             '6/12/36 months - END
 
@@ -633,12 +583,6 @@ Partial Class RptStudentAgeingViewer
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 181 AND '" + DateTo + "'::date - SA.TransDate::date <= 273 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirdX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 273 AND '" + DateTo + "'::date - SA.TransDate::date <= 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FourthX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 365 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""FifthX"" "
-            ElseIf stats = "SPNSR" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 90 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 90 AND '" + DateTo + "'::date - SPI.TransDate::date <= 181 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 181 AND '" + DateTo + "'::date - SPI.TransDate::date <= 273 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 273 AND '" + DateTo + "'::date - SPI.TransDate::date <= 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fifth"" "
             End If
             '30/12/2016 - END
 
@@ -672,20 +616,6 @@ Partial Class RptStudentAgeingViewer
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 305 AND '" + DateTo + "'::date - SA.TransDate::date <= 335 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""EleventhX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 335 AND '" + DateTo + "'::date - SA.TransDate::date <= 366 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""TwelfthX"","
                 AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SA.TransDate::date > 366 THEN " & GetPaidAmount("nonFT") & " ELSE '0.00' END AS ""ThirteenthX"" "
-            ElseIf stats = "SPNSR" Then
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date <= 31 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""First"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 31 AND '" + DateTo + "'::date - SPI.TransDate::date <= 60 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Second"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 60 AND '" + DateTo + "'::date - SPI.TransDate::date <= 91 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Third"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 91 AND '" + DateTo + "'::date - SPI.TransDate::date <= 121 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fourth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 121 AND '" + DateTo + "'::date - SPI.TransDate::date <= 152 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Fifth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 152 AND '" + DateTo + "'::date - SPI.TransDate::date <= 182 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Sixth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 182 AND '" + DateTo + "'::date - SPI.TransDate::date <= 213 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Seventh"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 213 AND '" + DateTo + "'::date - SPI.TransDate::date <= 244 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Eighth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 244 AND '" + DateTo + "'::date - SPI.TransDate::date <= 274 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Ninth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 274 AND '" + DateTo + "'::date - SPI.TransDate::date <= 305 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Tenth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 305 AND '" + DateTo + "'::date - SPI.TransDate::date <= 335 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Eleventh"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 335 AND '" + DateTo + "'::date - SPI.TransDate::date <= 366 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Twelfth"","
-                AgeingByQuery += "CASE WHEN '" & DateTo & "'::date - SPI.TransDate::date > 366 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""Thirteenth"" "
             End If
             '30/12/2016 - END
         End If
@@ -703,7 +633,6 @@ Partial Class RptStudentAgeingViewer
         Dim SumQuery As String = Nothing
 
         If AgeingBy = "rbMonthly" Then
-
             If str = "HEAD" Then
                 SumQuery = "SUM(" & Header & ".""FirstX"") AS ""First"","
                 SumQuery += "SUM(" & Header & ".""SecondX"") AS ""Second"","
@@ -721,9 +650,7 @@ Partial Class RptStudentAgeingViewer
                     "SUM(" & Header & ".""SixthX"")+SUM(" & Header & ".""SeventhX"")+SUM(" & Header & ".""EighthX"")+SUM(" & Header & ".""NinthX"")+SUM(" & Header & ".""TenthX"")+" +
                     "SUM(" & Header & ".""EleventhX"")+SUM(" & Header & ".""TwelfthX"") AS ""TotalAmount"","
             End If
-
         Else
-
             If str = "HEAD" Then
                 SumQuery = "SUM(" & Header & ".""FirstX"") AS ""First"","
                 SumQuery += "SUM(" & Header & ".""SecondX"") AS ""Second"","
@@ -732,82 +659,6 @@ Partial Class RptStudentAgeingViewer
                 SumQuery += "SUM(" & Header & ".""FifthX"") AS ""Fifth"","
                 SumQuery += "SUM(" & Header & ".""FirstX"")+SUM(" & Header & ".""SecondX"")+SUM(" & Header & ".""ThirdX"")+SUM(" & Header & ".""FourthX"")+SUM(" & Header & ".""FifthX"") AS ""TotalAmount"","
             End If
-
-            'If str = "Header1" Then
-            '    SumQuery = "COALESCE(" & Header & ".""First"",0) AS ""First"","
-            '    SumQuery += "COALESCE(" & Header & ".""Second"",0) AS ""Second"","
-            '    SumQuery += "COALESCE(" & Header & ".""Third"",0) AS ""Third"","
-            '    SumQuery += "COALESCE(" & Header & ".""Fourth"",0) AS ""Fourth"","
-            '    SumQuery += "COALESCE(" & Header & ".""Fifth"",0) AS ""Fifth"","
-            '    SumQuery += "COALESCE(" & Header & ".""TotalAmount"",0) AS ""TotalAmount"","
-            'ElseIf str = "Header2" Then
-            '    SumQuery = "SUM(" & Header & ".""FirstX"") AS ""First"","
-            '    SumQuery += "SUM(" & Header & ".""SecondX"") AS ""Second"","
-            '    SumQuery += "SUM(" & Header & ".""ThirdX"") AS ""Third"","
-            '    SumQuery += "SUM(" & Header & ".""FourthX"") AS ""Fourth"","
-            '    SumQuery += "SUM(" & Header & ".""FifthX"") AS ""Fifth"","
-            '    SumQuery += "SUM(" & Header & ".""FirstX"")+SUM(" & Header & ".""SecondX"")+SUM(" & Header & ".""ThirdX"")+SUM(" & Header & ".""FourthX"")+SUM(" & Header & ".""FifthX"") AS ""TotalAmount"" "
-            'End If
-        End If
-
-        Return SumQuery
-
-    End Function
-
-    Public Function QueryBuilderT2(ByVal AgeingBy As String, ByVal Header As String, Optional ByVal str As String = Nothing) As String
-
-        Dim SumQuery As String = Nothing
-
-        If AgeingBy = "rbMonthly" Then
-
-            If str = "SuperHeader" Then
-                SumQuery = "COALESCE(SUM(" & Header & ".""FirstX""),0) AS ""First"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""SecondX""),0) AS ""Second"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""ThirdX""),0) AS ""Third"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""FourthX""),0) AS ""Fourth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""FifthX""),0) AS ""Fifth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""SixthX""),0) AS ""Sixth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""SeventhX""),0) AS ""Seventh"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""EighthX""),0) AS ""Eighth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""NinthX""),0) AS ""Ninth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""TenthX""),0) AS ""Tenth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""EleventhX""),0) AS ""Eleventh"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""TwelfthX""),0) AS ""Twelfth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""TotalAmount""),0) AS ""TotalAmount"","
-            ElseIf str = "Header1" Then
-                SumQuery = "SUM(" & Header & ".""First"") AS ""First"","
-                SumQuery += "SUM(" & Header & ".""Second"") AS ""Second"","
-                SumQuery += "SUM(" & Header & ".""Third"") AS ""Third"","
-                SumQuery += "SUM(" & Header & ".""Fourth"") AS ""Fourth"","
-                SumQuery += "SUM(" & Header & ".""Fifth"") AS ""Fifth"","
-                SumQuery += "SUM(" & Header & ".""Sixth"") AS ""Sixth"","
-                SumQuery += "SUM(" & Header & ".""Seventh"") AS ""Seventh"","
-                SumQuery += "SUM(" & Header & ".""Eighth"") AS ""Eighth"","
-                SumQuery += "SUM(" & Header & ".""Ninth"") AS ""Ninth"","
-                SumQuery += "SUM(" & Header & ".""Tenth"") AS ""Tenth"","
-                SumQuery += "SUM(" & Header & ".""Eleventh"") AS ""Eleventh"","
-                SumQuery += "SUM(" & Header & ".""Twelfth"") AS ""Twelfth"","
-                SumQuery += "SUM(" & Header & ".""TotalAmount"") AS ""TotalAmount"" "
-            End If
-
-        Else
-
-            If str = "SuperHeader" Then
-                SumQuery = "COALESCE(SUM(" & Header & ".""FirstX""),0) AS ""First"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""SecondX""),0) AS ""Second"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""ThirdX""),0) AS ""Third"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""FourthX""),0) AS ""Fourth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""FifthX""),0) AS ""Fifth"","
-                SumQuery += "COALESCE(SUM(" & Header & ".""TotalAmount""),0) AS ""TotalAmount"","
-            ElseIf str = "Header1" Then
-                SumQuery = "SUM(" & Header & ".""First"") AS ""First"","
-                SumQuery += "SUM(" & Header & ".""Second"") AS ""Second"","
-                SumQuery += "SUM(" & Header & ".""Third"") AS ""Third"","
-                SumQuery += "SUM(" & Header & ".""Fourth"") AS ""Fourth"","
-                SumQuery += "SUM(" & Header & ".""Fifth"") AS ""Fifth"","
-                SumQuery += "SUM(" & Header & ".""TotalAmount"") AS ""TotalAmount"" "
-            End If
-
         End If
 
         Return SumQuery

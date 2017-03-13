@@ -39,7 +39,7 @@ public partial class RptReceiptCollectionsViewer : MenuAccess
                 sbFilter.AppendFormat(" AND SAS_Accounts.transdate BETWEEN '{0}' AND '{1}'", this.DateFromCondition, this.DateToCondition);
             }
 
-            sbFilter.AppendFormat(" ORDER BY SAS_Accounts.transdate");
+            sbFilter.AppendFormat(" ORDER BY SAS_Accounts.transdate, SAS_Accounts.TransCode");
 
             DataSet dataSet = reportHelper.GetDataSet(sbFilter.ToString());
             dataSet.Tables[0].TableName = "SAS_Accounts";

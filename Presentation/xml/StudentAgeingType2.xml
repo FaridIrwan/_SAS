@@ -1,31 +1,31 @@
 <?xml version="1.0" standalone="yes"?>
 <NewDataSet>
   <Table>
-    <matricno>161835</matricno>
-    <faculty>FAKULTI BAHASA MODEN DAN KOMUNIKASI</faculty>
-    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <matricno>170353</matricno>
+    <faculty>FAKULTI PERHUTANAN</faculty>
+    <sponsor>PERSENDIRIAN</sponsor>
     <status>AKTIF</status>
-    <category>LOCAL</category>
-    <First>3464</First>
+    <category>FOREIGNER</category>
+    <First>10956.5</First>
     <Second>0</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
-    <TotalAmount>3464</TotalAmount>
-    <dateto>18/01/2017</dateto>
+    <TotalAmount>10956.5</TotalAmount>
+    <dateto>13/03/2017</dateto>
   </Table>
   <Table>
-    <matricno>166954</matricno>
-    <faculty>FAKULTI BAHASA MODEN DAN KOMUNIKASI</faculty>
-    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <matricno>172895</matricno>
+    <faculty>FAKULTI PERHUTANAN</faculty>
+    <sponsor>PERSENDIRIAN</sponsor>
     <status>AKTIF</status>
     <category>LOCAL</category>
-    <First>4518</First>
+    <First>1387</First>
     <Second>0</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
-    <TotalAmount>4548</TotalAmount>
-    <dateto>18/01/2017</dateto>
+    <TotalAmount>1387</TotalAmount>
+    <dateto>13/03/2017</dateto>
   </Table>
 </NewDataSet>

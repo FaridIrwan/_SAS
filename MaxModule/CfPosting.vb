@@ -3,6 +3,8 @@
 Imports MaxGeneric
 Imports System.Reflection
 Imports System.Data.Common
+Imports HTS.SAS.Entities
+Imports HTS.SAS.DataAccessObjects
 
 #End Region
 
@@ -1457,34 +1459,52 @@ Public Class CfPosting
 
     Public Function MJGstDist(ByVal _Module As String, ByVal BatchCode As String, ByVal CompanyCode As String, ByVal ReferenceNo As String) As Boolean
 
-        Dim _CfGstDistEn As New CfGstDistEn(), _DataReader As IDataReader = Nothing
+        Dim _CfGstDistEn As New CfGstDistEn(), _DataReader As IDataReader = Nothing, _AccountsEn As New AccountsEn
         Dim SqlStatement As String = Nothing, Desc As String = Nothing, ConstSql As String = Nothing, JoinSql As String = Nothing
 
         Try
-            SqlStatement = "SELECT ROW_NUMBER() OVER() AS Row_No, CASE WHEN SAS_Accounts.Category='Refund' THEN SAS_Accounts.Voucherno "
-            SqlStatement &= "WHEN SAS_Accounts.Category='Receipt' THEN "
-            SqlStatement &= "CASE WHEN SAS_Accounts.Transcode = '' THEN SUBSTRING(SAS_Accounts.Transtempcode FROM 2 FOR Length(SAS_Accounts.Transtempcode)) "
-            SqlStatement &= "ELSE SAS_Accounts.Transcode END "
-            SqlStatement &= "WHEN SAS_Accounts.SubType='Sponsor' OR SAS_Accounts.Category='Loan' THEN CASE WHEN SAS_Accounts.Transcode = '' THEN "
-            SqlStatement &= "SUBSTRING(SAS_Accounts.Transtempcode FROM 2 FOR Length(SAS_Accounts.Transtempcode)) "
-            SqlStatement &= "ELSE SAS_Accounts.Transcode END "
-            SqlStatement &= "ELSE CASE WHEN SAS_Accountsdetails.Transcode = '' THEN "
-            SqlStatement &= "SUBSTRING(SAS_Accountsdetails.Transtempcode FROM 2 FOR Length(SAS_Accountsdetails.Transtempcode)) ELSE SAS_Accountsdetails.Transcode "
-            SqlStatement &= "END END AS Transcode, SAS_Accounts.Description AS Description, "
-            SqlStatement &= "CASE WHEN SAS_Accounts.Category = 'Receipt' OR SAS_Accounts.Category='Refund' "
-            SqlStatement &= "OR SAS_Accounts.SubType='Sponsor' OR SAS_Accounts.Category='Loan' THEN SUM(SAS_Accounts.Transamount) "
-            SqlStatement &= "ELSE SUM(SAS_Accountsdetails.Transamount) END AS Transamount,"
-            SqlStatement &= "CASE WHEN SAS_Accounts.SubType='Sponsor' THEN COALESCE(SAS_Accounts.TaxCode,'ES') "
-            SqlStatement &= "ELSE CASE WHEN SAS_Accounts.Category='Receipt' THEN 'ES' "
-            SqlStatement &= "ELSE COALESCE(SAS_Accountsdetails.TaxCode,'ES') END END AS Taxcode,"
-            SqlStatement &= "CASE WHEN SAS_Accounts.SubType='Sponsor' THEN COALESCE(SAS_Accounts.TaxAmount,0.0) "
-            SqlStatement &= "ELSE COALESCE(SAS_Accountsdetails.TaxAmount,0.0) END AS Taxamount "
-            SqlStatement &= "FROM SAS_Accounts "
-            SqlStatement &= "LEFT JOIN SAS_Accountsdetails ON SAS_Accounts.Transid = SAS_Accountsdetails.Transid "
-            SqlStatement &= "WHERE SAS_Accounts.Batchcode = " & clsGeneric.AddQuotes(BatchCode) & " "
-            SqlStatement &= "AND SAS_Accounts.Category NOT IN ('SPA','STA') "
-            SqlStatement &= "GROUP BY SAS_Accounts.Voucherno,SAS_Accounts.Transcode,SAS_Accountsdetails.Transcode,SAS_Accounts.Transtempcode,SAS_Accountsdetails.Transtempcode,SAS_Accounts.Description,"
-            SqlStatement &= "SAS_Accounts.Category,SAS_Accounts.SubType,SAS_Accounts.TaxCode,SAS_Accountsdetails.TaxCode,SAS_Accounts.Taxamount,SAS_Accountsdetails.Taxamount"
+            _AccountsEn = New AccountsDAL().GetItem(New AccountsEn With {.BatchCode = BatchCode, .Category = "", .SubType = ""})
+
+            If _Module = "MJ" Then
+
+                If _AccountsEn.Category = "Loan" Or _AccountsEn.SubType = "Sponsor" Then
+
+                    SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY Taxcode) AS Row_No," +
+                                    "Description AS Description," +
+                                    "Transamount AS Transamount," +
+                                    "COALESCE(TaxCode,'ES') AS Taxcode," +
+                                    "COALESCE(TaxAmount,0.0) AS Taxamount " +
+                                    "FROM SAS_Accounts " +
+                                    "WHERE Batchcode = " & clsGeneric.AddQuotes(BatchCode) & " " +
+                                    "AND Category NOT IN ('SPA','STA')"
+                Else
+
+                    SqlStatement = "SELECT ROW_NUMBER() OVER (ORDER BY SAD.TaxCode) AS Row_No," +
+                                    "SA.Description AS Description," +
+                                    "SUM(SAD.Transamount) AS Transamount," +
+                                    "COALESCE(SAD.TaxCode,'ES') AS Taxcode," +
+                                    "COALESCE(SAD.TaxAmount,0.0) AS Taxamount " +
+                                    "FROM SAS_Accounts SA " +
+                                    "INNER JOIN SAS_Accountsdetails SAD ON SA.Transid = SAD.Transid " +
+                                    "WHERE SA.Batchcode = " & clsGeneric.AddQuotes(BatchCode) & " " +
+                                    "GROUP BY SA.Description,SAD.TaxCode,SAD.TaxAmount"
+                End If
+
+            Else
+
+                SqlStatement = "SELECT CASE WHEN Category='Receipt' THEN " +
+                                "ROW_NUMBER() OVER (ORDER BY TransID) " +
+                                "ELSE ROW_NUMBER() OVER (ORDER BY TaxCode) " +
+                                "END AS Row_No," +
+                                "Description AS Description," +
+                                "Transamount AS Transamount, " +
+                                "CASE WHEN Category='Receipt' THEN 'ES' " +
+                                "ELSE COALESCE(TaxCode,'ES') END AS Taxcode," +
+                                "COALESCE(TaxAmount,0.0) AS Taxamount " +
+                                "FROM SAS_Accounts " +
+                                "WHERE Batchcode = " & clsGeneric.AddQuotes(BatchCode) & " " +
+                                "AND Category NOT IN ('SPA','STA')"
+            End If
 
             _DataReader = _DataBaseProvider.ExecuteReader(Helper.GetDataBaseType, Helper.GetConnectionString, SqlStatement).CreateDataReader()
 

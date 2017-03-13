@@ -640,6 +640,7 @@ Partial Class CimbClicksTrans
 
             Dim _listEN As List(Of CIMBclicksEn) = New AccountsDAL().GetCimbClicksList()
             If _listEN.Count > 0 Then
+
                 dgView.DataSource = _listEN.OrderBy(Function(x) x.BatchCode)
                 dgView.DataBind()
 
@@ -660,8 +661,7 @@ Partial Class CimbClicksTrans
                         link.NavigateUrl = "Receipts.aspx?Menuid=17&IsView=1&BatchCode=" + Trim(lb.Text) + ";St&IsCimbClicks=1"
                     End If
                 Next
-            Else
-                Throw New Exception("CIMB Details Is Empty. Add New to Proceed.")
+
             End If
 
         Catch ex As Exception
