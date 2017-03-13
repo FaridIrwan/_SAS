@@ -1563,7 +1563,7 @@ namespace HTS.SAS.DataAccessObjects
         public List<AccountsDetailsEn> GetActiveStuDentAllocation(AccountsDetailsEn argEn)
         {
             List<AccountsDetailsEn> loEnList = new List<AccountsDetailsEn>();
-          
+
             string sqlCmd = " select distinct ss.SASI_MatricNo,ss.SASI_Name,ss.SASI_PgId,ss.SASI_ICNo,ss.SASI_CurSem,sa.NoKelompok,sa.NoWarran," +
                             " sa.AmaunWarran,allocated.allocateamount as allocateamount, allocated.discountamount as creditamount, allocated.temppaidamount as sponamt, pocket.transamount as pocket" +
                             " ,pocket.tempamount as outstandingamt from  sas_accounts sa inner join sas_student ss on ss.SASI_MatricNo = sa.creditref left join" +

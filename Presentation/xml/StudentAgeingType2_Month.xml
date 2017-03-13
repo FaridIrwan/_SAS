@@ -1,13 +1,13 @@
 <?xml version="1.0" standalone="yes"?>
 <NewDataSet>
   <Table>
-    <matricno>161835</matricno>
-    <faculty>FAKULTI BAHASA MODEN DAN KOMUNIKASI</faculty>
-    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <matricno>159319</matricno>
+    <faculty>FAKULTI KEJURUTERAAN</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
     <status>AKTIF</status>
     <category>LOCAL</category>
-    <First>154</First>
-    <Second>3310</Second>
+    <First>0</First>
+    <Second>5766</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
@@ -18,8 +18,239 @@
     <Tenth>0</Tenth>
     <Eleventh>0</Eleventh>
     <Twelfth>0</Twelfth>
-    <TotalAmount>3464</TotalAmount>
-    <dateto>18/01/2017</dateto>
+    <TotalAmount>5766</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>161036</matricno>
+    <faculty>FAKULTI PERUBATAN DAN SAINS KESIHATAN</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>5766</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>5766</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>161331</matricno>
+    <faculty>FAKULTI PERUBATAN DAN SAINS KESIHATAN</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>FOREIGNER</category>
+    <First>14</First>
+    <Second>4805</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>4819</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>161835</matricno>
+    <faculty>FAKULTI BAHASA MODEN DAN KOMUNIKASI</faculty>
+    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1580</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1580</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>161994</matricno>
+    <faculty>FAKULTI PERUBATAN DAN SAINS KESIHATAN</faculty>
+    <sponsor>KEMENTERIAN PELAJARAN MALAYSIA (KPM)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>0</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>1752</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>866</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>2618</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>161997</matricno>
+    <faculty>FAKULTI SAINS KOMPUTER DAN TEKNOLOGI MAKLUMAT</faculty>
+    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1580</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1580</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>163675</matricno>
+    <faculty>FAKULTI SAINS</faculty>
+    <sponsor>KEMENTERIAN PELAJARAN MALAYSIA (KPM)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>0</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>0</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>164649</matricno>
+    <faculty>FAKULTI PERUBATAN DAN SAINS KESIHATAN</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>5766</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>5766</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>164920</matricno>
+    <faculty>FAKULTI BAHASA MODEN DAN KOMUNIKASI</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>5766</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>5766</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>165138</matricno>
+    <faculty>FAKULTI SAINS</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>302</First>
+    <Second>4805</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>5107</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>166626</matricno>
+    <faculty>FAKULTI BAHASA MODEN DAN KOMUNIKASI</faculty>
+    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1580</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1580</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>166655</matricno>
+    <faculty>FAKULTI SAINS</faculty>
+    <sponsor>PERBADANAN TABUNG PENDIDIKAN TINGGI NASIONAL</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>1060</First>
+    <Second>0</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1060</TotalAmount>
+    <dateto>10/03/2017</dateto>
   </Table>
   <Table>
     <matricno>166954</matricno>
@@ -27,8 +258,8 @@
     <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
     <status>AKTIF</status>
     <category>LOCAL</category>
-    <First>66</First>
-    <Second>4452</Second>
+    <First>0</First>
+    <Second>1368</Second>
     <Third>0</Third>
     <Fourth>0</Fourth>
     <Fifth>0</Fifth>
@@ -39,7 +270,196 @@
     <Tenth>0</Tenth>
     <Eleventh>0</Eleventh>
     <Twelfth>0</Twelfth>
-    <TotalAmount>4548</TotalAmount>
-    <dateto>18/01/2017</dateto>
+    <TotalAmount>1368</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>167877</matricno>
+    <faculty>FAKULTI PERUBATAN VETERINAR</faculty>
+    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1580</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1580</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>169990</matricno>
+    <faculty>FAKULTI PERHUTANAN</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>901</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>876</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1777</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>170353</matricno>
+    <faculty>FAKULTI PERHUTANAN</faculty>
+    <sponsor>PERSENDIRIAN</sponsor>
+    <status>AKTIF</status>
+    <category>FOREIGNER</category>
+    <First>0</First>
+    <Second>8131.5</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>2825</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>10956.5</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>170480</matricno>
+    <faculty>FAKULTI BIOTEKNOLOGI DAN SAINS BIOMOLEKUL</faculty>
+    <sponsor>KERAJAAN NEGERI SELANGOR</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1768</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1768</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>170627</matricno>
+    <faculty>FAKULTI BIOTEKNOLOGI DAN SAINS BIOMOLEKUL</faculty>
+    <sponsor>KERAJAAN NEGERI SELANGOR</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1802</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1802</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>170676</matricno>
+    <faculty>FAKULTI BIOTEKNOLOGI DAN SAINS BIOMOLEKUL</faculty>
+    <sponsor>AFFIN BANK BERHAD</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>0</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>1350</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1350</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>171103</matricno>
+    <faculty>FAKULTI PERHUTANAN</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>901</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>876</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1777</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>172895</matricno>
+    <faculty>FAKULTI PERHUTANAN</faculty>
+    <sponsor>PERSENDIRIAN</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1387</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1387</TotalAmount>
+    <dateto>10/03/2017</dateto>
+  </Table>
+  <Table>
+    <matricno>181367</matricno>
+    <faculty>FAKULTI PERHUTANAN</faculty>
+    <sponsor>JABATAN PERKHIDMATAN AWAM MALAYSIA  (JPA)</sponsor>
+    <status>AKTIF</status>
+    <category>LOCAL</category>
+    <First>0</First>
+    <Second>1224</Second>
+    <Third>0</Third>
+    <Fourth>0</Fourth>
+    <Fifth>0</Fifth>
+    <Sixth>0</Sixth>
+    <Seventh>0</Seventh>
+    <Eighth>0</Eighth>
+    <Ninth>0</Ninth>
+    <Tenth>0</Tenth>
+    <Eleventh>0</Eleventh>
+    <Twelfth>0</Twelfth>
+    <TotalAmount>1224</TotalAmount>
+    <dateto>10/03/2017</dateto>
   </Table>
 </NewDataSet>

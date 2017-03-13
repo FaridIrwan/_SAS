@@ -216,7 +216,7 @@ Partial Class RptCollectionAnalysisViewer
                                 " SAS_Accounts.BankCode, " +
                                 " CASE WHEN SAS_Student.SASI_PgId = (select SAPG_Code from SAS_Program where SAPG_Code = SAS_Student.SASI_PgId) then " +
                                     " (select sapg_program from SAS_Program where SAPG_Code = SAS_Student.SASI_PgId)" +
-                                " END Program," +
+                                " END As Program," +
                         " SAS_Student.SASI_Add1," +
                         " SAS_Student.SASI_Add2," +
                         " SAS_Student.SASI_Add3," +
@@ -248,7 +248,7 @@ Partial Class RptCollectionAnalysisViewer
                             " SAS_Accounts.BankCode," +
                             " CASE WHEN SAS_Student.SASI_PgId = (select SAPG_Code from SAS_Program where SAPG_Code = SAS_Student.SASI_PgId) then" +
                                 " (select sapg_program from SAS_Program where SAPG_Code = SAS_Student.SASI_PgId)" +
-                            " END Program," +
+                            " END As Program," +
                             " SAS_Student.SASI_Add1," +
                             " SAS_Student.SASI_Add2," +
                             " SAS_Student.SASI_Add3," +

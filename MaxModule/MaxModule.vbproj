@@ -105,6 +105,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\EntLibContrib.Data.PostgreSql.dll</HintPath>
     </Reference>
+    <Reference Include="HTS.SAS.DataAccessObjects">
+      <HintPath>..\Presentation\Bin\HTS.SAS.DataAccessObjects.dll</HintPath>
+    </Reference>
     <Reference Include="HTS.SAS.Entities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\HTS.SAS.Entities.dll</HintPath>
