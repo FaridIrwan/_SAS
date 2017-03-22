@@ -44,10 +44,10 @@ Partial Class RptStudentAgeing
     Private Sub FormatDate()
         txtDatePanelType1.Text = Format(Date.Now, "dd/MM/yyyy")
         txtDatePanelType2.Text = Format(Date.Now, "dd/MM/yyyy")
-        'txtCurrAgeingDt.Text = Format(Date.Now, "dd/MM/yyyy")
-        'txtLastAgeingDt.Text = Format(Date.Now, "dd/MM/yyyy")
-        txtCurrAgeingDt.Text = "Please Select"
-        txtLastAgeingDt.Text = "Please Select"
+        txtCurrAgeingDt.Text = Format(Date.Now, "dd/MM/yyyy")
+        txtLastAgeingDt.Text = Format(Date.Now, "dd/MM/yyyy")
+        'txtCurrAgeingDt.Text = "Please Select"
+        'txtLastAgeingDt.Text = "Please Select"
     End Sub
 
     Protected Sub LoadFaculty()
