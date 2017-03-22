@@ -423,50 +423,178 @@ Partial Class RptStudentAgeingViewer
                     y2 = Mid(LastAgeingDt, 7, 4)
                     Date_LastAgeing = y2 + "/" + m2 + "/" + d2
 
-                    str = "SELECT RefCode,COUNT(a.CreditRef) AS bil,"
-                    str += "SUM(a.""<3 months"") AS ""<3 months"","
-                    str += "SUM(a.""4-12 months"") AS ""4-12 months"","
-                    str += "SUM(a.""1-3 years"") AS ""1-3 years"","
-                    str += "SUM(a."">3 years"") AS "">3 years"","
-                    str += "SUM(cols) AS collection,(SUM(tot_dbt) - SUM(tot_crdt)) AS adjustment,"
-                    str += "CASE WHEN (SUM(tot_dbt) - SUM(tot_crdt)) < 0 THEN (SUM(a.""<3 months"")+SUM(a.""4-12 months"")+SUM(a.""1-3 years"")+SUM(a."">3 years"")) - " +
-                        "SUM(cols) - SUM(tot_dbt) - SUM(tot_crdt) "
-                    str += "WHEN (SUM(tot_dbt) - SUM(tot_crdt)) > 0 THEN (SUM(a.""<3 months"")+SUM(a.""4-12 months"")+SUM(a.""1-3 years"")+SUM(a."">3 years"")) - " +
-                        "SUM(cols) + SUM(tot_dbt) - SUM(tot_crdt) "
-                    str += "ELSE (SUM(a.""<3 months"")+SUM(a.""4-12 months"")+SUM(a.""1-3 years"")+SUM(a."">3 years"")) - SUM(cols) END AS final_total "
-                    str += "FROM ("
-                    str += "SELECT SAD.RefCode,SA.CreditRef,"
-                    str += "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 91 THEN "
-                    str += "COALESCE(SAD.TransAmount, 0) ELSE '0.00' END AS ""<3 months"","
-                    str += "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 365 THEN "
-                    str += "COALESCE(SAD.TransAmount, 0) ELSE '0.00' END AS ""4-12 months"","
-                    str += "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 1095 THEN "
-                    str += "COALESCE(SAD.TransAmount, 0) ELSE '0.00' END AS ""1-3 years"","
-                    str += "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 1095 THEN "
-                    str += "COALESCE(SAD.TransAmount, 0) ELSE '0.00' END AS "">3 years"","
-                    str += "CASE WHEN SA.Category = 'Receipt' THEN SA.TransAmount "
-                    str += "WHEN SA.Category = 'SPA' THEN CASE WHEN SA.Description LIKE '%Allocation%' THEN SA.TransAmount END "
-                    str += "ELSE 0.0 END AS cols,"
-                    str += "CASE WHEN SA.Category = 'Debit Note' THEN SAD.TransAmount ELSE 0.0 END AS tot_dbt,CASE WHEN SA.Category = 'Credit Note' THEN SAD.TransAmount ELSE 0.0 END AS tot_crdt "
+                    str = "SELECT " +
+                            "b.refcode," +
+                            "b.""BIL_1""," +
+                            "b.""<3 months""," +
+                            "b.collection1," +
+                            "b.adjustment1," +
+                            "CASE WHEN b.final_total1 <= 0 THEN 0 " +
+                            "ELSE b.final_total1 END AS final_total1," +
+                            "b.""BIL_2""," +
+                            "b.""4-12 months""," +
+                            "b.collection2," +
+                            "b.adjustment2," +
+                            "CASE WHEN b.final_total2 <= 0 THEN 0 " +
+                            "ELSE b.final_total2 END AS final_total2," +
+                            "b.""BIL_3""," +
+                            "b.""1-3 years""," +
+                            "b.collection3," +
+                            "b.adjustment3," +
+                            "CASE WHEN b.final_total3 <= 0 THEN 0 " +
+                            "ELSE b.final_total3 END AS final_total3," +
+                            "b.""BIL_4""," +
+                            "b."">3 years""," +
+                            "b.collection4," +
+                            "b.adjustment4," +
+                            "CASE WHEN b.final_total4 <= 0 THEN 0 " +
+                            "ELSE b.final_total4 END AS final_total4 " +
+                            "FROM ("
+                    str += "SELECT " +
+                            "RefCode," +
+                            "SUM(a.bil1) AS ""BIL_1""," +
+                            "SUM(a.bil2) AS ""BIL_2""," +
+                            "SUM(a.bil3) AS ""BIL_3""," +
+                            "SUM(a.bil4) AS ""BIL_4""," +
+                            "SUM(a.data1) AS ""<3 months""," +
+                            "SUM(a.data2) AS ""4-12 months""," +
+                            "SUM(a.data3) AS ""1-3 years""," +
+                            "SUM(a.data4) AS "">3 years""," +
+                            "SUM(cols1) AS collection1," +
+                            "SUM(cols2) AS collection2," +
+                            "SUM(cols3) AS collection3," +
+                            "SUM(cols4) AS collection4," +
+                            "(SUM(tot_dbt1) - SUM(tot_crdt1)) AS adjustment1," +
+                            "(SUM(tot_dbt2) - SUM(tot_crdt2)) AS adjustment2," +
+                            "(SUM(tot_dbt3) - SUM(tot_crdt3)) AS adjustment3," +
+                            "(SUM(tot_dbt4) - SUM(tot_crdt4)) AS adjustment4," +
+                            "CASE WHEN (SUM(tot_dbt1) - SUM(tot_crdt1)) < 0 THEN SUM(a.data1) - (SUM(cols1) - (SUM(tot_dbt1) - SUM(tot_crdt1))) " +
+                            "WHEN (SUM(tot_dbt1) - SUM(tot_crdt1)) > 0 THEN SUM(a.data1) - (SUM(cols1) + (SUM(tot_dbt1) - SUM(tot_crdt1))) " +
+                            "ELSE SUM(a.data1) - SUM(cols1) " +
+                            "END AS final_total1," +
+                            "CASE WHEN (SUM(tot_dbt2) - SUM(tot_crdt2)) < 0 THEN SUM(a.data2) - (SUM(cols2) - (SUM(tot_dbt2) - SUM(tot_crdt2))) " +
+                            "WHEN (SUM(tot_dbt2) - SUM(tot_crdt2)) > 0 THEN SUM(a.data2) - (SUM(cols2) + (SUM(tot_dbt2) - SUM(tot_crdt2))) " +
+                            "ELSE SUM(a.data2) - SUM(cols2) " +
+                            "END AS final_total2," +
+                            "CASE WHEN (SUM(tot_dbt3) - SUM(tot_crdt3)) < 0 THEN SUM(a.data3) - (SUM(cols3) - (SUM(tot_dbt3) - SUM(tot_crdt3))) " +
+                            "WHEN (SUM(tot_dbt3) - SUM(tot_crdt3)) > 0 THEN SUM(a.data3) - (SUM(cols3) + (SUM(tot_dbt3) - SUM(tot_crdt3))) " +
+                            "ELSE SUM(a.data3) - SUM(cols3) " +
+                            "END AS final_total3," +
+                            "CASE WHEN (SUM(tot_dbt4) - SUM(tot_crdt4)) < 0 THEN SUM(a.data4) - (SUM(cols4) - (SUM(tot_dbt4) - SUM(tot_crdt4))) " +
+                            "WHEN (SUM(tot_dbt4) - SUM(tot_crdt4)) > 0 THEN SUM(a.data4) - (SUM(cols4) + (SUM(tot_dbt4) - SUM(tot_crdt4))) " +
+                            "ELSE SUM(a.data4) - SUM(cols4) " +
+                            "END AS final_total4 "
+                    str += "FROM (" +
+                            "SELECT " +
+                            "SAD.RefCode," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 91 THEN " +
+                            "COUNT(SA.CreditRef) " +
+                            "ELSE 0 END AS bil1," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 365 THEN " +
+                            "COUNT(SA.CreditRef) " +
+                            "ELSE 0 END AS bil2," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 1095 THEN " +
+                            "COUNT(SA.CreditRef) " +
+                            "ELSE 0 END AS bil3," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 1095 THEN " +
+                            "COUNT(SA.CreditRef) " +
+                            "ELSE 0 END AS bil4," +
+                            "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 91 THEN " +
+                            "COALESCE(SAD.TransAmount, 0) " +
+                            "ELSE '0.00' END AS data1," +
+                            "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 365 THEN " +
+                            "COALESCE(SAD.TransAmount, 0) " +
+                            "ELSE '0.00' END AS data2," +
+                            "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 1095 THEN " +
+                            "COALESCE(SAD.TransAmount, 0) " +
+                            "ELSE '0.00' END AS data3," +
+                            "CASE WHEN SA.Category IN ('AFC','Invoice') AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 1095 THEN " +
+                            "COALESCE(SAD.TransAmount, 0) " +
+                            "ELSE '0.00' END AS data4," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 91 THEN " +
+                            "CASE WHEN SA.Category = 'Receipt' THEN SA.TransAmount " +
+                            "WHEN SA.Category = 'SPA' THEN " +
+                            "CASE WHEN SA.Description LIKE '%Allocation%' THEN SA.TransAmount END " +
+                            "ELSE 0.0 END " +
+                            "ELSE 0.0 END AS cols1," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 365 THEN " +
+                            "CASE WHEN SA.Category = 'Receipt' THEN SA.TransAmount " +
+                            "WHEN SA.Category = 'SPA' THEN " +
+                            "CASE WHEN SA.Description LIKE '%Allocation%' THEN SA.TransAmount END " +
+                            "ELSE 0.0 END " +
+                            "ELSE 0.0 END AS cols2," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 1095 THEN " +
+                            "CASE WHEN SA.Category = 'Receipt' THEN SA.TransAmount " +
+                            "WHEN SA.Category = 'SPA' THEN " +
+                            "CASE WHEN SA.Description LIKE '%Allocation%' THEN SA.TransAmount END " +
+                            "ELSE 0.0 END " +
+                            "ELSE 0.0 END AS cols3," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 1095 THEN " +
+                            "CASE WHEN SA.Category = 'Receipt' THEN SA.TransAmount " +
+                            "WHEN SA.Category = 'SPA' THEN " +
+                            "CASE WHEN SA.Description LIKE '%Allocation%' THEN SA.TransAmount END " +
+                            "ELSE 0.0 END " +
+                            "ELSE 0.0 END AS cols4," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 91 THEN " +
+                            "CASE WHEN SA.Category = 'Debit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_dbt1," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 365 THEN " +
+                            "CASE WHEN SA.Category = 'Debit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_dbt2," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 1095 THEN " +
+                            "CASE WHEN SA.Category = 'Debit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_dbt3," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 1095 THEN " +
+                            "CASE WHEN SA.Category = 'Debit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_dbt4," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 91 THEN " +
+                            "CASE WHEN SA.Category = 'Credit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_crdt1," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 365 THEN " +
+                            "CASE WHEN SA.Category = 'Credit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_crdt2," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SA.TransDate::date <= 1095 THEN " +
+                            "CASE WHEN SA.Category = 'Credit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_crdt3," +
+                            "CASE WHEN '" & Date_CurrAgeing & "'::date - SA.TransDate::date > 1095 THEN " +
+                            "CASE WHEN SA.Category = 'Credit Note' THEN SAD.TransAmount ELSE 0.0 END " +
+                            "ELSE 0.0 END AS tot_crdt4 "
                     str += "FROM SAS_AccountsDetails SAD "
                     str += "INNER JOIN SAS_Accounts SA ON SA.TransId=SAD.TransId "
                     str += "INNER JOIN SAS_FeeTypes SF ON SF.SAFT_Code=SAD.RefCode "
                     str += "WHERE SA.PostStatus='Posted' "
+                    str += "AND SA.TransDate <= '" + Date_LastAgeing + "' "
                     str += "GROUP BY SAD.RefCode,SA.CreditRef,SA.TransDate,SA.Category,SAD.TransAmount,SA.Description,SA.TransAmount "
                     str += "UNION "
-                    str += "SELECT SPID.RefCode,SPI.CreditRef,"
-                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 91 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""<3 months"","
-                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""4-12 months"","
-                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 1095 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS ""1-3 years"","
-                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 1095 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS "">3 years"","
-                    str += "0 AS cols,0 AS tot_dbt,0 AS tot_crdt "
+                    str += "SELECT SPID.RefCode,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 91 THEN "
+                    str += "COUNT(SPI.CreditRef)"
+                    str += "ELSE 0 END AS bil1,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 365 THEN "
+                    str += "COUNT(SPI.CreditRef)"
+                    str += "ELSE 0 END AS bil2,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 1095 THEN "
+                    str += "COUNT(SPI.CreditRef)"
+                    str += "ELSE 0 END AS bil3,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 1095 THEN "
+                    str += "COUNT(SPI.CreditRef)"
+                    str += "ELSE 0 END AS bil4,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 91 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS data1,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 91 AND '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 365 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS data2,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 365 AND '" & Date_CurrAgeing & "'::date - SPI.TransDate::date <= 1095 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS data3,"
+                    str += "CASE WHEN '" & Date_CurrAgeing & "'::date - SPI.TransDate::date > 1095 THEN COALESCE(SPID.TransAmount, 0) ELSE '0.00' END AS data4,"
+                    str += "0.0 AS cols1,0.0 AS cols2,0.0 AS cols3,0.0 AS cols4,"
+                    str += "0.0 AS tot_dbt1,0.0 AS tot_dbt2,0.0 AS tot_dbt3,0.0 AS tot_dbt4,"
+                    str += "0.0 AS tot_crdt1,0.0 AS tot_crdt2,0.0 AS tot_crdt3,0.0 AS tot_crdt4 "
                     str += "FROM SAS_SponsorInvoiceDetails SPID "
                     str += "INNER JOIN SAS_SponsorInvoice SPI ON SPI.TransId=SPID.TransId "
                     str += "INNER JOIN SAS_FeeTypes SF ON SF.SAFT_Code=SPID.RefCode     "
                     str += "WHERE SPI.PostStatus='Posted' "
+                    str += "AND SPI.TransDate <= '" + Date_LastAgeing + "' "
                     str += "GROUP BY SPID.RefCode,SPI.CreditRef,SPI.TransDate,SPID.TransAmount ) a "
                     str += "GROUP BY a.RefCode "
                     str += "ORDER BY a.RefCode "
+                    str += ") b"
                     'Report For KPT - END
 
                     Dim _DataSet As DataSet = _ReportHelper.GetDataSet(str)
