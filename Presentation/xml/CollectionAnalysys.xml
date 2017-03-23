@@ -1,2 +1,27 @@
 <?xml version="1.0" standalone="yes"?>
-<NewDataSet />
+<NewDataSet>
+  <Table>
+    <bil>1</bil>
+    <creditref>161835</creditref>
+    <creditref1>003</creditref1>
+    <total>0</total>
+    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <studname>WAN MURNI BINTI AMIRAM @ AMRAN</studname>
+  </Table>
+  <Table>
+    <bil>1</bil>
+    <creditref>166626</creditref>
+    <creditref1>003</creditref1>
+    <total>164</total>
+    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <studname>LEE SOON SENG</studname>
+  </Table>
+  <Table>
+    <bil>1</bil>
+    <creditref>166954</creditref>
+    <creditref1>003</creditref1>
+    <total>0</total>
+    <sponsor>MAJLIS AMANAH RAKYAT (MARA)</sponsor>
+    <studname>LIM SOO HOOI</studname>
+  </Table>
+</NewDataSet>

@@ -1,0 +1,619 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <Knockoffdebit>
+    <transid>20060</transid>
+    <creditref>151931</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>CN0000000027</transcode>
+    <category>Credit Note</category>
+    <debitamt>476</debitamt>
+    <studname>MOHAMAD FADLI BIN MOHAMED ZAILAN</studname>
+    <inv_no>DN0000000023</inv_no>
+    <paidamt>476</paidamt>
+    <debitdate>2017-02-14T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>40093</transid>
+    <creditref>161193</creditref>
+    <transdate>2017-02-24T00:00:00+08:00</transdate>
+    <transcode>CN0000000156</transcode>
+    <category>Credit Note</category>
+    <debitamt>90</debitamt>
+    <studname>NURUL AQILAH BINTI REHAN</studname>
+    <inv_no>AFC0000020012</inv_no>
+    <paidamt>90</paidamt>
+    <debitdate>2017-02-23T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>40094</transid>
+    <creditref>164007</creditref>
+    <transdate>2017-02-24T00:00:00+08:00</transdate>
+    <transcode>CN0000000157</transcode>
+    <category>Credit Note</category>
+    <debitamt>90</debitamt>
+    <studname>NUR AFIQAH BINTI ZAID</studname>
+    <inv_no>AFC0000020016</inv_no>
+    <paidamt>90</paidamt>
+    <debitdate>2017-02-23T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>40105</transid>
+    <creditref>166626</creditref>
+    <transdate>2017-02-24T00:00:00+08:00</transdate>
+    <transcode>PA0000000038</transcode>
+    <category>SPA</category>
+    <debitamt>164</debitamt>
+    <studname>LEE SOON SENG</studname>
+    <inv_no>DN0000000034</inv_no>
+    <paidamt>164</paidamt>
+    <debitdate>2017-02-14T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20063</transid>
+    <creditref>166771</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>A1119259</transcode>
+    <category>Receipt</category>
+    <debitamt>844</debitamt>
+    <studname>NUR FATHIAH BINTI MOKHTAR</studname>
+    <inv_no>AFC0000000314</inv_no>
+    <paidamt>500</paidamt>
+    <debitdate>2017-02-13T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20070</transid>
+    <creditref>166771</creditref>
+    <transdate>2017-02-15T00:00:00+08:00</transdate>
+    <transcode>CN0000000030</transcode>
+    <category>Credit Note</category>
+    <debitamt>844</debitamt>
+    <studname>NUR FATHIAH BINTI MOKHTAR</studname>
+    <inv_no>AFC0000000314</inv_no>
+    <paidamt>620</paidamt>
+    <debitdate>2017-02-13T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19837</transid>
+    <creditref>169990</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>AB00005</transcode>
+    <category>Receipt</category>
+    <debitamt>884</debitamt>
+    <studname>IZYAN SABIHAH BINTI ZAHARI</studname>
+    <inv_no>AFC0000000001</inv_no>
+    <paidamt>884</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19838</transid>
+    <creditref>170627</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>AB00006</transcode>
+    <category>Receipt</category>
+    <debitamt>800</debitamt>
+    <studname>MUHAMMAD AL IMRAN BIN MOHD AZMAN</studname>
+    <inv_no>AFC0000000144</inv_no>
+    <paidamt>800</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20064</transid>
+    <creditref>170676</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>A1128005</transcode>
+    <category>Receipt</category>
+    <debitamt>844</debitamt>
+    <studname>ZUNAH SYAKIRAH BINTI MOHAMAD JIWA</studname>
+    <inv_no>AFC0000000315</inv_no>
+    <paidamt>500</paidamt>
+    <debitdate>2017-02-13T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20071</transid>
+    <creditref>170676</creditref>
+    <transdate>2017-02-15T00:00:00+08:00</transdate>
+    <transcode>CN0000000031</transcode>
+    <category>Credit Note</category>
+    <debitamt>844</debitamt>
+    <studname>ZUNAH SYAKIRAH BINTI MOHAMAD JIWA</studname>
+    <inv_no>AFC0000000315</inv_no>
+    <paidamt>620</paidamt>
+    <debitdate>2017-02-13T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19839</transid>
+    <creditref>171103</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>AB00007</transcode>
+    <category>Receipt</category>
+    <debitamt>600</debitamt>
+    <studname>NOOR AZIEMATUL LAILA BINTI MUSTAFFA KAMA</studname>
+    <inv_no>AFC0000000003</inv_no>
+    <paidamt>600</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20018</transid>
+    <creditref>171756</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>AZ00001</transcode>
+    <category>Receipt</category>
+    <debitamt>776</debitamt>
+    <studname>AINI AMIRAH BINTI ABD HAMID</studname>
+    <inv_no>AFC0000000007</inv_no>
+    <paidamt>300</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20020</transid>
+    <creditref>171756</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>CN0000000024</transcode>
+    <category>Credit Note</category>
+    <debitamt>776</debitamt>
+    <studname>AINI AMIRAH BINTI ABD HAMID</studname>
+    <inv_no>AFC0000000007</inv_no>
+    <paidamt>476</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20019</transid>
+    <creditref>171777</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>AZ00002</transcode>
+    <category>Receipt</category>
+    <debitamt>700</debitamt>
+    <studname>NURUL FATIHAH BINTI MUSTAPHA</studname>
+    <inv_no>AFC0000000316</inv_no>
+    <paidamt>700</paidamt>
+    <debitdate>2017-02-13T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20021</transid>
+    <creditref>171868</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>CN0000000025</transcode>
+    <category>Credit Note</category>
+    <debitamt>25</debitamt>
+    <studname>GEORGE CRISOL ANAK JIJEW</studname>
+    <inv_no>AFC0000000317</inv_no>
+    <paidamt>25</paidamt>
+    <debitdate>2017-02-13T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20022</transid>
+    <creditref>171915</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>CN0000000026</transcode>
+    <category>Credit Note</category>
+    <debitamt>75</debitamt>
+    <studname>IFFAH MARIYANA BINTI MAHMUD</studname>
+    <inv_no>AFC0000000318</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-13T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19794</transid>
+    <creditref>173359</creditref>
+    <transdate>2017-02-09T00:00:00+08:00</transdate>
+    <transcode>A0620773</transcode>
+    <category>Receipt</category>
+    <debitamt>1350</debitamt>
+    <studname>SITI HASNULBARIAH BINTI AHMAD RUSMILI</studname>
+    <inv_no>AFC0000000155</inv_no>
+    <paidamt>850</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19802</transid>
+    <creditref>173359</creditref>
+    <transdate>2017-02-10T00:00:00+08:00</transdate>
+    <transcode>CN0000000009</transcode>
+    <category>Credit Note</category>
+    <debitamt>1350</debitamt>
+    <studname>SITI HASNULBARIAH BINTI AHMAD RUSMILI</studname>
+    <inv_no>AFC0000000155</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19795</transid>
+    <creditref>174315</creditref>
+    <transdate>2017-02-09T00:00:00+08:00</transdate>
+    <transcode>A0624689</transcode>
+    <category>Receipt</category>
+    <debitamt>1166</debitamt>
+    <studname>NUR FARAH AIN FARHAN BINTI AB RAHMAN</studname>
+    <inv_no>AFC0000000171</inv_no>
+    <paidamt>950</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19803</transid>
+    <creditref>174315</creditref>
+    <transdate>2017-02-10T00:00:00+08:00</transdate>
+    <transcode>CN0000000010</transcode>
+    <category>Credit Note</category>
+    <debitamt>1166</debitamt>
+    <studname>NUR FARAH AIN FARHAN BINTI AB RAHMAN</studname>
+    <inv_no>AFC0000000171</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19796</transid>
+    <creditref>174886</creditref>
+    <transdate>2017-02-09T00:00:00+08:00</transdate>
+    <transcode>A0636968</transcode>
+    <category>Receipt</category>
+    <debitamt>162.5</debitamt>
+    <studname>NOR FARAH AIN SYAZWANI BT MUSTAFA</studname>
+    <inv_no>AFC0000000174</inv_no>
+    <paidamt>162.5</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19797</transid>
+    <creditref>175693</creditref>
+    <transdate>2017-02-09T00:00:00+08:00</transdate>
+    <transcode>A0653592</transcode>
+    <category>Receipt</category>
+    <debitamt>1050</debitamt>
+    <studname>AINATUL NADIA BINTI RUSNAN</studname>
+    <inv_no>AFC0000000190</inv_no>
+    <paidamt>1050</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>39628</transid>
+    <creditref>180128</creditref>
+    <transdate>2017-02-21T00:00:00+08:00</transdate>
+    <transcode>T00001</transcode>
+    <category>Receipt</category>
+    <debitamt>531</debitamt>
+    <studname>NUR IZZATI BINTI NADZRI</studname>
+    <inv_no>AFC0000000226</inv_no>
+    <paidamt>30</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>39629</transid>
+    <creditref>180128</creditref>
+    <transdate>2017-02-21T00:00:00+08:00</transdate>
+    <transcode>CN0000000051</transcode>
+    <category>Credit Note</category>
+    <debitamt>531</debitamt>
+    <studname>NUR IZZATI BINTI NADZRI</studname>
+    <inv_no>AFC0000000226</inv_no>
+    <paidamt>476</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>39630</transid>
+    <creditref>180128</creditref>
+    <transdate>2017-02-21T00:00:00+08:00</transdate>
+    <transcode>CN0000000052</transcode>
+    <category>Credit Note</category>
+    <debitamt>531</debitamt>
+    <studname>NUR IZZATI BINTI NADZRI</studname>
+    <inv_no>AFC0000000226</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19798</transid>
+    <creditref>182004</creditref>
+    <transdate>2017-02-09T00:00:00+08:00</transdate>
+    <transcode>A0655111</transcode>
+    <category>Receipt</category>
+    <debitamt>1166</debitamt>
+    <studname>DANNIA SYAHIRAH BINTI MAHDAN</studname>
+    <inv_no>AFC0000000247</inv_no>
+    <paidamt>850</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19812</transid>
+    <creditref>182004</creditref>
+    <transdate>2017-02-10T00:00:00+08:00</transdate>
+    <transcode>CN0000000011</transcode>
+    <category>Credit Note</category>
+    <debitamt>1166</debitamt>
+    <studname>DANNIA SYAHIRAH BINTI MAHDAN</studname>
+    <inv_no>AFC0000000247</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19582</transid>
+    <creditref>185597</creditref>
+    <transdate>2017-02-07T00:00:00+08:00</transdate>
+    <transcode>A0371629</transcode>
+    <category>Receipt</category>
+    <debitamt>1360</debitamt>
+    <studname>LAU JIA XIN</studname>
+    <inv_no>AFC0000000096</inv_no>
+    <paidamt>50</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19600</transid>
+    <creditref>185597</creditref>
+    <transdate>2017-02-07T00:00:00+08:00</transdate>
+    <transcode>A0468150</transcode>
+    <category>Receipt</category>
+    <debitamt>1360</debitamt>
+    <studname>LAU JIA XIN</studname>
+    <inv_no>AFC0000000096</inv_no>
+    <paidamt>970</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19601</transid>
+    <creditref>185597</creditref>
+    <transdate>2017-02-08T00:00:00+08:00</transdate>
+    <transcode>CN0000000001</transcode>
+    <category>Credit Note</category>
+    <debitamt>1360</debitamt>
+    <studname>LAU JIA XIN</studname>
+    <inv_no>AFC0000000096</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19605</transid>
+    <creditref>185597</creditref>
+    <transdate>2017-02-08T00:00:00+08:00</transdate>
+    <transcode>CN0000000005</transcode>
+    <category>Credit Note</category>
+    <debitamt>1360</debitamt>
+    <studname>LAU JIA XIN</studname>
+    <inv_no>AFC0000000096</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>40095</transid>
+    <creditref>185597</creditref>
+    <transdate>2017-02-24T00:00:00+08:00</transdate>
+    <transcode>BS00001</transcode>
+    <category>Receipt</category>
+    <debitamt>1360</debitamt>
+    <studname>LAU JIA XIN</studname>
+    <inv_no>AFC0000000096</inv_no>
+    <paidamt>160</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20061</transid>
+    <creditref>186809</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>A1102521</transcode>
+    <category>Receipt</category>
+    <debitamt>2041</debitamt>
+    <studname>TAN ZHAO HUA</studname>
+    <inv_no>AFC0000000099</inv_no>
+    <paidamt>1500</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20067</transid>
+    <creditref>186809</creditref>
+    <transdate>2017-02-15T00:00:00+08:00</transdate>
+    <transcode>CN0000000029</transcode>
+    <category>Credit Note</category>
+    <debitamt>2041</debitamt>
+    <studname>TAN ZHAO HUA</studname>
+    <inv_no>AFC0000000099</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20072</transid>
+    <creditref>186809</creditref>
+    <transdate>2017-02-15T00:00:00+08:00</transdate>
+    <transcode>CN0000000032</transcode>
+    <category>Credit Note</category>
+    <debitamt>2041</debitamt>
+    <studname>TAN ZHAO HUA</studname>
+    <inv_no>AFC0000000099</inv_no>
+    <paidamt>65</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20062</transid>
+    <creditref>186821</creditref>
+    <transdate>2017-02-14T00:00:00+08:00</transdate>
+    <transcode>A1105964</transcode>
+    <category>Receipt</category>
+    <debitamt>2160</debitamt>
+    <studname>SITI NABIHAH BINTI KASMON</studname>
+    <inv_no>AFC0000000100</inv_no>
+    <paidamt>1500</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>20073</transid>
+    <creditref>186821</creditref>
+    <transdate>2017-02-15T00:00:00+08:00</transdate>
+    <transcode>CN0000000033</transcode>
+    <category>Credit Note</category>
+    <debitamt>2160</debitamt>
+    <studname>SITI NABIHAH BINTI KASMON</studname>
+    <inv_no>AFC0000000100</inv_no>
+    <paidamt>660</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19607</transid>
+    <creditref>187484</creditref>
+    <transdate>2017-02-10T00:00:00+08:00</transdate>
+    <transcode>AB00004</transcode>
+    <category>Receipt</category>
+    <debitamt>1135</debitamt>
+    <studname>WONG KEK ONN</studname>
+    <inv_no>AFC0000000105</inv_no>
+    <paidamt>1000</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19608</transid>
+    <creditref>187484</creditref>
+    <transdate>2017-02-10T00:00:00+08:00</transdate>
+    <transcode>CN0000000006</transcode>
+    <category>Credit Note</category>
+    <debitamt>1135</debitamt>
+    <studname>WONG KEK ONN</studname>
+    <inv_no>AFC0000000105</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19609</transid>
+    <creditref>187484</creditref>
+    <transdate>2017-02-10T00:00:00+08:00</transdate>
+    <transcode>CN0000000007</transcode>
+    <category>Credit Note</category>
+    <debitamt>1135</debitamt>
+    <studname>WONG KEK ONN</studname>
+    <inv_no>AFC0000000105</inv_no>
+    <paidamt>0</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19583</transid>
+    <creditref>187806</creditref>
+    <transdate>2017-02-07T00:00:00+08:00</transdate>
+    <transcode>A0383454</transcode>
+    <category>Receipt</category>
+    <debitamt>2176</debitamt>
+    <studname>NASUHA BINTI JUHANEIS</studname>
+    <inv_no>AFC0000000111</inv_no>
+    <paidamt>2176</paidamt>
+    <debitdate>2017-02-08T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19799</transid>
+    <creditref>190177</creditref>
+    <transdate>2017-02-09T00:00:00+08:00</transdate>
+    <transcode>A0669034</transcode>
+    <category>Receipt</category>
+    <debitamt>850</debitamt>
+    <studname>MUHAMMAD HARUNSANI B MOHAMED HASSAN</studname>
+    <inv_no>AFC0000000301</inv_no>
+    <paidamt>850</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19800</transid>
+    <creditref>190525</creditref>
+    <transdate>2017-02-09T00:00:00+08:00</transdate>
+    <transcode>A0670441</transcode>
+    <category>Receipt</category>
+    <debitamt>1162.5</debitamt>
+    <studname>NUR HAZWANI BINTI HASSAN</studname>
+    <inv_no>AFC0000000310</inv_no>
+    <paidamt>1162.5</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19828</transid>
+    <creditref>191025</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>CN0000000023</transcode>
+    <category>Credit Note</category>
+    <debitamt>500</debitamt>
+    <studname>NURAISHAH ABD RAHIM</studname>
+    <inv_no>AFC0000000312</inv_no>
+    <paidamt>500</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19827</transid>
+    <creditref>191389</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>CN0000000022</transcode>
+    <category>Credit Note</category>
+    <debitamt>201</debitamt>
+    <studname>MOHSEN AHMED MOHAMMED BAWZER</studname>
+    <inv_no>AFC0000000313</inv_no>
+    <paidamt>10</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19835</transid>
+    <creditref>191389</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>AB00002</transcode>
+    <category>Receipt</category>
+    <debitamt>201</debitamt>
+    <studname>MOHSEN AHMED MOHAMMED BAWZER</studname>
+    <inv_no>AFC0000000313</inv_no>
+    <paidamt>30</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19836</transid>
+    <creditref>191389</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>a1101</transcode>
+    <category>Receipt</category>
+    <debitamt>201</debitamt>
+    <studname>MOHSEN AHMED MOHAMMED BAWZER</studname>
+    <inv_no>AFC0000000313</inv_no>
+    <paidamt>10</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19840</transid>
+    <creditref>191389</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>a1107</transcode>
+    <category>Receipt</category>
+    <debitamt>201</debitamt>
+    <studname>MOHSEN AHMED MOHAMMED BAWZER</studname>
+    <inv_no>AFC0000000313</inv_no>
+    <paidamt>25</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19841</transid>
+    <creditref>191389</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>a1102</transcode>
+    <category>Receipt</category>
+    <debitamt>201</debitamt>
+    <studname>MOHSEN AHMED MOHAMMED BAWZER</studname>
+    <inv_no>AFC0000000313</inv_no>
+    <paidamt>66</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <Knockoffdebit>
+    <transid>19842</transid>
+    <creditref>191389</creditref>
+    <transdate>2017-02-13T00:00:00+08:00</transdate>
+    <transcode>a1103</transcode>
+    <category>Receipt</category>
+    <debitamt>201</debitamt>
+    <studname>MOHSEN AHMED MOHAMMED BAWZER</studname>
+    <inv_no>AFC0000000313</inv_no>
+    <paidamt>60</paidamt>
+    <debitdate>2017-02-10T00:00:00+08:00</debitdate>
+  </Knockoffdebit>
+  <sortbyvalue>
+    <invoice>Show</invoice>
+    <dateinvoice>Show</dateinvoice>
+    <amtinvoice>Show</amtinvoice>
+    <receipt>Show</receipt>
+    <datereceipt>Show</datereceipt>
+    <amtreceipt>Show</amtreceipt>
+  </sortbyvalue>
+  <sortbyvalue>
+    <invoice>Show</invoice>
+    <dateinvoice>Show</dateinvoice>
+    <amtinvoice>Show</amtinvoice>
+    <receipt>Show</receipt>
+    <datereceipt>Show</datereceipt>
+    <amtreceipt>Show</amtreceipt>
+  </sortbyvalue>
+</NewDataSet>
