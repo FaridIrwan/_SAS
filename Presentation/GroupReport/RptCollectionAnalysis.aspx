@@ -152,24 +152,10 @@
             var fromdate1 = "0"
             var todate1 = "0"
             var lbl = false
-            if ((document.getElementById("<%=ddlStuStatus.ClientID%>").value == "-1") && (document.getElementById("<%=ddlFaculty.ClientID%>").value == "-1") && (document.getElementById("<%=ddlProgram.ClientID%>").value == "-1") && (document.getElementById("<%=ddlSponsor.ClientID%>").value == "-1") && (document.getElementById("<%=ChkDateRange.ClientID%>").checked == false)) {
-                if (confirm("Do you Want to Show All Records?")) {
-                    if (document.getElementById("<%=ChkDateRange.ClientID%>").checked) {
-                        fromdate1 = document.getElementById("<%=txtFrom.ClientID%>").value
-                        todate1 = document.getElementById("<%=txtTodate.ClientID%>").value
-                    }
-                    lbl = true;
-                    new_window = window.open('../GroupReport/RptCollectionAnalysisViewer.aspx?fdate=' + fromdate1 + '&tdate=' + todate1, 'SAS', 'width=700,height=500,resizable=1'); new_window.focus();
-                    return lbl;
-                }
-                else {
-                    if (document.getElementById("<%=ddlStuStatus.ClientID%>").value == "-1") {
-                        document.getElementById("<%=ddlStuStatus.ClientID%>").focus();
-                        return lbl;
-                    }
-                }
+            if ((document.getElementById("<%=ddlType.ClientID%>").value == "-1") && (document.getElementById("<%=ChkDateRange.ClientID%>").checked == false)) {
+                alert("Please select type of report")
             }
-            else {
+            else  {
                 if (document.getElementById("<%=ChkDateRange.ClientID%>").checked) {
                     fromdate1 = document.getElementById("<%=txtFrom.ClientID%>").value
                     todate1 = document.getElementById("<%=txtTodate.ClientID%>").value
@@ -178,29 +164,7 @@
                 return true;
             }
         }
-
-
-        function dllValues1() {
-
-            var lbl = false
-            if ((document.getElementById("<%=ddlStuStatus.ClientID%>").value == "-1") && (document.getElementById("<%=ddlFaculty.ClientID%>").value == "-1") && (document.getElementById("<%=ddlProgram.ClientID%>").value == "-1") && (document.getElementById("<%=ddlSponsor.ClientID%>").value == "-1")) {
-                if (confirm("Do you Want to Show All Records?")) {
-                    lbl = true;
-                    new_window = window.open('../GroupReport/RptCollectionAnalysisViewer.aspx', 'SAS', 'width=700,height=500,resizable=1'); new_window.focus();
-                    return lbl;
-                }
-                else {
-                    if (document.getElementById("<%=ddlStuStatus.ClientID%>").value == "-1") {
-                        document.getElementById("<%=ddlStuStatus.ClientID%>").focus();
-                        return lbl;
-                    }
-                }
-            }
-            else {
-                new_window = window.open('../GroupReport/RptCollectionAnalysisViewer.aspx', 'SAS', 'width=700,height=500,resizable=1'); new_window.focus();
-                return true;
-            }
-        }
+ 
 
     </script>
 
@@ -266,40 +230,6 @@
                             </tr>
                     </table>
                 </td>
-               <%--Done Eddited by Zoya @26/02/2016--%>
-
-               <%--Commented by Zoya @26/02/2016--%>
-               <%-- <td>
-                    <table style="border-collapse: collapse;" class="menuoff" onmouseover="className='menuon';"
-                        onmouseout="className='menuoff';">
-                         <tr>
-                            <td style="width: 3%; height: 14px">
-                                <div id="wrap">
-                                     <ul id="navbar">
-                                        <li>
-                                            <a href="#">
-                                                <img id="ibtnPrint" src="/images/print.png"  width="24" height="24"  border="0" align="middle" />&nbsp;Print                                   
-                                                <img src="/images/down.png" width="16" height="16" align="middle" border="0" /></a>
-                                             <ul>
-                                                <li><a href="#">
-                                                    <asp:ImageButton ID="ibtnBMReport" runat="server" ImageUrl="~/images/print-bm.png" />
-                                                    </a></li>
-                                                <li><a href="#">
-                                                    <asp:ImageButton ID="ibtnEnReport" runat="server" ImageUrl="~/images/print-eng.png"/>
-                                                    </a></li>
-                                            </ul>
-                                        </li>
-                                       
-                                    </ul>
-                                 
-                                </div>
-                            </td>
-
-                        </tr>
-                    </table>                  
-                </td>--%>
-                <%--End Commented by Zoya @26/02/2016--%>
-
                  <%--Added by Zoya @26/02/2016 -  link to Malay Report--%>
                  <td>
                     <table style="border-collapse: collapse;" class="menuoff" onmouseover="className='menuon';"
@@ -427,14 +357,14 @@
                         <table style="width: 100%">
                             <tr>
                                 <td colspan="2" style="height: 16px">
-                                    <asp:Label ID="Label3" runat="server" Text="Status"></asp:Label>
+                                    <asp:Label ID="lbltype" runat="server" Text="Type of Report"></asp:Label>
                                 </td>
                                 <td style="height: 16px">
-                                    <asp:DropDownList ID="ddlStuStatus" runat="server" Width="135px" AutoPostBack="True"
-                                        OnSelectedIndexChanged="ddlStuStatus_SelectedIndexChanged">
+                                    <asp:DropDownList ID="ddlType" runat="server" Width="135px" AutoPostBack="True"
+                                        OnSelectedIndexChanged="ddlType_SelectedIndexChanged">
                                         <asp:ListItem Value="-1">-- Select --</asp:ListItem>
-                                        <asp:ListItem Value="1">Active</asp:ListItem>
-                                        <asp:ListItem Value="0">Inactive</asp:ListItem>
+                                        <asp:ListItem Value="1">Refund Report to Student Based on Sponsor</asp:ListItem>
+                                        <asp:ListItem Value="2">Payment Received From Student</asp:ListItem>
                                     </asp:DropDownList>
                                 </td>
                                 <td style="width: 10px; height: 16px">
@@ -442,32 +372,13 @@
                             </tr>
                             <tr>
                                 <td colspan="2" style="height: 16px">
-                                    <asp:Label ID="Label9" runat="server" Text="By Faculty"></asp:Label>
+                                    <asp:Label ID="lblSponsor" runat="server" Style="position: static" Text="By Sponsor" Visible ="false"></asp:Label>
                                 </td>
-                                <td colspan="5" style="height: 16px">
-                                    <asp:DropDownList ID="ddlFaculty" runat="server" Width="135px" onmousedown="this.style.width=''"
-                                        AppendDataBoundItems="True" AutoPostBack="True" OnSelectedIndexChanged="ddlFaculty_SelectedIndexChanged">
-                                    </asp:DropDownList>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" style="height: 16px">
-                                    <asp:Label ID="Label10" runat="server" Text="By Program"></asp:Label>
-                                </td>
-                                <td colspan="5" style="height: 16px">
-                                    <asp:DropDownList ID="ddlProgram" runat="server" Width="135px" onmousedown="this.style.width=''"
-                                        AppendDataBoundItems="True" OnSelectedIndexChanged="ddlProgram_SelectedIndexChanged"
-                                        AutoPostBack="True">
-                                    </asp:DropDownList>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" style="height: 16px">
-                                    <asp:Label ID="Label7" runat="server" Style="position: static" Text="By Sponsor"></asp:Label>
-                                </td>
-                                <td colspan="5" style="height: 16px">
-                                    <asp:DropDownList ID="ddlSponsor" runat="server" Width="135px" onmousedown="this.style.width=''"
-                                        Style="position: static" AppendDataBoundItems="True" AutoPostBack="True" OnSelectedIndexChanged="ddlSponsor_SelectedIndexChanged">
+                                <td style="height: 16px">
+                                    <asp:DropDownList ID="ddlSponsor" runat="server" Width="135px" AutoPostBack="True"
+                                        OnSelectedIndexChanged="ddlSponsor_SelectedIndexChanged" Visible ="false">
+                                        <asp:ListItem Value="-1">-- Select --</asp:ListItem>
+                                        <asp:ListItem Value="0">-- All --</asp:ListItem>
                                     </asp:DropDownList>
                                 </td>
                             </tr>
@@ -507,17 +418,21 @@
                 <td style="width: 113px; height: 16px">
                 </td>
             </tr>
+             </table>
+         </asp:Panel>
+     <asp:Panel ID="Panel3" runat="server" Width="100%" Visible ="false">
+            <table style="width: 100%" id ="student">
             <tr>
-                <td style="height: 16px">
+                <td style="width: 1px; height: 16px">
                 </td>
-                <td style="width: 1005px; height: 16px">
+                <td style="width: 98%; margin-left: auto; margin-right: auto; height: 16px">
                     <fieldset style="width: 100%;border: thin solid #A6D9F4;">
-                        <legend><strong><span style="color: #000000;">Record Sort By</span></strong></legend>
+                        <legend><strong><span style="color: #000000;">Invoice/Debit Note </span></strong></legend>
                         <table style="width: 100%">
                             <tr>
-                                <td colspan="2" style="height: 16px; width: 224px;">
-                                    &nbsp;<asp:RadioButton ID="rdbtnstudid" runat="server" Text="Matric Id" GroupName="RecordSort"
-                                        AutoPostBack="True" OnCheckedChanged="rdbtnstudid_CheckedChanged" />
+                                <td style="width: 85px; height: 16px">
+                                    <asp:CheckBox ID="chkinvoice" runat="server" AutoPostBack="True" OnCheckedChanged="chkinvoice_CheckedChanged"
+                                        Text="Invoice/Debit Note" Width="134px" />
                                 </td>
                                 <td style="width: 458px; height: 16px">
                                 </td>
@@ -527,9 +442,9 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2" style="height: 16px; width: 224px;">
-                                    &nbsp;<asp:RadioButton ID="rdbtnstudname" runat="server" Text="Student Name" Width="123px"
-                                        GroupName="RecordSort" AutoPostBack="True" OnCheckedChanged="rdbtnstudname_CheckedChanged" />
+                               <td style="width: 85px; height: 16px">
+                                    <asp:CheckBox ID="chkdateinvoice" runat="server" AutoPostBack="True" OnCheckedChanged="chkdateinvoice_CheckedChanged"
+                                        Text="Date" Width="81px" />
                                 </td>
                                 <td style="width: 458px; height: 16px">
                                 </td>
@@ -539,9 +454,59 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2" style="width: 224px; height: 16px">
-                                    &nbsp;<asp:RadioButton ID="rdbtnbank" runat="server" Text="Bank" GroupName="RecordSort"
-                                        AutoPostBack="True" OnCheckedChanged="rdbtnbank_CheckedChanged" />
+                               <td style="width: 85px; height: 16px">
+                                    <asp:CheckBox ID="chkamtinvoice" runat="server" AutoPostBack="True" OnCheckedChanged="chkamtinvoice_CheckedChanged"
+                                        Text="Amount" Width="81px" />
+                                </td>
+                                <td style="width: 458px; height: 16px">
+                                </td>
+                                <td style="width: 180px; height: 16px">
+                                </td>
+                                <td style="width: 10px; height: 16px">
+                                </td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </td>
+                <td style="height: 16px;">
+                </td>
+            </tr>
+           
+             <tr>
+               <td style="width: 1px; height: 16px">
+                </td>
+                <td style="width: 98%; margin-left: auto; margin-right: auto; height: 16px">
+                    <fieldset style="width: 100%;border: thin solid #A6D9F4;">
+                        <legend><strong><span style="color: #000000;">Receipt/Collection </span></strong></legend>
+                        <table style="width: 100%">
+                            <tr>
+                                <td style="width: 85px; height: 16px">
+                                    <asp:CheckBox ID="chkreceipt" runat="server" AutoPostBack="True" OnCheckedChanged="chkreceipt_CheckedChanged"
+                                        Text="Receipt/Credit Note" Width="134px" />
+                                </td>
+                                <td style="width: 458px; height: 16px">
+                                </td>
+                                <td style="width: 180px; height: 16px">
+                                </td>
+                                <td style="width: 10px; height: 16px">
+                                </td>
+                            </tr>
+                            <tr>
+                               <td style="width: 85px; height: 16px">
+                                    <asp:CheckBox ID="chkdatereceipt" runat="server" AutoPostBack="True" OnCheckedChanged="chkdatereceipt_CheckedChanged"
+                                        Text="Date" Width="81px" />
+                                </td>
+                                <td style="width: 458px; height: 16px">
+                                </td>
+                                <td style="width: 180px; height: 16px">
+                                </td>
+                                <td style="width: 10px; height: 16px">
+                                </td>
+                            </tr>
+                            <tr>
+                               <td style="width: 85px; height: 16px">
+                                    <asp:CheckBox ID="chkamtreceipt" runat="server" AutoPostBack="True" OnCheckedChanged="chkamtreceipt_CheckedChanged"
+                                        Text="Amount" Width="81px" />
                                 </td>
                                 <td style="width: 458px; height: 16px">
                                 </td>

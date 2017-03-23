@@ -21,20 +21,7 @@ Partial Class RptCollectionAnalysis
             Menuname(CInt(Request.QueryString("Menuid")))
             ibtnFDate.Attributes.Add("onClick", "return getibtnFDate()")
             ibtnTodate.Attributes.Add("onClick", "return getDateto()")
-
-            'Modified by Hafiz @ 10/3/2016
-
-            'UnCommented By Zoya @26/02/2016
             ibtnPrint.Attributes.Add("onclick", "return getDate()")
-            'Added By Zoya @26/02/2016
-            'ibtnPrint.Attributes.Add("onclick", "new_window=window.open('../GroupReport/RptCollectionAnalysisViewer.aspx','Hanodale','width=520,height=400,resize=0,scrollbars=1');new_window.focus();")
-
-            'Commented By Zoya @26/02/2016
-            'ibtnBMReport.Attributes.Add("onclick", "return getDate()")
-            'ibtnBMReport.Attributes.Add("onclick", "new_window=window.open('../GroupReport/RptCollectionAnalysisViewer.aspx','Hanodale','width=520,height=400,resize=0,scrollbars=1');new_window.focus();")
-            'ibtnEnReport.Attributes.Add("onclick", "return getDate()")
-            'ibtnEnReport.Attributes.Add("onclick", "new_window=window.open('../GroupReport/RptCollectionAnalysisViewerEn.aspx','Hanodale','width=520,height=400,resize=1,scrollbars=1');new_window.focus();")
-
             ibtnView.Attributes.Add("onclick", "return getDate()")
             ibtnView.Attributes.Add("onclick", "new_window=window.open('../GroupReport/RptCollectionAnalysisViewer.aspx','Hanodale','width=520,height=400,resize=1,scrollbars=1');new_window.focus();")
             txtFrom.Attributes.Add("OnKeyup", "return CheckFromDate()")
@@ -44,8 +31,6 @@ Partial Class RptCollectionAnalysis
             txtTodate.ReadOnly = True
             ibtnFDate.Visible = False
             ibtnTodate.Visible = False
-            Faculty()
-            Program()
             Sponsor()
             dates()
             Session("program") = Nothing
@@ -58,48 +43,19 @@ Partial Class RptCollectionAnalysis
     Private Sub dates()
         txtFrom.Text = Format(Date.Now, "dd/MM/yyyy")
         txtTodate.Text = Format(Date.Now, "dd/MM/yyyy")
-    End Sub
-    Private Sub Faculty()
-        Dim ObjFacultyEn As New FacultyEn
-        Dim ObjFacultyBAL As New FacultyBAL
-        Dim LstObjFaculty As New List(Of FacultyEn)
-        ObjFacultyEn.SAFC_Code = "%"
-        LstObjFaculty = ObjFacultyBAL.GetList(ObjFacultyEn)
-        ddlFaculty.Items.Clear()
-        ddlFaculty.Items.Add(New ListItem("-- Select --", "-1"))
-
-        ddlFaculty.DataTextField = "SAFC_Desc"
-        ddlFaculty.DataValueField = "SAFC_Code"
-        ddlFaculty.DataSource = LstObjFaculty
-        ddlFaculty.DataBind()
-    End Sub
-    Private Sub Program()
-        Dim ObjProgramEn As New ProgramInfoEn
-        Dim ObjProgramBAL As New ProgramInfoBAL
-        Dim LstProgram As New List(Of ProgramInfoEn)
-
-        ObjProgramEn.SAFC_Code = ddlFaculty.SelectedValue
-        LstProgram = ObjProgramBAL.GetProgramInfoListAll(ObjProgramEn.SAFC_Code)
-        ddlProgram.Items.Clear()
-        ddlProgram.Items.Add(New ListItem("-- Select --", "-1"))
-        ddlProgram.DataSource = LstProgram
-        ddlProgram.DataTextField = "Program"
-        ddlProgram.DataValueField = "ProgramCode"
-        'ddlProgram.DataValueField = "ProgramCode"
-        ddlProgram.DataBind()
-    End Sub
-   
+    End Sub   
     Private Sub Sponsor()
         Dim eobjSponsorEn As New SponsorEn
         Dim objSponsorBs As New SponsorBAL
         Dim listSponsor As New List(Of SponsorEn)
         listSponsor = objSponsorBs.GetList(eobjSponsorEn)
         ddlSponsor.Items.Clear()
-        ddlSponsor.Items.Add(New ListItem("-- Select --", "-1"))
         ddlSponsor.DataSource = listSponsor
         ddlSponsor.DataTextField = "Name"
         ddlSponsor.DataValueField = "SponserCode"
         ddlSponsor.DataBind()
+        ddlSponsor.Items.Insert(0, New ListItem("-- Select --", "-1"))
+        ddlSponsor.Items.Insert(1, New ListItem("Select All", "0"))
     End Sub
     Private Sub LoadUserRights()
 
@@ -198,9 +154,6 @@ Partial Class RptCollectionAnalysis
             ibtnPosting.ToolTip = "Access Denied"
         End If
     End Sub
-    Protected Sub ddlType_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-
-    End Sub
     Protected Sub ChkDateRange_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles ChkDateRange.CheckedChanged
         If ChkDateRange.Checked = True Then
             txtFrom.ReadOnly = False
@@ -236,90 +189,49 @@ Partial Class RptCollectionAnalysis
         Session("faculty") = Nothing
         Session("sponsor") = Nothing
         Session("status") = Nothing
-
-        ddlStuStatus.SelectedIndex = -1
-        ddlFaculty.SelectedIndex = -1
-        ddlProgram.SelectedIndex = -1
+        Panel3.Visible = False
+        ddlType.SelectedIndex = -1
+        lblSponsor.Visible = False
+        ddlSponsor.Visible = False
         ddlSponsor.SelectedIndex = -1
         ChkDateRange.Checked = False
-        rdbtnstudid.Checked = False
-        rdbtnstudname.Checked = False
-        rdbtnbank.Checked = False
         txtFrom.ReadOnly = True
         txtTodate.ReadOnly = True
         ibtnFDate.Visible = False
         ibtnTodate.Visible = False
         dates()
-        Program()
     End Sub
-
-    
     Protected Sub ibtnDelete_Click(ByVal sender As Object, ByVal e As System.Web.UI.ImageClickEventArgs)
 
     End Sub
 
-    Protected Sub rdbtnstudid_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        If rdbtnstudid.Checked = True Then
-            Session("sortby") = "a.CreditRef"
-        Else
-            Session("sortby") = ""
-        End If
-    End Sub
-
-    Protected Sub rdbtnstudname_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        If rdbtnstudname.Checked = True Then
-            Session("sortby") = "a.SASI_Name"
-        Else
-            Session("sortby") = ""
-        End If
-    End Sub
-
-    Protected Sub rdbtnbank_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        If rdbtnbank.Checked = True Then
-            Session("sortby") = "a.BankCode"
-        Else
-            Session("sortby") = ""
-        End If
-    End Sub
-
-    Protected Sub ddlStuStatus_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        Dim status As String
-        status = ddlStuStatus.SelectedValue
-        If status = "-1" Then
-            Session("status") = Nothing
-        Else
-            Session("status") = status
-        End If
-    End Sub
-    Protected Sub ddlFaculty_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        Program()
-        Dim faculty As String
-        faculty = ddlFaculty.SelectedValue
-        If faculty = "-1" Then
-            faculty = "%"
-            Session("faculty") = faculty
-            Session("program") = faculty
-        Else
-            Session("faculty") = faculty
-        End If
-    End Sub
-    Protected Sub ddlProgram_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
-        Dim program As String
-        program = ddlProgram.SelectedValue
-        If program = "-1" Then
-            program = "%"
-            Session("program") = program
-        Else
-            Session("program") = program
+    Protected Sub ddltype_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim type As String
+        type = ddlType.SelectedValue
+        If type = "-1" Then
+            lblSponsor.Visible = False
+            ddlSponsor.Visible = False
+            Panel3.Visible = False
+            Session("type") = Nothing
+        ElseIf type = "1" Then
+            lblSponsor.Visible = True
+            ddlSponsor.Visible = True
+            Panel3.Visible = False
+            Session("type") = type
+        ElseIf type = "2" Then
+            lblSponsor.Visible = False
+            ddlSponsor.Visible = False
+            Panel3.Visible = True
+            Session("type") = type
         End If
     End Sub
 
     Protected Sub ddlSponsor_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs)
         Dim sponsor As String
         sponsor = ddlSponsor.SelectedValue
-        If sponsor = "-1" Then
-            sponsor = "%"
-            Session("sponsor") = sponsor
+        If sponsor = "0" Or sponsor = "-1" Then
+            'sponsor = "%"
+            Session("sponsor") = Nothing
         Else
             Session("sponsor") = sponsor
         End If
@@ -327,29 +239,76 @@ Partial Class RptCollectionAnalysis
     Protected Sub txtFrom_TextChanged(ByVal sender As Object, ByVal e As System.EventArgs)
 
     End Sub
+    Protected Sub chkinvoice_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim Invoice As String
 
-    'Commented by Zoya @ 26/02/2016
 
-    'Protected Sub EnablePrintUserRights()
-    '    ibtnBMReport.Enabled = True
-    '    ibtnEnReport.Enabled = True
-    '    'ibtnPrint.ImageUrl = "../images/print.png"
-    '    ibtnBMReport.ImageUrl = ""
-    '    ibtnEnReport.ImageUrl = ""
-    '    ibtnBMReport.ToolTip = "Print"
-    '    ibtnEnReport.ToolTip = "Print"
-    '    'ibtnPrint.ToolTip = "Print"
-    'End Sub
+        If chkinvoice.Checked = True Then
+            Invoice = chkinvoice.Checked
+            Session("invoice") = Invoice
+        ElseIf chkinvoice.Checked = False Then
+            'student = chkstudent.Checked
+            Session("invoice") = Nothing
+        End If
+    End Sub
+    Protected Sub chkdateinvoice_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim dateinvoice As String
 
-    'Protected Sub DisablePrintUserRights()
-    '    ibtnBMReport.Enabled = False
-    '    ibtnEnReport.Enabled = False
-    '    'ibtnPrint.ImageUrl = "../images/print.png"
-    '    ibtnBMReport.ImageUrl = ""
-    '    ibtnEnReport.ImageUrl = ""
-    '    ibtnBMReport.ToolTip = "Access Denied"
-    '    ibtnEnReport.ToolTip = "Access Denied"
-    '    'ibtnPrint.ToolTip = "Access Denied"
-    'End Sub
 
+        If chkdateinvoice.Checked = True Then
+            dateinvoice = chkdateinvoice.Checked
+            Session("dateinvoice") = dateinvoice
+        ElseIf chkdateinvoice.Checked = False Then
+            'student = chkstudent.Checked
+            Session("dateinvoice") = Nothing
+        End If
+    End Sub
+    Protected Sub chkamtinvoice_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim amtinvoice As String
+
+
+        If chkamtinvoice.Checked = True Then
+            amtinvoice = chkamtinvoice.Checked
+            Session("amtinvoice") = amtinvoice
+        ElseIf chkamtinvoice.Checked = False Then
+            'student = chkstudent.Checked
+            Session("amtinvoice") = Nothing
+        End If
+    End Sub
+    Protected Sub chkreceipt_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim receipt As String
+
+
+        If chkreceipt.Checked = True Then
+            receipt = chkreceipt.Checked
+            Session("receipt") = receipt
+        ElseIf chkreceipt.Checked = False Then
+            'student = chkstudent.Checked
+            Session("receipt") = Nothing
+        End If
+    End Sub
+    Protected Sub chkdatereceipt_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim datereceipt As String
+
+
+        If chkdatereceipt.Checked = True Then
+            datereceipt = chkdatereceipt.Checked
+            Session("datereceipt") = datereceipt
+        ElseIf chkdatereceipt.Checked = False Then
+            'student = chkstudent.Checked
+            Session("datereceipt") = Nothing
+        End If
+    End Sub
+    Protected Sub chkamtreceipt_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs)
+        Dim amtreceipt As String
+
+
+        If chkamtreceipt.Checked = True Then
+            amtreceipt = chkamtreceipt.Checked
+            Session("amtreceipt") = amtreceipt
+        ElseIf chkamtreceipt.Checked = False Then
+            'student = chkstudent.Checked
+            Session("amtreceipt") = Nothing
+        End If
+    End Sub
 End Class
